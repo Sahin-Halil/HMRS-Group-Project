@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 2432983554652157262}
   - component: {fileID: 897580799856471155}
   - component: {fileID: 2196653160664923058}
+  - component: {fileID: 1883157090077181032}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -175,3 +176,24 @@ MonoBehaviour:
   chaseRange: 10
   wanderRadius: 5
   wanderChangeInterval: 3
+--- !u!114 &1883157090077181032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2334251344416574482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f98f287465cc4cd4821346371aa7a61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 50
+  currentHealth: 0
+  onDeath:
+    m_PersistentCalls:
+      m_Calls: []
+  onHealthChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  showDebugInfo: 1
