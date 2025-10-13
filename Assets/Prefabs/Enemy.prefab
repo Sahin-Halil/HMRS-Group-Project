@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 897580799856471155}
   - component: {fileID: 2196653160664923058}
   - component: {fileID: 1883157090077181032}
+  - component: {fileID: 4888846071823290058}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -171,11 +172,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3716d6bf338c44de28a056984d9b3dcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shouldChase: 1
+  behaviourMode: 0
   moveSpeed: 3
-  chaseRange: 10
+  detectionRange: 10
+  fleeDistance: 8
   wanderRadius: 5
   wanderChangeInterval: 3
+  attackRange: 2
+  attackDamage: 10
+  attackCooldown: 1.5
+  requireLineOfSight: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &1883157090077181032
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,3 +206,17 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   showDebugInfo: 1
+--- !u!114 &4888846071823290058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2334251344416574482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b35ccc49cd3b748099031af3e04f54a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashColour: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.1

@@ -305,6 +305,7 @@ GameObject:
   - component: {fileID: 1097731298}
   - component: {fileID: 1097731297}
   - component: {fileID: 1097731302}
+  - component: {fileID: 1097731303}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -448,6 +449,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   showDebugInfo: 1
+--- !u!114 &1097731303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1097731296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b35ccc49cd3b748099031af3e04f54a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashColour: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.1
 --- !u!1 &1196978855
 GameObject:
   m_ObjectHideFlags: 0
