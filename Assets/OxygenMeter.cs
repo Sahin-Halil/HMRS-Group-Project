@@ -38,3 +38,12 @@ public class OxygenMeter : MonoBehaviour
     }
 }
 
+[System.Serializable]
+public class Item
+{
+    public string itemName;
+    public Sprite itemIcon;
+    public bool isOxygenItem = false;  // New flag for oxygen refilling items
+    public float oxygenAmount = 20f;   // Amount to refill oxygen
+}
+
