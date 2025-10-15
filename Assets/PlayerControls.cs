@@ -2,20 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCamera : MonoBehaviour
+
+public class PlayerControls: MonoBehaviour
 {
-    private float speed;
-    private Vector2 motion;
+    private CharacterController controller;
+
+    [SerializeField] private float speed;
+    //[SerializeField] private PlayerCamera;
+
+
     // Start is called before the first frame update
     void Start()
     {
-        speed = 20;
+        controller = GetComponent<CharacterController>();
+        speed = 10f;
+
     }
 
     // Update is called once per frame
-    void Update()
+    void Update() 
     {
-        motion = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        transform.Translate(motion * speed * Time.deltaTime);
+        Vector3 move = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")) * speed * Time.deltaTime;
+        controller.Move(move);
     }
 }
