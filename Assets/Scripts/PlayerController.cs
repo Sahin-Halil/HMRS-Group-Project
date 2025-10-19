@@ -10,29 +10,36 @@ public class PlayerController : MonoBehaviour
 
     // Movement
     [SerializeField] private float speed;
-    [SerializeField] private Vector2 move;
+    [SerializeField] private Vector3 move;
+    [SerializeField] private float moveHorizontal = 0f;
+    [SerializeField] private float moveVertical = 0f;
 
     // Mouse look
     [SerializeField] private float mouseSense;
     [SerializeField] private Vector2 mouse;
-    [SerializeField] private float lookHorizontal = 0;
-    [SerializeField] private float lookVertical = 0;
+    [SerializeField] private float lookHorizontal = 0f;
+    [SerializeField] private float lookVertical = 0f;
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
     {
-        move = value.Get<Vector2>();
+        Vector2 moveInput = value.Get<Vector2>();
+        moveHorizontal = moveInput.x;
+        moveVertical = moveInput.y;
+        //Debug.Log((transform.right.z, transform.forward.x));
     }
 
     // Called when mouse input is detected
     private void OnLook(InputValue value)
     {
         mouse = value.Get<Vector2>();
-        lookHorizontal = Mathf.Clamp(lookHorizontal - (mouse.y * mouseSense), -90f, 90f);
-        lookVertical = Mathf.Clamp(lookVertical + (mouse.x * mouseSense), -90f, 90f);
+        //Debug.Log(mouse);
+        //Debug.Log(direction);
+        lookHorizontal = lookHorizontal + (mouse.x * mouseSense);
+        lookVertical = Mathf.Clamp(lookVertical - (mouse.y * mouseSense), -90f, 90f);
     }
 
-    // Runs before Start, used for setup
+    // Runs when game starts, used for setup
     void Awake()
     {
         characterController = GetComponent<CharacterController>();
@@ -44,7 +51,8 @@ public class PlayerController : MonoBehaviour
     // Called every frame
     void Update()
     {
-        characterController.SimpleMove(new Vector3(move.x, 0, move.y) * speed);
-        transform.rotation = Quaternion.Euler(lookHorizontal, lookVertical, 0);
+        move = transform.right * moveHorizontal + transform.forward * moveVertical;
+        characterController.SimpleMove(move * speed);
+        transform.rotation = Quaternion.Euler(lookVertical, lookHorizontal, 0f);
     }
 }
