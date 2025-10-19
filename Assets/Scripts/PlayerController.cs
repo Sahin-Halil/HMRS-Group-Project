@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
     // Runs when game starts, used for setup
     void Awake()
     {
-        characterController = GetComponent<CharacterController>();
+        characterController = GetComponent<CharacterController>(); 
         Cursor.lockState = CursorLockMode.Locked;
         speed = 5f;
         mouseSense = 0.5f;
