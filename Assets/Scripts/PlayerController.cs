@@ -9,34 +9,49 @@ public class PlayerController : MonoBehaviour
     private CharacterController characterController;
 
     // Movement
-    [SerializeField] private float speed;
+    [SerializeField] private float standingSpeed;
     [SerializeField] private Vector3 move;
-    [SerializeField] private float moveHorizontal = 0f;
-    [SerializeField] private float moveVertical = 0f;
+    [SerializeField] private float xMove;
+    [SerializeField] private float yMove;
 
     // Mouse look
     [SerializeField] private float mouseSense;
-    [SerializeField] private Vector2 mouse;
-    [SerializeField] private float lookHorizontal = 0f;
-    [SerializeField] private float lookVertical = 0f;
+    [SerializeField] private float xRotation;
+    [SerializeField] private float yRotation;
+
+    private bool crouchInput;
+    private float crouchSpeed;
+    private float crouchHeight;
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
     {
         Vector2 moveInput = value.Get<Vector2>();
-        moveHorizontal = moveInput.x;
-        moveVertical = moveInput.y;
-        //Debug.Log((transform.right.z, transform.forward.x));
+        if (!crouchInput)
+        {
+            xMove = moveInput.x * standingSpeed;
+            yMove = moveInput.y * standingSpeed;
+        }
+        else{
+            xMove = moveInput.x * crouchSpeed;
+            yMove = moveInput.y * crouchSpeed;
+        }
     }
 
     // Called when mouse input is detected
     private void OnLook(InputValue value)
     {
-        mouse = value.Get<Vector2>();
+        Vector2 mouseInput = value.Get<Vector2>();
         //Debug.Log(mouse);
         //Debug.Log(direction);
-        lookHorizontal = lookHorizontal + (mouse.x * mouseSense);
-        lookVertical = Mathf.Clamp(lookVertical - (mouse.y * mouseSense), -90f, 90f);
+        xRotation = xRotation + (mouseInput.x * mouseSense);
+        yRotation = Mathf.Clamp(yRotation - (mouseInput.y * mouseSense), -90f, 90f);
+    }
+
+    private void OnCrouch() {
+        crouchInput = !crouchInput;
+        characterController.height -= crouchHeight;
+        crouchHeight *= -1f;
     }
 
     // Runs when game starts, used for setup
@@ -44,15 +59,22 @@ public class PlayerController : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
-        speed = 5f;
+        standingSpeed = 5f;
+        xMove = 0f;
+        yMove = 0f;
         mouseSense = 0.5f;
+        xRotation = 0f;
+        yRotation = 0f;
+        crouchInput = false;
+        crouchSpeed = 0.5f * standingSpeed;
+        crouchHeight = 0.25f * characterController.height;
     }
 
     // Called every frame
     void Update()
     {
-        move = transform.right * moveHorizontal + transform.forward * moveVertical;
-        characterController.SimpleMove(move * speed);
-        transform.rotation = Quaternion.Euler(lookVertical, lookHorizontal, 0f);
+        move = transform.right * xMove + transform.forward * yMove;
+        characterController.SimpleMove(move);
+        transform.rotation = Quaternion.Euler(yRotation, xRotation, 0f);
     }
 }
