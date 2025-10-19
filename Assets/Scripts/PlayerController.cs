@@ -27,15 +27,9 @@ public class PlayerController : MonoBehaviour
     private void OnMove(InputValue value)
     {
         Vector2 moveInput = value.Get<Vector2>();
-        if (!crouchInput)
-        {
-            xMove = moveInput.x * standingSpeed;
-            yMove = moveInput.y * standingSpeed;
-        }
-        else{
-            xMove = moveInput.x * crouchSpeed;
-            yMove = moveInput.y * crouchSpeed;
-        }
+        xMove = moveInput.x;
+        yMove = moveInput.y;
+        //Debug.Log((xMove, yMove));
     }
 
     // Called when mouse input is detected
@@ -49,6 +43,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void OnCrouch() {
+        Debug.Log("hello");
         crouchInput = !crouchInput;
         characterController.height -= crouchHeight;
         crouchHeight *= -1f;
@@ -73,8 +68,9 @@ public class PlayerController : MonoBehaviour
     // Called every frame
     void Update()
     {
+        float currentSpeed = crouchInput ? crouchSpeed : standingSpeed;
         move = transform.right * xMove + transform.forward * yMove;
-        characterController.SimpleMove(move);
+        characterController.SimpleMove(move * currentSpeed);
         transform.rotation = Quaternion.Euler(yRotation, xRotation, 0f);
     }
 }
