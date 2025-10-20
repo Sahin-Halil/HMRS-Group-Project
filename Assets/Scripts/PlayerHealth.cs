@@ -12,9 +12,7 @@ public class PlayerHealth : MonoBehaviour
 
     void Update()
     {
-        // Simulate health decreasing over time
         currentHealth -= Time.deltaTime * 5; // Decrease health over time
-
         if (currentHealth <= 0)
         {
             Debug.Log("Player is dead!");
