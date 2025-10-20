@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
 {
     // Components
     private CharacterController characterController;
+    public Camera characterCamera;
 
     // Movement
     [SerializeField] private float standingSpeed = 5f;
@@ -66,6 +67,7 @@ public class PlayerController : MonoBehaviour
             move.Normalize();
         }
         characterController.SimpleMove(move * currentSpeed);
-        transform.rotation = Quaternion.Euler(yRotation, xRotation, 0f);
+        transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
+        characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
 }
