@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class PauseManager : MonoBehaviour
 {
     [SerializeField] private GameObject pauseMenuUI;
+    [SerializeField] private GameObject settingsMenuUI;
     [SerializeField] private PlayerInput playerInput;
 
     private bool isPaused = false;
@@ -45,6 +46,7 @@ public class PauseManager : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
         pauseMenuUI.SetActive(false);
+        settingsMenuUI.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         playerInput.actions.Enable();
@@ -52,7 +54,23 @@ public class PauseManager : MonoBehaviour
 
     public void ExitGame()
     {
-        // Need to make this return to Title Screen when we create it
+        // Need to make this return to Title Screen when we create it, for now does nothing
         Application.Quit();
+    }
+
+    public void OpenSettings()
+    {
+        pauseMenuUI.SetActive(false);
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        playerInput.actions.Disable();
+        settingsMenuUI.SetActive(true);
+    }
+
+    public void CloseSettings()
+    {
+        settingsMenuUI.SetActive(false);
+        pauseMenuUI.SetActive(true);
     }
 }

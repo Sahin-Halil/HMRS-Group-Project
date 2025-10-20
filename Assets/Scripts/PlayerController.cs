@@ -55,4 +55,11 @@ public class PlayerController : MonoBehaviour
         characterController.SimpleMove(move * speed);
         transform.rotation = Quaternion.Euler(lookVertical, lookHorizontal, 0f);
     }
+
+    // Below are required for sensitivity slider in settings
+    // Getter for sensitivity
+    public float GetSensitivity() => mouseSense;
+
+    //Setter for sensitivity
+    public float SetSensitivity(float sensitivity) => mouseSense = sensitivity;
 }
