@@ -10,7 +10,7 @@ public class BarConfig
 }
 
 [System.Serializable]
-public class RectTransformData  // JSON 映射
+public class RectTransformData  
 {
     public float x, y, width, height;
 }
@@ -20,7 +20,7 @@ public class UIManager : MonoBehaviour
     [Header("UI References")]
     public Slider healthSlider;
     public Slider oxygenSlider;
-    public Image healthFill;  // 可加颜色变化
+    public Image healthFill;  
     public Image oxygenFill;
 
     private PlayerHealth health;
@@ -29,31 +29,30 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        health = FindObjectOfType<PlayerHealth>();  // 自动找（防硬编码）
+        health = FindObjectOfType<PlayerHealth>();  
         oxygen = FindObjectOfType<PlayerOxygen>();
         
-        LoadUIConfig();  // 加载你的 JSON
-        SetupEvents();   // 绑定事件
+        LoadUIConfig();  
+        SetupEvents();   
         
-        // 初始更新
+        // Initial update
         UpdateHealthBar();
         UpdateOxygenBar();
     }
 
     void LoadUIConfig()
     {
-        TextAsset jsonText = Resources.Load<TextAsset>("UIConfig");  // 放 Resources 文件夹
+        TextAsset jsonText = Resources.Load<TextAsset>("UIConfig");  // Place the "Resources" folder
         if (jsonText != null)
         {
             config = JsonUtility.FromJson<BarConfig>(jsonText.text);
-            // 应用位置（假设 Slider 是 RectTransform 子对象）
+            // Application Domain Placement
             if (healthSlider != null)
             {
                 RectTransform rt = healthSlider.GetComponent<RectTransform>();
                 rt.anchoredPosition = new Vector2(config.healthBar.x, config.healthBar.y);
                 rt.sizeDelta = new Vector2(config.healthBar.width, config.healthBar.height);
             }
-            // 同理 oxygen
         }
     }
 
@@ -61,6 +60,8 @@ public class UIManager : MonoBehaviour
     {
         if (health != null) health.onHealthChanged.AddListener(UpdateHealthBar);
         if (oxygen != null) oxygen.onOxygenChanged.AddListener(UpdateOxygenBar);
+        
+        // Link to the pause menu
         if (health != null) health.onDeath.AddListener(() => Time.timeScale = 0);  
         if (oxygen != null) oxygen.onOxygenDepleted.AddListener(() => Time.timeScale = 0);
     }
