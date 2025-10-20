@@ -1,0 +1,15 @@
+{
+    "healthBar": {
+      "x": 100,
+      "y": 50,
+      "width": 200,
+      "height": 20
+    },
+    "oxygenBar": {
+      "x": 100,
+      "y": 80,
+      "width": 200,
+      "height": 20
+    }
+  }
+  
