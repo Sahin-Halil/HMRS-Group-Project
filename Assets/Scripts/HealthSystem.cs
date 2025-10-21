@@ -3,12 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class HealthSystem : MonoBehaviour
 {
     [Header("Health Settings")]
     public float maxHealth = 100f;
     public float currentHealth;
+
+    [Header("UI References")]
+    public Slider healthSlider;
 
     [Header("Events")]
     public UnityEvent onDeath;
@@ -20,14 +24,22 @@ public class HealthSystem : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
+        if (healthSlider != null) {
+            healthSlider.minValue = 0f;
+            healthSlider.maxValue = maxHealth;
+            healthSlider.value = currentHealth;
+        }
     }
 
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        if (healthSlider != null) { 
+            healthSlider.value = currentHealth;
+        }
 
-        if(showDebugInfo)
+        if (showDebugInfo)
         {
             Debug.Log($"{gameObject.name} took {damage} damage. Health: {currentHealth}/{maxHealth}");
         }
