@@ -2,41 +2,72 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
-using UnityEditor.Search;
 
 public class RebindKey : MonoBehaviour
 {
-    [SerializeField] private InputActionReference action; // Action that we want to rebind
-    [SerializeField] private Button rebindButton;
+    [SerializeField] private InputActionReference action; // Specific movement action we want to change (movement, crouch etc.)
+    [SerializeField] private string compositePart; // Specific composite action we want to change like up, down etc.
+    [SerializeField] private Button rebindButton; // The button actually doing the rebinding
     [SerializeField] private TextMeshProUGUI label;
+
+    private int bindingIndex;
 
     private void Start()
     {
-        // Show current label when started
+        bindingIndex = FindBindingIndex(compositePart);
+        LoadBindingOverride();
         UpdateLabel();
-
-        // Listen for the new key when user clicks button
         rebindButton.onClick.AddListener(StartRebind);
+    }
+
+    private int FindBindingIndex(string partName)
+    {
+        var bindings = action.action.bindings;
+        for (int i = 0; i < bindings.Count; i++)
+        {
+            if (bindings[i].isPartOfComposite && bindings[i].name == partName)
+                return i;
+        }
+        Debug.LogError($"Binding part '{partName}' not found on {action.action.name}");
+        return -1;
     }
 
     private void StartRebind()
     {
+        if (bindingIndex < 0) return;
+
         rebindButton.interactable = false;
         label.text = "<Press a key>";
 
-        action.action.PerformInteractiveRebinding().OnComplete(op =>
-        {
-            op.Dispose(); // Delete the original keybind
-            rebindButton.interactable = true; // Allow user to rebind again
-            UpdateLabel(); // Reflect changes
-        }).Start();
+        action.action.PerformInteractiveRebinding(bindingIndex)
+            .OnMatchWaitForAnother(0.1f)
+            .OnComplete(op =>
+            {
+                op.Dispose();
+                rebindButton.interactable = true;
+                SaveBindingOverride();
+                UpdateLabel();
+            })
+            .Start();
     }
 
     private void UpdateLabel()
     {
-        if (action!=null && action.action!=null)
-        {
-            label.text = action.action.GetBindingDisplayString();
-        }
+        if (bindingIndex >= 0)
+            label.text = action.action.GetBindingDisplayString(bindingIndex);
+    }
+
+    private void SaveBindingOverride()
+    {
+        string saveKey = $"{action.action.actionMap.name}.{action.action.name}.{compositePart}";
+        PlayerPrefs.SetString(saveKey, action.action.bindings[bindingIndex].overridePath);
+    }
+
+    private void LoadBindingOverride()
+    {
+        string saveKey = $"{action.action.actionMap.name}.{action.action.name}.{compositePart}";
+        string overridePath = PlayerPrefs.GetString(saveKey, "");
+        if (!string.IsNullOrEmpty(overridePath))
+            action.action.ApplyBindingOverride(bindingIndex, overridePath);
     }
 }
