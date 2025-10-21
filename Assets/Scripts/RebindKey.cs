@@ -6,7 +6,7 @@ using TMPro;
 public class RebindKey : MonoBehaviour
 {
     [SerializeField] private InputActionReference action; // Specific movement action we want to change (movement, crouch etc.)
-    [SerializeField] private string compositePart; // Specific composite action we want to change like up, down etc.
+    [SerializeField] private string compositePart; // Specific composite action we want to change like up, down etc. Left empty if non composite (crouch, jump)
     [SerializeField] private Button rebindButton; // The button actually doing the rebinding
     [SerializeField] private TextMeshProUGUI label;
 
@@ -22,7 +22,11 @@ public class RebindKey : MonoBehaviour
 
     private int FindBindingIndex(string partName)
     {
+        
         var bindings = action.action.bindings;
+
+        if (string.IsNullOrEmpty(partName)) return 0;
+
         for (int i = 0; i < bindings.Count; i++)
         {
             if (bindings[i].isPartOfComposite && bindings[i].name == partName)
@@ -34,6 +38,7 @@ public class RebindKey : MonoBehaviour
 
     private void StartRebind()
     {
+
         if (bindingIndex < 0) return;
 
         rebindButton.interactable = false;
@@ -54,17 +59,24 @@ public class RebindKey : MonoBehaviour
     private void UpdateLabel()
     {
         if (bindingIndex >= 0)
-            label.text = action.action.GetBindingDisplayString(bindingIndex);
+        {
+            label.text = action.action.GetBindingDisplayString(
+                bindingIndex,
+                InputBinding.DisplayStringOptions.DontIncludeInteractions
+            );
+        }
     }
 
     private void SaveBindingOverride()
     {
+        if (bindingIndex < 0) return;
         string saveKey = $"{action.action.actionMap.name}.{action.action.name}.{compositePart}";
         PlayerPrefs.SetString(saveKey, action.action.bindings[bindingIndex].overridePath);
     }
 
     private void LoadBindingOverride()
     {
+        if (bindingIndex < 0) return;
         string saveKey = $"{action.action.actionMap.name}.{action.action.name}.{compositePart}";
         string overridePath = PlayerPrefs.GetString(saveKey, "");
         if (!string.IsNullOrEmpty(overridePath))
