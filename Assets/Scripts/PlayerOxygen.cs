@@ -36,6 +36,7 @@ public class PlayerOxygen : MonoBehaviour
         currentOxygen -= Time.deltaTime * drainRate;
         currentOxygen = Mathf.Clamp(currentOxygen, 0, maxOxygen);
         oxygenSlider.value = currentOxygen;
+
         onOxygenChanged?.Invoke();
 
         if (currentOxygen <= 0)
