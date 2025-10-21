@@ -52,10 +52,11 @@ public class PlayerController : MonoBehaviour
     // Setup components and values
     void Awake()
     {
-        characterController = GetComponent<CharacterController>(); 
+        characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         crouchSpeed = 0.5f * standingSpeed;
         crouchHeight = 0.25f * characterController.height;
+        mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
     }
 
     // Handles movement and rotation each frame
@@ -63,7 +64,7 @@ public class PlayerController : MonoBehaviour
     {
         float currentSpeed = crouchInput ? crouchSpeed : standingSpeed;
         move = transform.right * xMove + transform.forward * yMove;
-        if (move.magnitude > 1) { 
+        if (move.magnitude > 1) {
             move.Normalize();
         }
         characterController.SimpleMove(move * currentSpeed);
@@ -76,5 +77,5 @@ public class PlayerController : MonoBehaviour
     public float GetSensitivity() => mouseSense;
 
     //Setter for sensitivity
-    public float SetSensitivity(float sensitivity) => mouseSense = sensitivity;
+    public void SetSensitivity(float sensitivity)=> mouseSense = sensitivity;
 }

@@ -13,7 +13,7 @@ public class Checkpoint : MonoBehaviour
     void Start()
     {
         checkpointRenderer = GetComponent<Renderer>();
-        gameManager = FindObjectOfType<GameManager>();
+        gameManager = Object.FindFirstObjectByType<GameManager>();
         UpdateVisuals();
     }
 
