@@ -23,8 +23,8 @@ public class PlayerOxygen : MonoBehaviour
     void Update()
     {
         float drainRate = normalDrainRate;
-        if (playerController != null && (playerController.isMoving || playerController.isJumping))  // Linked mobility
-            drainRate *= movementDrainMultiplier;
+        //if (playerController != null && (playerController.isMoving || playerController.isJumping))  // Linked mobility
+        //    drainRate *= movementDrainMultiplier;
 
         currentOxygen -= Time.deltaTime * drainRate;
         currentOxygen = Mathf.Clamp(currentOxygen, 0, maxOxygen);
