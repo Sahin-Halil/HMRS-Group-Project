@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PauseManager : MonoBehaviour
@@ -8,6 +9,7 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private GameObject pauseMenuUI;
     [SerializeField] private GameObject settingsMenuUI;
     [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private HealthSystem healthSystem;
 
     private bool isPaused = false;
 
@@ -72,5 +74,10 @@ public class PauseManager : MonoBehaviour
     {
         settingsMenuUI.SetActive(false);
         pauseMenuUI.SetActive(true);
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

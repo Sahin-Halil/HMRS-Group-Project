@@ -29,8 +29,8 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        health = FindObjectOfType<PlayerHealth>();  
-        oxygen = FindObjectOfType<PlayerOxygen>();
+        health = FindFirstObjectByType<PlayerHealth>();  
+        oxygen = FindFirstObjectByType<PlayerOxygen>();
         
         LoadUIConfig();  
         SetupEvents();   

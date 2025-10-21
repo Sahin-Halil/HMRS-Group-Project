@@ -1,12 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class HealthSystem : MonoBehaviour
 {
+    // Need the UI element for respawn
+    [SerializeField] private GameObject respawnMenuUI;
+    [SerializeField] private PlayerInput playerInput;
+
+    
     [Header("Health Settings")]
     public float maxHealth = 100f;
     public float currentHealth;
@@ -16,7 +19,7 @@ public class HealthSystem : MonoBehaviour
 
     [Header("Events")]
     public UnityEvent onDeath;
-    public UnityEvent<float> onHealthChanged; // @Haoge can use for HUD
+    public UnityEvent<float> onHealthChanged;
 
     [Header("Debug")]
     public bool showDebugInfo = true;
@@ -69,7 +72,11 @@ public class HealthSystem : MonoBehaviour
     {
         if(showDebugInfo)
         {
-            Debug.Log($"{gameObject.name} has died!");
+            respawnMenuUI.SetActive(true);
+            Time.timeScale = 0f;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            playerInput.actions.Disable();
         }
         onDeath?.Invoke();
 
