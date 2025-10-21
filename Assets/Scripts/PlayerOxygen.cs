@@ -1,12 +1,16 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class PlayerOxygen : MonoBehaviour
 {
+    [Header("UI References")]
+    public Slider oxygenSlider;
+
     [Header("Oxygen Settings")]
-    public float maxOxygen = 100f;
+    public float maxOxygen = 50f;
     public float currentOxygen;
-    public float normalDrainRate = 0.5f;  // Static oxygen consumption
+    public float normalDrainRate = 1f;  // Static oxygen consumption
     public float movementDrainMultiplier = 2f;  // Accelerate when moving
     public UnityEvent onOxygenChanged;
     public UnityEvent onOxygenDepleted;
@@ -18,6 +22,9 @@ public class PlayerOxygen : MonoBehaviour
         currentOxygen = maxOxygen;
         playerController = GetComponent<PlayerController>();  
         onOxygenChanged?.Invoke();
+        oxygenSlider.minValue = 0f;
+        oxygenSlider.maxValue = maxOxygen;
+        oxygenSlider.value = currentOxygen;
     }
 
     void Update()
@@ -28,6 +35,7 @@ public class PlayerOxygen : MonoBehaviour
 
         currentOxygen -= Time.deltaTime * drainRate;
         currentOxygen = Mathf.Clamp(currentOxygen, 0, maxOxygen);
+        oxygenSlider.value = currentOxygen;
         onOxygenChanged?.Invoke();
 
         if (currentOxygen <= 0)
