@@ -52,7 +52,7 @@ public class HealthSystem : MonoBehaviour
 
         if(currentHealth <= 0)
         {
-            Die();
+            onDeath?.Invoke();
         }
     }
 
@@ -61,30 +61,11 @@ public class HealthSystem : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        if(showDebugInfo)
+        if (showDebugInfo)
         {
             Debug.Log($"{gameObject.name} healed {amount}. Health: {currentHealth}/{maxHealth}");
         }
         onHealthChanged?.Invoke(currentHealth);
-    }
-
-    void Die()
-    {
-        if(showDebugInfo)
-        {
-            respawnMenuUI.SetActive(true);
-            Time.timeScale = 0f;
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            playerInput.actions.Disable();
-        }
-        onDeath?.Invoke();
-
-        // If there is an enemy left, destroy it
-        if(!CompareTag("Player"))
-        {
-            Destroy(gameObject);
-        }
     }
 
     public float GetHealthPercentage()

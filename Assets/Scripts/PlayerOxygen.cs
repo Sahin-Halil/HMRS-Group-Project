@@ -35,10 +35,6 @@ public class PlayerOxygen : MonoBehaviour
     {
         // Calculate drain rate based on movement
         float drainRate = normalDrainRate;
-        if (playerController != null && (playerController.isMoving || playerController.isJumping))
-        {
-            drainRate *= movementDrainMultiplier;  // Accelerate drain during activity
-        }
 
         // Apply drain and clamp
         currentOxygen -= Time.deltaTime * drainRate;

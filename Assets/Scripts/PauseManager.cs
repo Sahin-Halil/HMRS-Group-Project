@@ -10,6 +10,7 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private GameObject settingsMenuUI;
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private HealthSystem healthSystem;
+    [SerializeField] private DieScript playerDeath;
 
     private bool isPaused = false;
 
@@ -23,8 +24,9 @@ public class PauseManager : MonoBehaviour
     // Checks every frame to see if the player has pressed the escape key to open the settings menu
     void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (Keyboard.current.escapeKey.wasPressedThisFrame && !playerDeath.checkDead())
         {
+            playerDeath.toggleDeathStatus();
             if (isPaused) { ResumeGame(); }
 
             else { PauseGame(); }
