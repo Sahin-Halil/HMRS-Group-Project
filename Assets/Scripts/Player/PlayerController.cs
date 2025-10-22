@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour
     private float crouchSpeed;
     private float crouchHeight;
 
+    [SerializeField] private ShipPartManager shipPartManager;
+
     // Called when movement input is detected
     private void OnMove(InputValue value)
     {
@@ -47,6 +49,13 @@ public class PlayerController : MonoBehaviour
         crouchInput = !crouchInput;
         characterController.height -= crouchHeight;
         crouchHeight *= -1f;
+    }
+
+    private void OnTriggerEnter(Collider collider) {
+        if (collider.gameObject.CompareTag("ShipPart")) {
+            shipPartManager.addPart();
+            Destroy(collider.gameObject);
+        }
     }
 
     // Setup components and values
