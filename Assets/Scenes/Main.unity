@@ -2750,7 +2750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parts: 0
-  shipPartText: {fileID: 0}
+  shipPartText: {fileID: 1240682750}
 --- !u!4 &737277552
 Transform:
   m_ObjectHideFlags: 0
@@ -3578,7 +3578,7 @@ MonoBehaviour:
   xRotation: 0
   yRotation: 0
   crouchInput: 0
-  shipPartManager: {fileID: 0}
+  shipPartManager: {fileID: 737277551}
 --- !u!4 &954540878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8764431963872186613, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
@@ -5041,7 +5041,7 @@ GameObject:
   - component: {fileID: 1240682751}
   - component: {fileID: 1240682750}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: PartCounter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
