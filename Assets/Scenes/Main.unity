@@ -3532,7 +3532,7 @@ MonoBehaviour:
   xRotation: 0
   yRotation: 0
   crouchInput: 0
-  shipPartManager: {fileID: 939050304}
+  shipPartManager: {fileID: 0}
 --- !u!4 &954540878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8764431963872186613, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
@@ -6202,7 +6202,6 @@ RectTransform:
   m_Children:
   - {fileID: 1543971160}
   - {fileID: 1843247278}
-  - {fileID: 327611487}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -8004,7 +8003,6 @@ SceneRoots:
   - {fileID: 600900409}
   - {fileID: 1554322457}
   - {fileID: 1220877888}
-  - {fileID: 5655665710797463688}
   - {fileID: 217021523}
   - {fileID: 943599156}
   - {fileID: 1776363901}
@@ -8015,3 +8013,5 @@ SceneRoots:
   - {fileID: 1090851662}
   - {fileID: 587986513}
   - {fileID: 585416227}
+  - {fileID: 298700855}
+  - {fileID: 1421219099}
