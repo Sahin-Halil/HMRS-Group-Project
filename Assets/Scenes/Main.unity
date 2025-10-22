@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028396, g: 0.22571427, b: 0.30692327, a: 1}
+  m_IndirectSpecularColor: {r: 0.01346862, g: 0.0106264455, b: 0.007826944, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -445,13 +445,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 50212717}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.42261827, y: 0, z: 0, w: 0.9063079}
+  m_LocalRotation: {x: 0.99539626, y: -0, z: -0, w: -0.095845714}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 191, y: 0, z: 0}
 --- !u!1 &81768372
 GameObject:
   m_ObjectHideFlags: 0
@@ -2307,6 +2307,7 @@ GameObject:
   - component: {fileID: 802959327}
   - component: {fileID: 802959326}
   - component: {fileID: 802959325}
+  - component: {fileID: 802959329}
   m_Layer: 0
   m_Name: Lamp
   m_TagString: Untagged
@@ -2403,6 +2404,19 @@ Transform:
   - {fileID: 1766875160}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &802959329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802959324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d109915726a3c32419b514f1b776408d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lamp: {fileID: 802959324}
 --- !u!1 &812681037
 GameObject:
   m_ObjectHideFlags: 0
@@ -2605,7 +2619,6 @@ MonoBehaviour:
   pauseMenuUI: {fileID: 280874209}
   settingsMenuUI: {fileID: 1245443757}
   playerInput: {fileID: 954540879}
-  healthSystem: {fileID: 0}
   playerDeath: {fileID: 954540893}
 --- !u!4 &887885496
 Transform:
@@ -6165,6 +6178,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 887885495}
+    - target: {fileID: 1625624842916186454, guid: b8e065c6ac25d484abfd9295c3b6f402, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ExitGame
+      objectReference: {fileID: 0}
     - target: {fileID: 1846197802628490513, guid: b8e065c6ac25d484abfd9295c3b6f402, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
