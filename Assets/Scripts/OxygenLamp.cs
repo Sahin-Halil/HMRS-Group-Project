@@ -12,6 +12,11 @@ public class OxygenLamp : MonoBehaviour
             oxygen = other.GetComponent<PlayerOxygen>();
             oxygen.RefillOxygen(Time.deltaTime * 2);
         }
+
+        else if (other.CompareTag("Enemy"))
+        {
+            Object.Destroy(other);
+        }
     }
     public void OnTriggerExit(Collider other)
     {
