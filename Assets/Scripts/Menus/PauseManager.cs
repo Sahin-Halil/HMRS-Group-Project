@@ -27,9 +27,6 @@ public class PauseManager : MonoBehaviour
     {
         if (Keyboard.current.escapeKey.wasPressedThisFrame && !playerDeath.checkDead() && !hasWon)
         {
-            if (playerDeath.checkDead()) { 
-                playerDeath.toggleDeathStatus();
-            }
             if (isPaused) { ResumeGame(); }
 
             else { PauseGame(); }

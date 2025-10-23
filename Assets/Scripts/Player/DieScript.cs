@@ -5,15 +5,20 @@ using UnityEngine.UI;
 
 public class DieScript : MonoBehaviour
 {
+    // Attributes
     [SerializeField] private GameObject respawnMenuUI;
     private PlayerInput playerInput;
     private bool isDead = false;
 
-    void Awake() {
+    // Setup references
+    void Awake()
+    {
         playerInput = GetComponent<PlayerInput>();
     }
 
-    public void Die() {
+    // Handles player death logic and UI activation
+    public void Die()
+    {
         toggleDeathStatus();
         respawnMenuUI.SetActive(true);
         Time.timeScale = 0f;
@@ -22,11 +27,15 @@ public class DieScript : MonoBehaviour
         playerInput.actions.Disable();
     }
 
-    public void toggleDeathStatus() {
+    // Toggles death state
+    public void toggleDeathStatus()
+    {
         isDead = !isDead;
     }
 
-    public bool checkDead() {
+    // Returns current death state
+    public bool checkDead()
+    {
         return isDead;
     }
 }

@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     // Components
     private CharacterController characterController;
     public Camera characterCamera;
+    [SerializeField] private ShipPartManager shipPartManager;
 
     // Movement
     [SerializeField] private float standingSpeed = 5f;
@@ -25,7 +26,6 @@ public class PlayerController : MonoBehaviour
     private float crouchSpeed;
     private float crouchHeight;
 
-    [SerializeField] private ShipPartManager shipPartManager;
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
@@ -51,8 +51,11 @@ public class PlayerController : MonoBehaviour
         crouchHeight *= -1f;
     }
 
-    private void OnTriggerEnter(Collider collider) {
-        if (collider.gameObject.CompareTag("ShipPart")) {
+    // Detects collisions with collectible ship parts
+    private void OnTriggerEnter(Collider collider)
+    {
+        if (collider.gameObject.CompareTag("ShipPart"))
+        {
             shipPartManager.addPart();
             Destroy(collider.gameObject);
         }
@@ -73,10 +76,17 @@ public class PlayerController : MonoBehaviour
     {
         float currentSpeed = crouchInput ? crouchSpeed : standingSpeed;
         move = transform.right * xMove + transform.forward * yMove;
-        if (move.magnitude > 1) {
+
+        // Prevent diagonal speed boost
+        if (move.magnitude > 1)
+        {
             move.Normalize();
         }
+
+        // Apply calculated movement
         characterController.SimpleMove(move * currentSpeed);
+
+        // Apply rotation for camera and player
         transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
@@ -85,9 +95,10 @@ public class PlayerController : MonoBehaviour
     // Getter for sensitivity
     public float GetSensitivity() => mouseSense;
 
-    //Setter for sensitivity
-    public void SetSensitivity(float sensitivity)=> mouseSense = sensitivity;
+    // Setter for sensitivity
+    public void SetSensitivity(float sensitivity) => mouseSense = sensitivity;
 
+    // Returns reference to ShipPartManager
     public ShipPartManager GetShipPartManager()
     {
         return shipPartManager;
