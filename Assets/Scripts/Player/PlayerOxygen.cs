@@ -3,17 +3,15 @@ using UnityEngine.UI;
 
 public class PlayerOxygen : MonoBehaviour
 {
-    [Header("UI References")]
+    // Oxygen and UI references
     [SerializeField] private Slider oxygenSlider;
-
-    [Header("Oxygen Settings")]
     [SerializeField] private float maxOxygen = 50f;
+    [SerializeField] private DieScript dieScript;
 
-    [Header("Respawn Handler")]
-    [SerializeField] private DieScript dieScript; 
-        
+    // Players oxygen level
     private float currentOxygen;
 
+    // Initialize oxygen values and UI
     private void Start()
     {
         currentOxygen = maxOxygen;
@@ -26,13 +24,12 @@ public class PlayerOxygen : MonoBehaviour
         }
     }
 
+    // Handles oxygen depletion and death trigger
     private void Update()
     {
-        // Drain oxygen over time
         currentOxygen -= Time.deltaTime;
         if (currentOxygen < 0f) currentOxygen = 0f;
         else if (currentOxygen > maxOxygen) currentOxygen = maxOxygen;
-
 
         if (oxygenSlider != null)
             oxygenSlider.value = currentOxygen;
@@ -43,9 +40,10 @@ public class PlayerOxygen : MonoBehaviour
         }
     }
 
+    // Refills oxygen by a given amount
     public void RefillOxygen(float amount)
     {
-        if (currentOxygen+amount>maxOxygen)
+        if (currentOxygen + amount > maxOxygen)
         {
             currentOxygen = maxOxygen;
             return;

@@ -105,7 +105,6 @@ GameObject:
   - component: {fileID: 6912760680959231430}
   - component: {fileID: 2950871916919252211}
   - component: {fileID: 8165190203434886559}
-  - component: {fileID: 6900338795575111778}
   - component: {fileID: 5837627451698827889}
   - component: {fileID: 4110184154961936350}
   - component: {fileID: 2297157792861158656}
@@ -221,42 +220,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   respawnMenuUI: {fileID: 0}
   playerInput: {fileID: 4110184154961936350}
+  dieScript: {fileID: 0}
   maxHealth: 100
   currentHealth: 0
   healthSlider: {fileID: 0}
-  onDeath:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6562504523566788359}
-        m_TargetAssemblyTypeName: DieScript, Assembly-CSharp
-        m_MethodName: Die
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onHealthChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  showDebugInfo: 1
---- !u!114 &6900338795575111778
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7644519512351195686}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b35ccc49cd3b748099031af3e04f54a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  flashColour: {r: 1, g: 0, b: 0, a: 1}
-  flashDuration: 0.1
 --- !u!114 &5837627451698827889
 MonoBehaviour:
   m_ObjectHideFlags: 0

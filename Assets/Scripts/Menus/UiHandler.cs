@@ -4,12 +4,13 @@ using TMPro;
 
 public class UiHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 {
+    // UI text and color states
     [SerializeField] private TextMeshProUGUI buttonText;
     [SerializeField] private Color normalColor;
     [SerializeField] private Color hoverColor;
     [SerializeField] private Color pressedColor;
 
-    //Ensures that colors are reset when buttons are enabled and disabled
+    // Ensures button color is reset when enabled or disabled
     void OnEnable()
     {
         buttonText.color = normalColor;
@@ -19,6 +20,8 @@ public class UiHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         buttonText.color = normalColor;
     }
+
+    // Handles color changes on hover and click
     public void OnPointerEnter(PointerEventData eventData) => buttonText.color = hoverColor;
     public void OnPointerExit(PointerEventData eventData) => buttonText.color = normalColor;
     public void OnPointerDown(PointerEventData eventData) => buttonText.color = pressedColor;

@@ -10,7 +10,7 @@ public class HealthSystem : MonoBehaviour
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private DieScript dieScript;
 
-    // Health
+    // Health 
     public float maxHealth = 100f;
     public float currentHealth;
     public Slider healthSlider;

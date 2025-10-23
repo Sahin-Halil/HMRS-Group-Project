@@ -4,28 +4,29 @@ using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
+    // UI references and player controller
     [SerializeField] private GameObject settingsMenuUI;
     [SerializeField] private GameObject pauseMenuUI;
     [SerializeField] private Slider sensitivitySlider;
     [SerializeField] private PlayerController controller;
 
+    // Initializes settings and loads saved sensitivity
     private void Start()
     {
         settingsMenuUI.SetActive(false);
 
         float savedSense = PlayerPrefs.GetFloat("MouseSensitivity", 0.5f);
 
-        if (controller!=null)
+        if (controller != null)
         {
             controller.SetSensitivity(savedSense);
         }
 
         sensitivitySlider.SetValueWithoutNotify(savedSense);
-
-        // Make slider listen for changes
         sensitivitySlider.onValueChanged.AddListener(OnSensitivityChanged);
     }
 
+    // Handles sensitivity slider changes and saves preference
     private void OnSensitivityChanged(float value)
     {
         if (value <= 0f) value = 0.01f;
@@ -33,7 +34,6 @@ public class SettingsManager : MonoBehaviour
         if (controller != null)
             controller.SetSensitivity(value);
 
-        // Save for next session
         PlayerPrefs.SetFloat("MouseSensitivity", value);
         PlayerPrefs.Save();
     }

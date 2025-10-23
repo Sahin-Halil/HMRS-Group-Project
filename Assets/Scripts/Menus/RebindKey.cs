@@ -5,13 +5,15 @@ using TMPro;
 
 public class RebindKey : MonoBehaviour
 {
-    [SerializeField] private InputActionReference action; // Specific movement action we want to change (movement, crouch etc.)
-    [SerializeField] private string compositePart; // Specific composite action we want to change like up, down etc. Left empty if non composite (crouch, jump)
-    [SerializeField] private Button rebindButton; // The button actually doing the rebinding
+    // References for rebinding setup
+    [SerializeField] private InputActionReference action;
+    [SerializeField] private string compositePart;
+    [SerializeField] private Button rebindButton;
     [SerializeField] private TextMeshProUGUI label;
 
     private int bindingIndex;
 
+    // Initialize rebind setup and load saved bindings
     private void Start()
     {
         bindingIndex = FindBindingIndex(compositePart);
@@ -20,9 +22,9 @@ public class RebindKey : MonoBehaviour
         rebindButton.onClick.AddListener(StartRebind);
     }
 
+    // Finds index of binding part within the action
     private int FindBindingIndex(string partName)
     {
-        
         var bindings = action.action.bindings;
 
         if (string.IsNullOrEmpty(partName)) return 0;
@@ -32,13 +34,12 @@ public class RebindKey : MonoBehaviour
             if (bindings[i].isPartOfComposite && bindings[i].name == partName)
                 return i;
         }
-        Debug.LogError($"Binding part '{partName}' not found on {action.action.name}");
         return -1;
     }
 
+    // Starts interactive key rebinding process
     private void StartRebind()
     {
-
         if (bindingIndex < 0) return;
 
         rebindButton.interactable = false;
@@ -56,6 +57,7 @@ public class RebindKey : MonoBehaviour
             .Start();
     }
 
+    // Updates on-screen label to show current binding
     private void UpdateLabel()
     {
         if (bindingIndex >= 0)
@@ -67,6 +69,7 @@ public class RebindKey : MonoBehaviour
         }
     }
 
+    // Saves overridden key binding to player preferences
     private void SaveBindingOverride()
     {
         if (bindingIndex < 0) return;
@@ -74,6 +77,7 @@ public class RebindKey : MonoBehaviour
         PlayerPrefs.SetString(saveKey, action.action.bindings[bindingIndex].overridePath);
     }
 
+    // Loads saved key binding override if it exists
     private void LoadBindingOverride()
     {
         if (bindingIndex < 0) return;

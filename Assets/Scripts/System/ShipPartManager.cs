@@ -6,27 +6,25 @@ using TMPro;
 
 public class ShipPartManager : MonoBehaviour
 {
+    // Ship part tracking and UI reference
     [SerializeField] private float parts = 0;
     [SerializeField] private TMP_Text shipPartText;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
+    // Updates ship part count display each frame
     void Update()
     {
         shipPartText.text = "ShipPart Count: " + parts.ToString();
     }
 
+    // Increases collected ship part count
     public void addPart()
     {
         parts++;
     }
 
-    public float getParts() {
+    // Returns current number of collected ship parts
+    public float getParts()
+    {
         return parts;
     }
 }
