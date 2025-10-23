@@ -12,7 +12,7 @@ public class ShipPartManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -21,7 +21,12 @@ public class ShipPartManager : MonoBehaviour
         shipPartText.text = "ShipPart Count: " + parts.ToString();
     }
 
-    public void addPart() {
+    public void addPart()
+    {
         parts++;
+    }
+
+    public float getParts() {
+        return parts;
     }
 }
