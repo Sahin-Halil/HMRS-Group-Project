@@ -6,22 +6,26 @@ public class PauseManager : MonoBehaviour
 {
     [SerializeField] private GameObject pauseMenuUI;
     [SerializeField] private GameObject settingsMenuUI;
+    [SerializeField] private GameObject winMenuUI;
+    [SerializeField] private GameObject notEnoughPartsUI;
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private DieScript playerDeath;
 
     private bool isPaused = false;
+    private bool hasWon = false;
 
     // Makes sure that game is not paused when starting
     private void Start()
     {
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
+        hasWon = false;
     }
 
     // Checks every frame to see if the player has pressed the escape key to open the settings menu
     void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame && !playerDeath.checkDead())
+        if (Keyboard.current.escapeKey.wasPressedThisFrame && !playerDeath.checkDead() && !hasWon)
         {
             if (playerDeath.checkDead()) { 
                 playerDeath.toggleDeathStatus();
@@ -80,5 +84,21 @@ public class PauseManager : MonoBehaviour
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void Win()
+    {
+        hasWon = true;
+        Time.timeScale = 0f;
+        winMenuUI.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        playerInput.actions.Disable();
+        if (Keyboard.current.escapeKey.wasPressedThisFrame) winMenuUI.SetActive(true); // Does nothing if esc is pressed to pause
+    }
+
+    public void NotEnoughParts(bool value)
+    {
+        notEnoughPartsUI.SetActive(value);
     }
 }

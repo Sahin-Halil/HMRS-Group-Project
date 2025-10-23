@@ -87,4 +87,9 @@ public class PlayerController : MonoBehaviour
 
     //Setter for sensitivity
     public void SetSensitivity(float sensitivity)=> mouseSense = sensitivity;
+
+    public ShipPartManager GetShipPartManager()
+    {
+        return shipPartManager;
+    }
 }
