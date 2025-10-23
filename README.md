@@ -2,33 +2,31 @@
 ECS657U/ECS7003P - Multi-platform Game Development - 2025/26
 
 ## Game Overview
-[Insert Game Name] is a 3D adventure prototype game.
+LiGHT is a 3D adventure prototype game.
 The player controls a stranded explorer repairing their crashed ship. Collect missing ship pieces while managing limited oxygen and surviving hostile creatures aboard the damaged vessel. Repair the ship to progress toward escape.
 
 ## Game Objective
-* Explore the ship's interior to locate scattered ship pieces.
+* Explore the world to locate scattered ship pieces.
 * Collect oxygen tanks to survive longer.
 * Avoid or defeat roaming enemies.
 * Return collected parts to the Repair Console in the hub area.
 * Repair the ship to complete the prototype.
 
-(Note: Outdoor environment is locked in this prototype and will be added in the final game)
+(Note: Second environment is locked in this prototype and will be added in the final game)
 
 ## How to Play
-1. Start in the Hub area of the crashed ship.
-2. Enter the Indoor Zone through the door.
-3. Navigate the area, collect ship pieces, and watch your oxygen bar.
-4. Refill oxygen by picking up oxygen tanks.
-5. Avoid or fight enemies that patrol the area.
-6. When you've collected all pieces, return to the hub and interact with the Repair Console to finish the prototype.
+1. Start in the tutorial area.
+2. Navigate the area, collect ship pieces, and watch your oxygen bar.
+3. Refill oxygen by standing near lamps.
+4. Avoid or fight enemies that patrol the area.
+5. When you've collected all pieces, return to the hub and interact with the Repair Console to finish the prototype.
 
-### Controls (change as appropriate when protoype is complete)
+### Controls (Can be Rebound)
 | Action | Key / Mouse |
 | :------- | :------: |
-| Left     |  W A S D, arrow keys  |
+| Move     |  W A S D |
 | Look / Aim   |  Mouse  |
-| Jump   |  Spacebar  |
-| Interact / Collect / Attack   |  E  |
+| Crouch   |  LShift  |
 | Pause / Resume   |  Esc  |
 
 Playable with keybpard and mouse on WebGL builds.
@@ -41,8 +39,8 @@ Playable with keybpard and mouse on WebGL builds.
 * Player health and respawn
 * Heads-Up Display (HUD) for oxygen, health and part count
 * Pause menu
-* Hub and indoor environment scenes
-* Repair console win condition
+* Basic level design
+* Win Screen
 
 ## Building and Running
 #### Local
@@ -58,9 +56,9 @@ A playable build is hosted on GitHub Pages:
 | Member | Role |
 | :------- | :------: |
 | Haoge Tang     |  HUD & Oxygen Systems  |
-| Meldy Asili Bile   |  Enemy AI & Combat Systems  |
-| Rayyan Parkar   |  Environment / Level Design & Accessibility  |
-| Sahin Efe Sabri Halil  |  Player & Input Systems  |
+| Meldy Asili Bile   |  Enemy AI / Combat Systems / Documentation  |
+| Rayyan Parkar   |  Level Design / Accessibility / UI / UX / Code Refactor / Lamps  |
+| Sahin Efe Sabri Halil  |  Player & Input Systems / Code Refactor / HUD / Organisation |
 
 ### Gameplay Video
 Watch our prototype demo:
