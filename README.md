@@ -7,7 +7,7 @@ The player controls a stranded explorer repairing their crashed ship. Collect mi
 
 ## Game Objective
 * Explore the world to locate scattered ship pieces.
-* Collect oxygen tanks to survive longer.
+* Stand near lamps to replenish oxygen.
 * Avoid or defeat roaming enemies.
 * Return collected parts to the Repair Console in the hub area.
 * Repair the ship to complete the prototype.
