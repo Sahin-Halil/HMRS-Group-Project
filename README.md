@@ -67,4 +67,4 @@ Watch our prototype demo:
 
 ### Academic Integrity
 This project follows Queen Mary University of London's Academic Integrity and Misconduct Policy.
-All generative-AI or external toll usag is acknowledged in this README and the group submission form.
+All generative-AI or external tool usage is acknowledged in this README and the group submission form.
