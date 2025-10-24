@@ -29,7 +29,7 @@ The player controls a stranded explorer repairing their crashed ship. Collect mi
 | Crouch   |  LShift  |
 | Pause / Resume   |  P  |
 
-Playable with keybpard and mouse on WebGL builds.
+Playable with keyboard and mouse on WebGL builds.
 
 ### Core Systems Implemented
 * Player movement and camera controls
