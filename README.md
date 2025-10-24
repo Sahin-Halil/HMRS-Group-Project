@@ -50,7 +50,7 @@ Playable with keyboard and mouse on WebGL builds.
 
 #### WebGL
 A playable build is hosted on GitHub Pages:
-[(insert link)](https://rayyan-parkar.github.io/HMRS-BUILD/index)
+[(CLICK HERE)](https://rayyan-parkar.github.io/HMRS-BUILD/index)
 
 ## Team
 | Member | Role |
@@ -61,9 +61,7 @@ A playable build is hosted on GitHub Pages:
 | Sahin Efe Sabri Halil  |  Player & Input Systems / Code Refactor / HUD / Organisation |
 
 ### Gameplay Video
-Watch our prototype demo:
-
-[insert link]
+Watch our prototype demo: [(CLICK HERE)](https://youtu.be/0Qupi1xkNf4)
 
 ### Academic Integrity
 This project follows Queen Mary University of London's Academic Integrity and Misconduct Policy.
