@@ -27,7 +27,7 @@ The player controls a stranded explorer repairing their crashed ship. Collect mi
 | Move     |  W A S D |
 | Look / Aim   |  Mouse  |
 | Crouch   |  LShift  |
-| Pause / Resume   |  Esc  |
+| Pause / Resume   |  P  |
 
 Playable with keybpard and mouse on WebGL builds.
 
@@ -50,7 +50,7 @@ Playable with keybpard and mouse on WebGL builds.
 
 #### WebGL
 A playable build is hosted on GitHub Pages:
-(insert link)
+[(insert link)](https://rayyan-parkar.github.io/HMRS-BUILD/index)
 
 ## Team
 | Member | Role |
