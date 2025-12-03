@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: b71bc772023f845e6b935504fd06974d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - puzzleUI: {instanceID: 0}
+  - promptText: {instanceID: 0}
+  - statusText: {instanceID: 0}
+  - consoleRenderer: {instanceID: 0}
+  - gridParent: {instanceID: 0}
+  - pipeSegmentPrefab: {instanceID: 0}
+  - instructionText: {instanceID: 0}
+  - checkSolutionButton: {instanceID: 0}
+  - straightPipeSprite: {fileID: 1844290285, guid: 7e9c91c21da64460a8932d727adb3282, type: 3}
+  - cornerPipeSprite: {fileID: -1375191729, guid: 3220a4fa059434f6c964387d990f12ef, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

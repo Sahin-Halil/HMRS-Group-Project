@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collider.gameObject.CompareTag("ShipPart"))
         {
-            shipPartManager.addPart();
+            shipPartManager.AddPart();
             Destroy(collider.gameObject);
         }
     }

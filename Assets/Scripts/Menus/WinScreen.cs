@@ -11,13 +11,13 @@ public class WinScreen : MonoBehaviour
     // Handles win or insufficient parts when player enters trigger
     public void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && shipPartManager.getParts() == 5)
+        if (other.CompareTag("Player") && shipPartManager.GetParts() == 5)
         {
             pauseManager.Win();
             return;
         }
 
-        else if (other.CompareTag("Player") && shipPartManager.getParts() < 5)
+        else if (other.CompareTag("Player") && shipPartManager.GetParts() < 5)
         {
             pauseManager.NotEnoughParts(true);
         }
@@ -26,7 +26,7 @@ public class WinScreen : MonoBehaviour
     // Hides 'not enough parts' message when player exits trigger
     public void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player") && shipPartManager.getParts() < 5)
+        if (other.CompareTag("Player") && shipPartManager.GetParts() < 5)
             pauseManager.NotEnoughParts(false);
     }
 }
