@@ -19,7 +19,7 @@ public abstract class PuzzleConsole : MonoBehaviour
 
     // Visual feedback for player
     public Renderer consoleRenderer;
-    public Color normalColor = Color.gray;
+    public Color originalColor = Color.gray;
     public Color puzzleCompleteColor = Color.yellow;
     public Color partPlacedColor = Color.green;
 
@@ -186,7 +186,7 @@ public abstract class PuzzleConsole : MonoBehaviour
             }
             else
             {
-                mat.color = normalColor;
+                mat.color = originalColor;
             }
         }
     }
