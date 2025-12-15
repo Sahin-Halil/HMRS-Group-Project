@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private ShipPartManager shipPartManager;
 
     // Movement
-    [SerializeField] private float standingSpeed = 5f;
+    [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private Vector3 move;
     [SerializeField] private float xMove;
     [SerializeField] private float yMove;
@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour
     private float crouchSpeed;
     private float crouchHeight;
 
+    // Running Speed
+    [SerializeField] private bool runInput = false;
+    [SerializeField] private float runSpeed;
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
@@ -51,6 +54,29 @@ public class PlayerController : MonoBehaviour
         crouchHeight *= -1f;
     }
 
+    // Handles Run toggling
+    private void OnRun() 
+    {
+        runInput = !runInput;
+    }
+
+    // Handles players speed depending on current state
+    private float MovementSpeedHandler() 
+    {
+        if (crouchInput)
+        {
+            return crouchSpeed;
+        }
+        else if (runInput)
+        {
+            return runSpeed;
+        }
+        else 
+        {
+            return walkSpeed;
+        }
+    }
+
     // Detects collisions with collectible ship parts
     private void OnTriggerEnter(Collider collider)
     {
@@ -66,15 +92,17 @@ public class PlayerController : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
-        crouchSpeed = 0.5f * standingSpeed;
+        crouchSpeed = 0.5f * walkSpeed;
         crouchHeight = 0.25f * characterController.height;
+        runSpeed = 1.5f * walkSpeed;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
     }
 
     // Handles movement and rotation each frame
     void Update()
     {
-        float currentSpeed = crouchInput ? crouchSpeed : standingSpeed;
+        // Adjust speed for player depending on current state
+        float currentSpeed = MovementSpeedHandler();
         move = transform.right * xMove + transform.forward * yMove;
 
         // Prevent diagonal speed boost
