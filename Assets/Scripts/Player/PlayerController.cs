@@ -19,8 +19,11 @@ public class PlayerController : MonoBehaviour
     // Movement
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private Vector3 move;
+    private Vector3 normalMovement;
     [SerializeField] private float xMove;
     [SerializeField] private float yMove;
+    private float xMoveOld;
+    private float yMoveOld;
 
     // Mouse look
     [SerializeField] private float mouseSense = 0.5f;
@@ -42,6 +45,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 slideDirection; 
     private float startSlideSpeed;
     private float currentSlideSpeed;
+    private float slideDecay = 5f;
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
@@ -85,29 +89,28 @@ public class PlayerController : MonoBehaviour
         if (isSliding) return;
         isSliding = true;
         currentSlideSpeed = startSlideSpeed;
-        slideDirection = transform.right * xMove +transform.forward * yMove;
+        slideDirection = transform.right * xMove + transform.forward * yMove;
+        xMoveOld = xMove;
+        yMoveOld = yMove;
     }
 
     // Handles mid slide motion
     private void handleSlide()
     {
-        currentSlideSpeed -= Time.deltaTime;
+        //Debug.Log(currentSlideSpeed);
+        currentSlideSpeed -= slideDecay * Time.deltaTime;
 
-        if (!crouchInput || !runInput)
+        // Cancel slide if user let go of sprint/crouch or changed movement directions
+        if (!crouchInput || !runInput || xMoveOld != xMove || yMoveOld != yMove)
         {
             isSliding = false;
         }
     }
 
-    // Handles end slide motion
-    private void stopSlide()
-    {
-    }
-
     // Handles players speed depending on current state
     private float MovementSpeedHandler() 
     {
-        Debug.Log(currentSlideSpeed);
+        //Debug.Log(currentSlideSpeed);
         if (isSliding)
         {
             // motion whilst sliding
@@ -121,6 +124,7 @@ public class PlayerController : MonoBehaviour
             startSlide();
             return startSlideSpeed;
         }
+        // Rest of normal inputs
         else if (crouchInput)
         {
             return crouchSpeed;
@@ -153,7 +157,7 @@ public class PlayerController : MonoBehaviour
         crouchSpeed = 0.5f * walkSpeed;
         crouchHeight = 0.25f * characterController.height;
         runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 2f * walkSpeed;
+        startSlideSpeed = 2.5f * walkSpeed;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
     }
 
@@ -164,7 +168,7 @@ public class PlayerController : MonoBehaviour
         float currentSpeed = MovementSpeedHandler();
 
         // Either move normally or in if sliding, go in that direction
-        Vector3 normalMovement = transform.right * xMove + transform.forward * yMove;
+        normalMovement = transform.right * xMove + transform.forward * yMove;
         move = isSliding ? slideDirection : normalMovement;
 
         // Prevent diagonal speed boost
