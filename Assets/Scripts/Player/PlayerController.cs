@@ -4,6 +4,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
 
+// 3 issues
+// Player can slide in any direction (simple isSlide check in update and extra variable for slideDirection)
+// Player can slide by crouching first (add check in crouch to see if run was activated first - use this new boolean to only allow slide when run is activated first)
+// This one is less of an issue but slide can last way too long either add a timer or multiply slide decrease (maybe have a check for both)
+
 public class PlayerController : MonoBehaviour
 {
     // Components
@@ -33,6 +38,7 @@ public class PlayerController : MonoBehaviour
 
     // Sliding
     private bool isSliding = false;
+    private Vector3 slideDirection; 
     private float startSlideSpeed;
     private float currentSlideSpeed;
 
@@ -73,6 +79,7 @@ public class PlayerController : MonoBehaviour
         if (isSliding) return;
         isSliding = true;
         currentSlideSpeed = startSlideSpeed;
+        slideDirection = transform.right * xMove +transform.forward * yMove;
     }
 
     // Handles mid slide motion
@@ -80,7 +87,7 @@ public class PlayerController : MonoBehaviour
     {
         currentSlideSpeed -= Time.deltaTime;
 
-        if (currentSlideSpeed <= 0 && !crouchInput && !runInput)
+        if (!crouchInput && !runInput)
         {
             isSliding = false;
         }
@@ -100,7 +107,6 @@ public class PlayerController : MonoBehaviour
             handleSlide();
             return Math.Max(currentSlideSpeed, 0);
         }
-        
         // start mechanic
         if (crouchInput && runInput)
         {
@@ -148,7 +154,10 @@ public class PlayerController : MonoBehaviour
     {
         // Adjust speed for player depending on current state
         float currentSpeed = MovementSpeedHandler();
-        move = transform.right * xMove + transform.forward * yMove;
+
+        // Either move normally or in if sliding, go in that direction
+        Vector3 normalMovement = transform.right * xMove + transform.forward * yMove;
+        move = isSliding ? slideDirection : normalMovement;
 
         // Prevent diagonal speed boost
         if (move.magnitude > 1)
