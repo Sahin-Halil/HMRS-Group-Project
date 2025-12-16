@@ -37,11 +37,11 @@ public class PlayerController : MonoBehaviour
     private float runSpeed;
 
     // Sliding
+    private bool canSlide = false;
     private bool isSliding = false;
     private Vector3 slideDirection; 
     private float startSlideSpeed;
     private float currentSlideSpeed;
-
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
@@ -65,6 +65,12 @@ public class PlayerController : MonoBehaviour
         crouchInput = !crouchInput;
         characterController.height -= crouchHeight;
         crouchHeight *= -1f;
+
+        // Start slide ONLY if run was active first
+        if (runInput && crouchInput) 
+        {
+            canSlide = true;
+        }
     }
 
     // Handles Run toggling
@@ -87,7 +93,7 @@ public class PlayerController : MonoBehaviour
     {
         currentSlideSpeed -= Time.deltaTime;
 
-        if (!crouchInput && !runInput)
+        if (!crouchInput || !runInput)
         {
             isSliding = false;
         }
@@ -104,12 +110,14 @@ public class PlayerController : MonoBehaviour
         Debug.Log(currentSlideSpeed);
         if (isSliding)
         {
+            // motion whilst sliding
             handleSlide();
             return Math.Max(currentSlideSpeed, 0);
         }
-        // start mechanic
-        if (crouchInput && runInput)
+        if (canSlide)
         {
+            // start slide mechanic
+            canSlide = false;
             startSlide();
             return startSlideSpeed;
         }
