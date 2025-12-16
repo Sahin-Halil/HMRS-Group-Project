@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -22,13 +23,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float yRotation;
 
     // Crouch
-    [SerializeField] private bool crouchInput = false;
+    private bool crouchInput = false;
     private float crouchSpeed;
     private float crouchHeight;
 
-    // Running Speed
-    [SerializeField] private bool runInput = false;
-    [SerializeField] private float runSpeed;
+    // Running 
+    private bool runInput = false;
+    private float runSpeed;
+
+    // Sliding
+    private bool isSliding = false;
+    private float startSlideSpeed;
+    private float currentSlideSpeed;
+
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
@@ -60,10 +67,47 @@ public class PlayerController : MonoBehaviour
         runInput = !runInput;
     }
 
+    // Handles start slide motion
+    private void startSlide()
+    {
+        if (isSliding) return;
+        isSliding = true;
+        currentSlideSpeed = startSlideSpeed;
+    }
+
+    // Handles mid slide motion
+    private void handleSlide()
+    {
+        currentSlideSpeed -= Time.deltaTime;
+
+        if (currentSlideSpeed <= 0 && !crouchInput && !runInput)
+        {
+            isSliding = false;
+        }
+    }
+
+    // Handles end slide motion
+    private void stopSlide()
+    {
+    }
+
     // Handles players speed depending on current state
     private float MovementSpeedHandler() 
     {
-        if (crouchInput)
+        Debug.Log(currentSlideSpeed);
+        if (isSliding)
+        {
+            handleSlide();
+            return Math.Max(currentSlideSpeed, 0);
+        }
+        
+        // start mechanic
+        if (crouchInput && runInput)
+        {
+            startSlide();
+            return startSlideSpeed;
+        }
+        else if (crouchInput)
         {
             return crouchSpeed;
         }
@@ -71,7 +115,7 @@ public class PlayerController : MonoBehaviour
         {
             return runSpeed;
         }
-        else 
+        else
         {
             return walkSpeed;
         }
@@ -95,6 +139,7 @@ public class PlayerController : MonoBehaviour
         crouchSpeed = 0.5f * walkSpeed;
         crouchHeight = 0.25f * characterController.height;
         runSpeed = 1.5f * walkSpeed;
+        startSlideSpeed = 2f * walkSpeed;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
     }
 
