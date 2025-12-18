@@ -7,6 +7,10 @@ using System;
 // 1 issue
 // Optional: Make it so user can keep moving whilst crouched/running after slide ends and they didnt change input key
 
+// Added a min run timer for the user (needs fixing)
+// Need to fix height issue when crouching
+// Add jump feature
+
 public class PlayerController : MonoBehaviour
 {
     // Components
@@ -41,6 +45,7 @@ public class PlayerController : MonoBehaviour
 
     // Sliding
     private bool isSlide = false;
+    private bool canSlide = true;
     private Vector3 slideDirection; 
     private float startSlideSpeed;
     private float currentSlideSpeed;
@@ -81,8 +86,12 @@ public class PlayerController : MonoBehaviour
     private void OnCrouch()
     {
         crouchInput = !crouchInput;
+        characterController.height = crouchInput ? -crouchHeight : crouchHeight;
 
-        characterController.height += crouchInput ? -crouchHeight : crouchHeight;
+        if (crouchInput)
+        {
+            canSlide = true;
+        }
     }
 
 
@@ -92,14 +101,17 @@ public class PlayerController : MonoBehaviour
         runInput = !runInput;
     }
 
-
     // Handles start slide motion
     private void StartSlide()
     {
+        canSlide = false;
         isSlide = true;
         currentSlideSpeed = startSlideSpeed;
 
         slideDirection = transform.right * xMove + transform.forward * yMove;
+
+        xMoveOld = xMove;
+        yMoveOld = yMove;
     }
 
 
@@ -107,8 +119,11 @@ public class PlayerController : MonoBehaviour
     private void UpdateSlide()
     {
         currentSlideSpeed -= slideDecay * Time.deltaTime;
-        
-        if (currentSlideSpeed <= 0f)
+
+        bool changedDirection = xMove != xMoveOld || yMove != yMoveOld;
+        bool releasedInput = !runInput || !crouchInput;
+
+        if (changedDirection || releasedInput || currentSlideSpeed <= 0f)
         {
             isSlide = false;
         }
@@ -194,7 +209,7 @@ public class PlayerController : MonoBehaviour
                     state = MovementState.Walk;
                 }
                 // Start slide if crouch is pressed while running
-                else if (crouchInput)
+                else if (crouchInput && canSlide)
                 {
                     state = MovementState.Slide;
                     StartSlide();
@@ -245,7 +260,28 @@ public class PlayerController : MonoBehaviour
                 // If slide has ended, return to idle (state resolution happens next frame)
                 if (!isSlide)
                 {
-                    state = MovementState.Idle;
+                    // Transition to crouch if crouch is still pressed
+                    if (crouchInput) 
+                    { 
+                        state = MovementState.Crouch;
+                    }
+                    // If still moving, decide whether to run or walk
+                    else if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            state = MovementState.Run;
+                        }
+                        else if (walkInput)
+                        {
+                            state = MovementState.Walk;
+                        }
+                    }
+                    // Otherwise return to idle
+                    else
+                    {
+                        state = MovementState.Idle;
+                    }
                 }
                 // While sliding, update slide physics and apply slide speed
                 else
@@ -275,7 +311,7 @@ public class PlayerController : MonoBehaviour
         crouchSpeed = 0.5f * walkSpeed;
         crouchHeight = 0.25f * characterController.height;
         runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 2.5f * walkSpeed;
+        startSlideSpeed = 1.5f * walkSpeed;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
     }
 
@@ -288,7 +324,7 @@ public class PlayerController : MonoBehaviour
         // Moves player in specified direction
         Vector3 inputDirection = transform.right * xMove + transform.forward * yMove;
         move = state == MovementState.Slide ? slideDirection : inputDirection;
-
+        
         // Normalise for multi directional movement
         if (move.magnitude > 1)
         {
@@ -297,7 +333,7 @@ public class PlayerController : MonoBehaviour
 
         Debug.Log(state);
         if (!isSlide) { 
-            Debug.Log(speed);
+          //  Debug.Log(speed);
         }
 
         // Move player
