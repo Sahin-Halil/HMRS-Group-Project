@@ -162,6 +162,11 @@ public abstract class PuzzleConsole : MonoBehaviour
             OnPartPlaced();
             Debug.Log($"Ship part placed at {consoleName}!");
 
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetCheckpoint(player.position);
+            }
+
             if (shipPartManager.IsShipRepaired())
             {
                 Debug.Log("ALL SHIP PARTS PLACED! Ship is repaired!");
