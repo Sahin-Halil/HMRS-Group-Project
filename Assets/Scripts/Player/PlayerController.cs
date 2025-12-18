@@ -4,10 +4,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
 
-// 3 issues
-// Player can slide in any direction (simple isSlide check in update and extra variable for slideDirection)
-// Player can slide by crouching first (add check in crouch to see if run was activated first - use this new boolean to only allow slide when run is activated first)
-// This one is less of an issue but slide can last way too long either add a timer or multiply slide decrease (maybe have a check for both)
+// 1 issue
+// Optional: Make it so user can keep moving whilst crouched/running after slide ends and they didnt change input key
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,6 +15,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private ShipPartManager shipPartManager;
 
     // Movement
+    private bool walkInput = false;
+    private float speed;
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private Vector3 move;
     private Vector3 normalMovement;
@@ -40,16 +40,30 @@ public class PlayerController : MonoBehaviour
     private float runSpeed;
 
     // Sliding
-    private bool canSlide = false;
-    private bool isSliding = false;
+    private bool isSlide = false;
     private Vector3 slideDirection; 
     private float startSlideSpeed;
     private float currentSlideSpeed;
     private float slideDecay = 5f;
 
+    // Possible player states
+    private enum MovementState
+    {
+        Idle,
+        Walk,
+        Run,
+        Crouch,
+        Slide,
+        Air
+    }
+
+    // Players initial state
+    private MovementState state = MovementState.Idle;
+
     // Called when movement input is detected
     private void OnMove(InputValue value)
     {
+        walkInput = !walkInput;
         Vector2 moveInput = value.Get<Vector2>();
         xMove = moveInput.x;
         yMove = moveInput.y;
@@ -67,75 +81,179 @@ public class PlayerController : MonoBehaviour
     private void OnCrouch()
     {
         crouchInput = !crouchInput;
-        characterController.height -= crouchHeight;
-        crouchHeight *= -1f;
 
-        // Start slide ONLY if run was active first
-        if (runInput && crouchInput) 
-        {
-            canSlide = true;
-        }
+        characterController.height += crouchInput ? -crouchHeight : crouchHeight;
     }
 
+
     // Handles Run toggling
-    private void OnRun() 
+    private void OnRun()
     {
         runInput = !runInput;
     }
 
+
     // Handles start slide motion
-    private void startSlide()
+    private void StartSlide()
     {
-        if (isSliding) return;
-        isSliding = true;
+        isSlide = true;
         currentSlideSpeed = startSlideSpeed;
+
         slideDirection = transform.right * xMove + transform.forward * yMove;
-        xMoveOld = xMove;
-        yMoveOld = yMove;
     }
 
-    // Handles mid slide motion
-    private void handleSlide()
-    {
-        //Debug.Log(currentSlideSpeed);
-        currentSlideSpeed -= slideDecay * Time.deltaTime;
 
-        // Cancel slide if user let go of sprint/crouch or changed movement directions
-        if (!crouchInput || !runInput || xMoveOld != xMove || yMoveOld != yMove)
+    // Updates mid slide motion
+    private void UpdateSlide()
+    {
+        currentSlideSpeed -= slideDecay * Time.deltaTime;
+        
+        if (currentSlideSpeed <= 0f)
         {
-            isSliding = false;
+            isSlide = false;
         }
     }
 
     // Handles players speed depending on current state
-    private float MovementSpeedHandler() 
+    private void PlayerState()
     {
-        //Debug.Log(currentSlideSpeed);
-        if (isSliding)
+        // True if the player is providing any movement input
+        bool hasMovementInput = xMove != 0 || yMove != 0;
+
+        // State machine controlling player movement behaviour
+        switch (state)
         {
-            // motion whilst sliding
-            handleSlide();
-            return Math.Max(currentSlideSpeed, 0);
-        }
-        if (canSlide)
-        {
-            // start slide mechanic
-            canSlide = false;
-            startSlide();
-            return startSlideSpeed;
-        }
-        // Rest of normal inputs
-        else if (crouchInput)
-        {
-            return crouchSpeed;
-        }
-        else if (runInput)
-        {
-            return runSpeed;
-        }
-        else
-        {
-            return walkSpeed;
+            // =======================
+            // IDLE STATE
+            // =======================
+            case MovementState.Idle:
+                // Enter crouch if crouch input is active
+                if (crouchInput)
+                {
+                    state = MovementState.Crouch;
+                }
+                // Start moving if there is movement input
+                else if (hasMovementInput)
+                {
+                    // Prefer running if run input is active
+                    if (runInput)
+                    {
+                        state = MovementState.Run;
+                    }
+                    // Otherwise walk
+                    else if (walkInput)
+                    {
+                        state = MovementState.Walk;
+                    }
+                }
+                // No input: remain idle and stop movement
+                else
+                {
+                    speed = 0;
+                }
+                break;
+
+            // =======================
+            // WALK STATE
+            // =======================
+            case MovementState.Walk:
+                // Transition to crouch if crouch input is pressed
+                if (crouchInput)
+                {
+                    state = MovementState.Crouch;
+                }
+                // Stop moving if movement input is released
+                else if (!hasMovementInput)
+                {
+                    state = MovementState.Idle;
+                }
+                // Transition to run if run input is pressed
+                else if (runInput)
+                {
+                    state = MovementState.Run;
+                }
+                // Continue walking
+                else
+                {
+                    speed = walkSpeed;
+                }
+                break;
+
+            // =======================
+            // RUN STATE
+            // =======================
+            case MovementState.Run:
+                // Stop moving if movement input is released
+                if (!hasMovementInput)
+                {
+                    state = MovementState.Idle;
+                }
+                // Drop to walk if run input is released
+                else if (!runInput)
+                {
+                    state = MovementState.Walk;
+                }
+                // Start slide if crouch is pressed while running
+                else if (crouchInput)
+                {
+                    state = MovementState.Slide;
+                    StartSlide();
+                }
+                // Continue running
+                else
+                {
+                    speed = runSpeed;
+                }
+                break;
+
+            // =======================
+            // CROUCH STATE
+            // =======================
+            case MovementState.Crouch:
+                // Exit crouch if crouch input is released
+                if (!crouchInput)
+                {
+                    // If moving, decide whether to run or walk
+                    if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            state = MovementState.Run;
+                        }
+                        else if (walkInput)
+                        {
+                            state = MovementState.Walk;
+                        }
+                    }
+                    // Otherwise return to idle
+                    else
+                    {
+                        state = MovementState.Idle;
+                    }
+                }
+                // Continue crouch movement
+                else
+                {
+                    speed = crouchSpeed;
+                }
+                break;
+
+            // =======================
+            // SLIDE STATE
+            // =======================
+            case MovementState.Slide:
+                // If slide has ended, return to idle (state resolution happens next frame)
+                if (!isSlide)
+                {
+                    state = MovementState.Idle;
+                }
+                // While sliding, update slide physics and apply slide speed
+                else
+                {
+                    UpdateSlide();
+                    speed = currentSlideSpeed;
+                }
+                break;
         }
     }
 
@@ -164,23 +282,28 @@ public class PlayerController : MonoBehaviour
     // Handles movement and rotation each frame
     void Update()
     {
-        // Adjust speed for player depending on current state
-        float currentSpeed = MovementSpeedHandler();
+        // Handles players next state
+        PlayerState(); 
 
-        // Either move normally or in if sliding, go in that direction
-        normalMovement = transform.right * xMove + transform.forward * yMove;
-        move = isSliding ? slideDirection : normalMovement;
+        // Moves player in specified direction
+        Vector3 inputDirection = transform.right * xMove + transform.forward * yMove;
+        move = state == MovementState.Slide ? slideDirection : inputDirection;
 
-        // Prevent diagonal speed boost
+        // Normalise for multi directional movement
         if (move.magnitude > 1)
         {
             move.Normalize();
         }
 
-        // Apply calculated movement
-        characterController.SimpleMove(move * currentSpeed);
+        Debug.Log(state);
+        if (!isSlide) { 
+            Debug.Log(speed);
+        }
 
-        // Apply rotation for camera and player
+        // Move player
+        characterController.SimpleMove(move * speed);
+
+        // update the camera
         transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
