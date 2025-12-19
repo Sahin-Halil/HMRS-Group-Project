@@ -7,9 +7,13 @@ using System;
 // 1 issue
 // Optional: Make it so user can keep moving whilst crouched/running after slide ends and they didnt change input key
 
-// Added a min run timer for the user (needs fixing)
 // Need to fix height issue when crouching
 // Add jump feature
+
+// Needs fixing
+// Jump doesn't work
+// Crouch goes underneath floor (needs fixing for snappy anyways)
+// Fix Comments
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,7 +24,7 @@ public class PlayerController : MonoBehaviour
 
     // Movement
     private bool walkInput = false;
-    private float speed;
+    private float playerHorizontalSpeed = 0f;
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private Vector3 move;
     private Vector3 normalMovement;
@@ -51,6 +55,16 @@ public class PlayerController : MonoBehaviour
     private float currentSlideSpeed;
     private float slideDecay = 5f;
 
+    // Gravity
+    private float gravity = -9.81f;
+    [SerializeField] private float gravityMultiplier = 0.005f;
+
+    // Jumping
+    [SerializeField] private float jumpValue = 0.005f;
+    private float playerHeightSpeed = 0f;
+    private bool jumpInput = false;
+    private bool canJump = false;
+
     // Possible player states
     private enum MovementState
     {
@@ -59,7 +73,7 @@ public class PlayerController : MonoBehaviour
         Run,
         Crouch,
         Slide,
-        Air
+        Jump
     }
 
     // Players initial state
@@ -88,17 +102,37 @@ public class PlayerController : MonoBehaviour
         crouchInput = !crouchInput;
         characterController.height = crouchInput ? -crouchHeight : crouchHeight;
 
+        // possible to begin slide
         if (crouchInput)
         {
             canSlide = true;
         }
     }
 
-
     // Handles Run toggling
     private void OnRun()
     {
         runInput = !runInput;
+    }
+
+    // Handles Jump toggling
+    private void OnJump()
+    {
+        jumpInput = !jumpInput;
+
+        // possible for jump to start
+        if (jumpInput)
+        {
+            canJump = true;
+        }
+    }
+
+    private void StartJump()
+    {
+        canJump = false;
+
+        // Apply vertical velocity formula
+        playerHeightSpeed = Mathf.Sqrt(2f * jumpValue * -gravity * gravityMultiplier);
     }
 
     // Handles start slide motion
@@ -113,7 +147,6 @@ public class PlayerController : MonoBehaviour
         xMoveOld = xMove;
         yMoveOld = yMove;
     }
-
 
     // Updates mid slide motion
     private void UpdateSlide()
@@ -143,7 +176,12 @@ public class PlayerController : MonoBehaviour
             // =======================
             case MovementState.Idle:
                 // Enter crouch if crouch input is active
-                if (crouchInput)
+                if (jumpInput && canJump)
+                {
+                    state = MovementState.Jump;
+                    StartJump();
+                }
+                else if (crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -164,7 +202,7 @@ public class PlayerController : MonoBehaviour
                 // No input: remain idle and stop movement
                 else
                 {
-                    speed = 0;
+                    playerHorizontalSpeed = 0;
                 }
                 break;
 
@@ -190,7 +228,7 @@ public class PlayerController : MonoBehaviour
                 // Continue walking
                 else
                 {
-                    speed = walkSpeed;
+                    playerHorizontalSpeed = walkSpeed;
                 }
                 break;
 
@@ -217,7 +255,7 @@ public class PlayerController : MonoBehaviour
                 // Continue running
                 else
                 {
-                    speed = runSpeed;
+                    playerHorizontalSpeed = runSpeed;
                 }
                 break;
 
@@ -249,7 +287,14 @@ public class PlayerController : MonoBehaviour
                 // Continue crouch movement
                 else
                 {
-                    speed = crouchSpeed;
+                    playerHorizontalSpeed = crouchSpeed;
+                }
+                break;
+
+            case MovementState.Jump:
+                if (characterController.isGrounded)
+                {
+                    state = MovementState.Idle;
                 }
                 break;
 
@@ -287,7 +332,7 @@ public class PlayerController : MonoBehaviour
                 else
                 {
                     UpdateSlide();
-                    speed = currentSlideSpeed;
+                    playerHorizontalSpeed = currentSlideSpeed;
                 }
                 break;
         }
@@ -301,6 +346,50 @@ public class PlayerController : MonoBehaviour
             shipPartManager.addPart();
             Destroy(collider.gameObject);
         }
+    }
+
+    private void ApplyGravity()
+    {
+        if (characterController.isGrounded && playerHeightSpeed <= 0f)
+        {
+            playerHeightSpeed = 0f;
+        }
+        else
+        {
+            playerHeightSpeed += gravity * gravityMultiplier * Time.deltaTime;
+        }
+    }
+
+    private void MovePlayer()
+    {
+        // Moves player in horizontal direction
+        Vector3 horizontalDirection = transform.right * xMove + transform.forward * yMove;
+        Vector3 horizontalMove = state == MovementState.Slide ? slideDirection : horizontalDirection;
+        
+        // Normalise for multi horizontal directional movement
+        if (horizontalMove.magnitude > 1)
+        {
+            horizontalMove.Normalize();
+        }
+
+        // Apply speed and delta Time
+        horizontalMove *= playerHorizontalSpeed * Time.deltaTime;
+
+        // Moves player in vertical direction
+        Vector3 verticalMove = transform.up * playerHeightSpeed;
+
+        // Combine both horizontal and vertical movement
+        move = horizontalMove + verticalMove;
+
+        // Move player
+        characterController.Move(move);
+    }
+    
+
+    private void MovePlayerCamera()
+    {
+        transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
+        characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
 
     // Setup components and values
@@ -321,27 +410,17 @@ public class PlayerController : MonoBehaviour
         // Handles players next state
         PlayerState(); 
 
-        // Moves player in specified direction
-        Vector3 inputDirection = transform.right * xMove + transform.forward * yMove;
-        move = state == MovementState.Slide ? slideDirection : inputDirection;
+        ApplyGravity();
         
-        // Normalise for multi directional movement
-        if (move.magnitude > 1)
-        {
-            move.Normalize();
-        }
+        MovePlayer();
 
         Debug.Log(state);
         if (!isSlide) { 
           //  Debug.Log(speed);
         }
 
-        // Move player
-        characterController.SimpleMove(move * speed);
-
         // update the camera
-        transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
-        characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
+        MovePlayerCamera();
     }
 
     // Below are required for sensitivity slider in settings
