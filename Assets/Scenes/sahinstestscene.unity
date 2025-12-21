@@ -130,7 +130,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1434722701233807620, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
       propertyPath: jumpValue
-      value: 0.005
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 1434722701233807620, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
       propertyPath: standingSpeed
@@ -139,14 +139,18 @@ PrefabInstance:
     - target: {fileID: 1434722701233807620, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
       propertyPath: characterCamera
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 317722431}
     - target: {fileID: 1434722701233807620, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
       propertyPath: gravityMultiplier
-      value: 0.005
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 1434722701233807620, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
+      propertyPath: crouchTransitionSpeed
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 2395341869530255477, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
       propertyPath: m_Name
-      value: Player 1
+      value: TestingPlayer1
       objectReference: {fileID: 0}
     - target: {fileID: 2969142017016372113, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
       propertyPath: m_Actions
@@ -205,6 +209,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
+--- !u!20 &317722431 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 3947528271277601555, guid: 472b7a3587f4f3a488f9001b44c09c33, type: 3}
+  m_PrefabInstance: {fileID: 254929017}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1187716645
 GameObject:
   m_ObjectHideFlags: 0

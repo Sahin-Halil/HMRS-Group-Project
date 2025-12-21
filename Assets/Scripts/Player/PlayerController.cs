@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,8 +11,9 @@ using System;
 // Add jump feature
 
 // Needs fixing
-// Jump doesn't work
+// Jump doesn't work for all states
 // Crouch goes underneath floor (needs fixing for snappy anyways)
+// Optional add slide option after jump ends 
 // Fix Comments
 
 public class PlayerController : MonoBehaviour
@@ -21,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private CharacterController characterController;
     public Camera characterCamera;
     [SerializeField] private ShipPartManager shipPartManager;
+    private float originalHeight;
 
     // Movement
     private bool walkInput = false;
@@ -42,6 +44,8 @@ public class PlayerController : MonoBehaviour
     private bool crouchInput = false;
     private float crouchSpeed;
     private float crouchHeight;
+    [SerializeField] private float crouchTransitionSpeed = 100f;
+    private float heightVelocity;
 
     // Running 
     private bool runInput = false;
@@ -50,17 +54,29 @@ public class PlayerController : MonoBehaviour
     // Sliding
     private bool isSlide = false;
     private bool canSlide = true;
-    private Vector3 slideDirection; 
-    private float startSlideSpeed;
+    private Vector3 slideDirection;
+    public float startSlideSpeed;
     private float currentSlideSpeed;
-    private float slideDecay = 5f;
+    public float slideDecay = 17f;
+
+    [Header("Dash Settings")]
+    [SerializeField] private float dashDistance = 7f;
+    [SerializeField] private float dashDuration = 0.2f;
+    [SerializeField] private float dashCooldown = 1f;
+    [SerializeField] private float dashFOVKick = 10f;
+
+    private bool isDashing = false;
+    private bool canDash = true;
+    private float dashCooldownTimer = 0f;
+    private Vector3 dashDirection;
+    private float dashTimeElapsed = 0f;
 
     // Gravity
     private float gravity = -9.81f;
-    [SerializeField] private float gravityMultiplier = 0.005f;
+    [SerializeField] private float gravityMultiplier = 0.001f;
 
     // Jumping
-    [SerializeField] private float jumpValue = 0.005f;
+    [SerializeField] private float jumpValue = 0.001f;
     private float playerHeightSpeed = 0f;
     private bool jumpInput = false;
     private bool canJump = false;
@@ -73,7 +89,8 @@ public class PlayerController : MonoBehaviour
         Run,
         Crouch,
         Slide,
-        Jump
+        Jump,
+        Dash
     }
 
     // Players initial state
@@ -99,8 +116,9 @@ public class PlayerController : MonoBehaviour
     // Handles crouch toggling
     private void OnCrouch()
     {
+        if (isDashing) return;
+
         crouchInput = !crouchInput;
-        characterController.height = crouchInput ? -crouchHeight : crouchHeight;
 
         // possible to begin slide
         if (crouchInput)
@@ -109,10 +127,25 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void HandleCrouchTransition()
+    {
+        float targetHeight = crouchInput ? crouchHeight : originalHeight;
+
+        // Use crouchTransitionSpeed to control the smoothing time
+
+        characterController.height = Mathf.Lerp(
+            characterController.height,
+            targetHeight,
+            crouchTransitionSpeed * Time.deltaTime
+        );
+    }
+
     // Handles Run toggling
     private void OnRun()
     {
         runInput = !runInput;
+        Debug.Log("Running");
+
     }
 
     // Handles Jump toggling
@@ -124,6 +157,14 @@ public class PlayerController : MonoBehaviour
         if (jumpInput)
         {
             canJump = true;
+        }
+    }
+
+    private void OnDash(InputValue value)
+    {
+        if (value.isPressed && !isDashing && canDash)
+        {
+            StartDash();
         }
     }
 
@@ -160,6 +201,86 @@ public class PlayerController : MonoBehaviour
         {
             isSlide = false;
         }
+    }
+
+    private void StartDash()
+    {
+        Vector3 inputDirection = transform.right * xMove + transform.forward * yMove;
+
+        if (inputDirection.magnitude > 0.1f)
+        {
+            dashDirection = inputDirection.normalized;
+        }
+        else
+        {
+            dashDirection = transform.forward;
+        }
+
+        state = MovementState.Dash;
+        isDashing = true;
+        canDash = false;
+        dashTimeElapsed = 0f;
+
+        //StartCoroutine(DashFOVKick());
+    }
+
+    private void UpdateDash()
+    {
+        dashTimeElapsed += Time.deltaTime;
+        float dashProgress = dashTimeElapsed / dashDuration;
+
+        if (dashProgress >= 1f)
+        {
+            StopDash();
+            return;
+        }
+
+        float dashSpeed = dashDistance / dashDuration;
+        Vector3 dashMovement = dashDirection * dashSpeed * Time.deltaTime;
+        Vector3 verticalMove = transform.up * playerHeightSpeed;
+
+        CollisionFlags collisionFlags = characterController.Move(dashMovement + verticalMove);
+
+        if ((collisionFlags & CollisionFlags.Sides) != 0 || (collisionFlags & CollisionFlags.Above) != 0)
+        {
+            StopDash();
+        }
+    }
+
+    private void StopDash()
+    {
+        if (!isDashing) return;
+        isDashing = false;
+        dashCooldownTimer = dashCooldown;
+    }
+
+    private IEnumerator DashFOVKick()
+    {
+        Camera cam = characterCamera;
+        if (cam == null) yield break;
+
+        float originalFOV = cam.fieldOfView;
+        float targetFOV = originalFOV + dashFOVKick;
+        float elapsed = 0f;
+        float kickDuration = dashDuration * 0.5f;
+
+        while (elapsed < kickDuration && isDashing)
+        {
+            elapsed += Time.deltaTime;
+            cam.fieldOfView = Mathf.Lerp(originalFOV, targetFOV, elapsed / kickDuration);
+            yield return null;
+        }
+
+        elapsed = 0f;
+        float returnDuration = 0.3f;
+        while (elapsed < returnDuration)
+        {
+            elapsed += Time.deltaTime;
+            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, originalFOV, elapsed / returnDuration);
+            yield return null;
+        }
+
+        cam.fieldOfView = originalFOV;
     }
 
     // Handles players speed depending on current state
@@ -210,8 +331,13 @@ public class PlayerController : MonoBehaviour
             // WALK STATE
             // =======================
             case MovementState.Walk:
+                if (jumpInput && canJump)
+                {
+                    state = MovementState.Jump;
+                    StartJump();
+                }
                 // Transition to crouch if crouch input is pressed
-                if (crouchInput)
+                else if (crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -231,13 +357,17 @@ public class PlayerController : MonoBehaviour
                     playerHorizontalSpeed = walkSpeed;
                 }
                 break;
-
             // =======================
             // RUN STATE
             // =======================
             case MovementState.Run:
+                if (jumpInput && canJump)
+                {
+                    state = MovementState.Jump;
+                    StartJump();
+                }
                 // Stop moving if movement input is released
-                if (!hasMovementInput)
+                else if (!hasMovementInput)
                 {
                     state = MovementState.Idle;
                 }
@@ -264,7 +394,12 @@ public class PlayerController : MonoBehaviour
             // =======================
             case MovementState.Crouch:
                 // Exit crouch if crouch input is released
-                if (!crouchInput)
+                if (jumpInput && canJump)
+                {
+                    state = MovementState.Jump;
+                    StartJump();
+                }
+                else if (!crouchInput)
                 {
                     // If moving, decide whether to run or walk
                     if (hasMovementInput)
@@ -290,11 +425,35 @@ public class PlayerController : MonoBehaviour
                     playerHorizontalSpeed = crouchSpeed;
                 }
                 break;
-
             case MovementState.Jump:
                 if (characterController.isGrounded)
                 {
-                    state = MovementState.Idle;
+                    // Transition to crouch if crouch is still pressed
+                    if (crouchInput)
+                    {
+                        state = MovementState.Crouch;
+                    }
+                    // If still moving, decide whether to run or walk
+                    else if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            state = MovementState.Run;
+                        }
+                        else if (walkInput)
+                        {
+                            state = MovementState.Walk;
+                        }
+                    }
+                    // Otherwise return to idle
+                    else
+                    {
+                        state = MovementState.Idle;
+                    }
+                }
+                else if (walkInput)
+                {
+                    playerHorizontalSpeed = walkSpeed;
                 }
                 break;
 
@@ -303,11 +462,16 @@ public class PlayerController : MonoBehaviour
             // =======================
             case MovementState.Slide:
                 // If slide has ended, return to idle (state resolution happens next frame)
-                if (!isSlide)
+                if (jumpInput && canJump)
+                {
+                    state = MovementState.Jump;
+                    StartJump();
+                }
+                else if (!isSlide)
                 {
                     // Transition to crouch if crouch is still pressed
-                    if (crouchInput) 
-                    { 
+                    if (crouchInput)
+                    {
                         state = MovementState.Crouch;
                     }
                     // If still moving, decide whether to run or walk
@@ -333,6 +497,31 @@ public class PlayerController : MonoBehaviour
                 {
                     UpdateSlide();
                     playerHorizontalSpeed = currentSlideSpeed;
+                }
+                break;
+
+            case MovementState.Dash:
+                if (!isDashing)
+                {
+                    if (crouchInput)
+                    {
+                        state = MovementState.Crouch;
+                    }
+                    else if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            state = MovementState.Run;
+                        }
+                        else if (walkInput)
+                        {
+                            state = MovementState.Walk;
+                        }
+                    }
+                    else
+                    {
+                        state = MovementState.Idle;
+                    }
                 }
                 break;
         }
@@ -362,10 +551,16 @@ public class PlayerController : MonoBehaviour
 
     private void MovePlayer()
     {
+        if (state == MovementState.Dash)
+        {
+            UpdateDash();
+            return;
+        }
+
         // Moves player in horizontal direction
         Vector3 horizontalDirection = transform.right * xMove + transform.forward * yMove;
         Vector3 horizontalMove = state == MovementState.Slide ? slideDirection : horizontalDirection;
-        
+
         // Normalise for multi horizontal directional movement
         if (horizontalMove.magnitude > 1)
         {
@@ -384,7 +579,7 @@ public class PlayerController : MonoBehaviour
         // Move player
         characterController.Move(move);
     }
-    
+
 
     private void MovePlayerCamera()
     {
@@ -397,29 +592,42 @@ public class PlayerController : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
+        originalHeight = characterController.height;
         crouchSpeed = 0.5f * walkSpeed;
-        crouchHeight = 0.25f * characterController.height;
+        crouchHeight = 0.7f * originalHeight;
+        //crouchCenter = new Vector3(characterController.center.x, 0.7f * originalHeight, characterController.center.z);
         runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 1.5f * walkSpeed;
+        startSlideSpeed = 10;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
     }
 
     // Handles movement and rotation each frame
     void Update()
     {
-        // Handles players next state
-        PlayerState(); 
+        if (dashCooldownTimer > 0)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+            if (dashCooldownTimer <= 0)
+            {
+                canDash = true;
+            }
+        }
+
+        PlayerState();
+
+        HandleCrouchTransition();
 
         ApplyGravity();
-        
+
         MovePlayer();
 
         Debug.Log(state);
-        if (!isSlide) { 
-          //  Debug.Log(speed);
+        Debug.Log(runInput);
+        if (!isSlide)
+        {
+            //  Debug.Log(speed);
         }
 
-        // update the camera
         MovePlayerCamera();
     }
 
@@ -434,5 +642,13 @@ public class PlayerController : MonoBehaviour
     public ShipPartManager GetShipPartManager()
     {
         return shipPartManager;
+    }
+
+    public bool IsDashing() => isDashing;
+
+    public float GetDashCooldownProgress()
+    {
+        if (canDash) return 1f;
+        return 1f - (dashCooldownTimer / dashCooldown);
     }
 }
