@@ -77,10 +77,10 @@ public class PlayerController : MonoBehaviour
 
     // Gravity
     private float gravity = -9.81f;
-    private float gravityMultiplier = 0.001f;
+    private float gravityMultiplier = 0.003f;
 
     // Jumping
-    private float jumpValue = 0.001f;
+    private float jumpValue = 0.003f;
     private float playerHeightSpeed = 0f;
     private bool jumpInput = false;
     private bool canJump = false;
