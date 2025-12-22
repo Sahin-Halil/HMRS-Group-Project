@@ -658,16 +658,13 @@ public class PlayerController : MonoBehaviour
                 canSlide = true;
             }
         }
-    }
 
-    private void UpdateCoolDowns()
-    {
-        if (slideCoolDownTimer > 0f)
+        if (dashCooldownTimer > 0)
         {
-            slideCoolDownTimer -= Time.deltaTime;
-            if (slideCoolDownTimer <= 0f)
+            dashCooldownTimer -= Time.deltaTime;
+            if (dashCooldownTimer <= 0)
             {
-                canSlide = true;
+                canDash = true;
             }
         }
     }
@@ -698,15 +695,6 @@ public class PlayerController : MonoBehaviour
         PollHeldActions();
         
         UpdateCoolDowns();
-
-        if (dashCooldownTimer > 0)
-        {
-            dashCooldownTimer -= Time.deltaTime;
-            if (dashCooldownTimer <= 0)
-            {
-                canDash = true;
-            }
-        }
 
         PlayerState();
 
