@@ -1,18 +1,5 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
-
-// 1 issue
-// Optional: Make it so user can keep moving whilst crouched/running after slide ends and they didnt change input key
-
-// Need to fix height issue when crouching
-// Add jump feature
-
-// Needs fixing
-// Jump doesn't work for all states
-// Crouch goes underneath floor (needs fixing for snappy anyways)
-// Optional add slide option after jump ends 
-// Fix Comments
 
 public class PlayerController : MonoBehaviour
 {
@@ -151,6 +138,7 @@ public class PlayerController : MonoBehaviour
         canJump = true;
     }
 
+    // Handles Dash toggling
     private void OnDash()
     {
         if (canDash && dashCooldownTimer <= 0)
@@ -159,6 +147,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Starts start Jump motion
     private void StartJump()
     {
         canJump = false;
@@ -195,6 +184,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Handles start dash motion
     private void StartDash()
     {
         canDash = false;
@@ -213,6 +203,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Handles mid dash motion
     private void UpdateDash()
     {
         dashTimeElapsed += Time.deltaTime;
@@ -236,6 +227,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Handles end of Dash
     private void StopDash()
     {
         if (!isDash) return;
@@ -546,6 +538,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Applies constant gravity to player
     private void ApplyGravity()
     {
         if (characterController.isGrounded && playerHeightSpeed <= 0f)
@@ -558,6 +551,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Handles player movement
     private void MovePlayer()
     {
         if (pauseManager.getPauseState())
@@ -617,13 +611,14 @@ public class PlayerController : MonoBehaviour
         characterController.Move(move);
     }
 
-
+    // Handles camera movement
     private void MovePlayerCamera()
     {
         transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
 
+    // Polls inputs to make sure they are false when not pressed
     private void PollHeldActions()
     {
         if (walkInput && !walkAction.IsPressed())
@@ -648,6 +643,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Updates cooldowns for dash and slide
     private void UpdateCoolDowns()
     {
         if (slideCoolDownTimer > 0f)

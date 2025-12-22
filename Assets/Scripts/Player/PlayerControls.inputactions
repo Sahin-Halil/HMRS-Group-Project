@@ -327,7 +327,7 @@
                     "name": "",
                     "id": "d2273ebd-77f7-4a24-9e7d-df79bfd96397",
                     "path": "<Mouse>/rightButton",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
