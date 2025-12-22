@@ -103,4 +103,9 @@ public class PauseManager : MonoBehaviour
     {
         notEnoughPartsUI.SetActive(value);
     }
+
+    public bool getPauseState() 
+    {
+        return isPaused;
+    }
 }

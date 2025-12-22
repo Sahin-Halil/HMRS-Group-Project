@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     public Camera characterCamera;
     private ShipPartManager shipPartManager;
     private float originalHeight;
+    [SerializeField] private PauseManager pauseManager;
     private PlayerInput playerInput;
     private InputAction walkAction;
     private InputAction runAction;
@@ -45,21 +46,23 @@ public class PlayerController : MonoBehaviour
 
     // Crouch
     private bool crouchInput = false;
-    private float crouchSpeed;
+    [SerializeField] private float crouchSpeed = 2.5f;
     private float crouchHeight;
     private float crouchTransitionSpeed = 100f;
 
     // Running 
     private bool runInput = false;
-    private float runSpeed;
+    public float runSpeed = 7.5f;
 
     // Sliding
     private bool isSlide = false;
     private bool canSlide = true;
     private Vector3 slideDirection;
-    private float startSlideSpeed;
-    private float currentSlideSpeed;
-    private float slideDecay = 17f;
+    public float startSlideSpeed;
+    private float currentSlideSpeed = 12f;
+    public float slideDecay = 17f;
+    [SerializeField] private float slideCoolDown = 1f;
+    private float slideCoolDownTimer = 0f;
 
     // Dashing
     private bool dashInput = false;
@@ -143,6 +146,8 @@ public class PlayerController : MonoBehaviour
     private void OnJump()
     {
         jumpInput = true;
+
+        // possible for jump to start
         canJump = true;
     }
 
@@ -186,6 +191,7 @@ public class PlayerController : MonoBehaviour
         if (changedDirection || releasedInput || currentSlideSpeed <= 0f)
         {
             isSlide = false;
+            slideCoolDownTimer = slideCoolDown;
         }
     }
 
@@ -348,6 +354,11 @@ public class PlayerController : MonoBehaviour
                     state = MovementState.Slide;
                     StartSlide();
                 }
+                else if (crouchInput)
+                {
+                    state = MovementState.Crouch;
+                }
+                // Continue running
                 else
                 {
                     playerHorizontalSpeed = runSpeed;
@@ -406,8 +417,13 @@ public class PlayerController : MonoBehaviour
                 }
                 else if (characterController.isGrounded)
                 {
+                    if (crouchInput && canSlide)
+                    {
+                        state = MovementState.Slide;
+                        StartSlide();
+                    }
                     // Transition to crouch if crouch is still pressed
-                    if (crouchInput)
+                    else if (crouchInput)
                     {
                         state = MovementState.Crouch;
                     }
@@ -428,6 +444,10 @@ public class PlayerController : MonoBehaviour
                         state = MovementState.Idle;
                     }
                 }
+                else if (runInput)
+                {
+                    playerHorizontalSpeed = runSpeed;
+                }
                 else if (walkInput)
                 {
                     playerHorizontalSpeed = walkSpeed;
@@ -438,7 +458,6 @@ public class PlayerController : MonoBehaviour
             // SLIDE STATE
             // =======================
             case MovementState.Slide:
-                // If slide has ended, return to idle (state resolution happens next frame)
                 if (jumpInput && canJump)
                 {
                     state = MovementState.Jump;
@@ -534,13 +553,24 @@ public class PlayerController : MonoBehaviour
             playerHeightSpeed = 0f;
         }
         else
-        {
+        { 
             playerHeightSpeed += gravity * gravityMultiplier * Time.deltaTime;
         }
     }
 
     private void MovePlayer()
     {
+        if (pauseManager.getPauseState())
+        {
+            return;
+        }
+
+        if (state == MovementState.Dash)
+        {
+            UpdateDash();
+            return;
+        }
+
         // Moves player in horizontal direction
         Vector3 horizontalDirection = transform.right * xMove + transform.forward * yMove;
         Vector3 horizontalMove;
@@ -618,6 +648,30 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void UpdateCoolDowns()
+    {
+        if (slideCoolDownTimer > 0f)
+        {
+            slideCoolDownTimer -= Time.deltaTime;
+            if (slideCoolDownTimer <= 0f)
+            {
+                canSlide = true;
+            }
+        }
+    }
+
+    private void UpdateCoolDowns()
+    {
+        if (slideCoolDownTimer > 0f)
+        {
+            slideCoolDownTimer -= Time.deltaTime;
+            if (slideCoolDownTimer <= 0f)
+            {
+                canSlide = true;
+            }
+        }
+    }
+
     // Setup components and values
     void Awake()
     {
@@ -642,6 +696,8 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         PollHeldActions();
+        
+        UpdateCoolDowns();
 
         if (dashCooldownTimer > 0)
         {
@@ -660,9 +716,8 @@ public class PlayerController : MonoBehaviour
 
         MovePlayer();
 
-        if (!isSlide)
-        {
-        }
+        Debug.Log(state);
+        Debug.Log(runInput);
 
         MovePlayerCamera();
     }
