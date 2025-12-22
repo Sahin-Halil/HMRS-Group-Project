@@ -60,8 +60,10 @@ public class PlayerController : MonoBehaviour
     private bool canSlide = true;
     private Vector3 slideDirection;
     public float startSlideSpeed;
-    private float currentSlideSpeed;
+    private float currentSlideSpeed = 12f;
     public float slideDecay = 17f;
+    [SerializeField] private float slideCoolDown = 1f;
+    private float slideCoolDownTimer = 0f;
 
     [Header("Dash Settings")]
     [SerializeField] private float dashDistance = 7f;
@@ -123,12 +125,6 @@ public class PlayerController : MonoBehaviour
         if (isDashing) return;
 
         crouchInput = true;
-
-        // possible to begin slide
-        if (crouchInput)
-        {
-            canSlide = true;
-        }
     }
 
     private void HandleCrouchTransition()
@@ -136,7 +132,6 @@ public class PlayerController : MonoBehaviour
         float targetHeight = crouchInput ? crouchHeight : originalHeight;
 
         // Use crouchTransitionSpeed to control the smoothing time
-
         characterController.height = Mathf.Lerp(
             characterController.height,
             targetHeight,
@@ -148,7 +143,6 @@ public class PlayerController : MonoBehaviour
     private void OnRun()
     {
         runInput = true;
-        Debug.Log("Running");
     }
 
     // Handles Jump toggling
@@ -157,10 +151,7 @@ public class PlayerController : MonoBehaviour
         jumpInput = true;
 
         // possible for jump to start
-        if (jumpInput)
-        {
-            canJump = true;
-        }
+        canJump = true;
     }
 
     private void OnDash(InputValue value)
@@ -203,6 +194,7 @@ public class PlayerController : MonoBehaviour
         if (changedDirection || releasedInput || currentSlideSpeed <= 0f)
         {
             isSlide = false;
+            slideCoolDownTimer = slideCoolDown;
         }
     }
 
@@ -384,6 +376,10 @@ public class PlayerController : MonoBehaviour
                 {
                     state = MovementState.Slide;
                     StartSlide();
+                }
+                else if (crouchInput)
+                {
+                    state = MovementState.Crouch;
                 }
                 // Continue running
                 else
@@ -611,6 +607,18 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    private void UpdateCooldowns()
+    {
+        if (slideCoolDownTimer > 0f)
+        {
+            slideCoolDownTimer -= Time.deltaTime;
+            if (slideCoolDownTimer <= 0f)
+            {
+                canSlide = true;
+            }
+        }
+    }
+
     // Setup components and values
     void Awake()
     {
@@ -621,7 +629,6 @@ public class PlayerController : MonoBehaviour
         crouchHeight = 0.7f * originalHeight;
         //crouchCenter = new Vector3(characterController.center.x, 0.7f * originalHeight, characterController.center.z);
         runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 10;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
         
         playerInput = GetComponent<PlayerInput>();
@@ -635,6 +642,8 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         PollHeldActions();
+        
+        UpdateCooldowns();
 
         if (dashCooldownTimer > 0)
         {
