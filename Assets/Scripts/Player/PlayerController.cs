@@ -23,13 +23,17 @@ public class PlayerController : MonoBehaviour
     public Camera characterCamera;
     [SerializeField] private ShipPartManager shipPartManager;
     private float originalHeight;
+    private PlayerInput playerInput;
+    private InputAction walkAction;
+    private InputAction runAction;
+    private InputAction crouchAction;
+    private InputAction jumpAction;
 
     // Movement
     private bool walkInput = false;
     private float playerHorizontalSpeed = 0f;
     [SerializeField] private float walkSpeed = 5f;
     [SerializeField] private Vector3 move;
-    private Vector3 normalMovement;
     [SerializeField] private float xMove;
     [SerializeField] private float yMove;
     private float xMoveOld;
@@ -99,7 +103,7 @@ public class PlayerController : MonoBehaviour
     // Called when movement input is detected
     private void OnMove(InputValue value)
     {
-        walkInput = !walkInput;
+        walkInput = true;
         Vector2 moveInput = value.Get<Vector2>();
         xMove = moveInput.x;
         yMove = moveInput.y;
@@ -118,7 +122,7 @@ public class PlayerController : MonoBehaviour
     {
         if (isDashing) return;
 
-        crouchInput = !crouchInput;
+        crouchInput = true;
 
         // possible to begin slide
         if (crouchInput)
@@ -143,15 +147,14 @@ public class PlayerController : MonoBehaviour
     // Handles Run toggling
     private void OnRun()
     {
-        runInput = !runInput;
+        runInput = true;
         Debug.Log("Running");
-
     }
 
     // Handles Jump toggling
     private void OnJump()
     {
-        jumpInput = !jumpInput;
+        jumpInput = true;
 
         // possible for jump to start
         if (jumpInput)
@@ -587,6 +590,27 @@ public class PlayerController : MonoBehaviour
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
 
+    private void PollHeldActions()
+    {
+        if (walkInput && !walkAction.IsPressed())
+        {
+            runInput = false;
+        }
+        if (runInput && !runAction.IsPressed())
+        {
+            runInput = false;
+        }
+        if (crouchInput && !crouchAction.IsPressed()) 
+        {
+            crouchInput = false;
+        }
+        if (crouchInput && !jumpAction.IsPressed())
+        {
+            jumpInput = false;
+        }
+
+    }
+
     // Setup components and values
     void Awake()
     {
@@ -599,11 +623,19 @@ public class PlayerController : MonoBehaviour
         runSpeed = 1.5f * walkSpeed;
         startSlideSpeed = 10;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
+        
+        playerInput = GetComponent<PlayerInput>();
+        walkAction = playerInput.actions["Move"];
+        runAction = playerInput.actions["Run"];
+        crouchAction = playerInput.actions["Crouch"];
+        jumpAction = playerInput.actions["Jump"];
     }
 
     // Handles movement and rotation each frame
     void Update()
     {
+        PollHeldActions();
+
         if (dashCooldownTimer > 0)
         {
             dashCooldownTimer -= Time.deltaTime;
