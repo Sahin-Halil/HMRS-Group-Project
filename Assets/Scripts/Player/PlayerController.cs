@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System;
 
 // 1 issue
 // Optional: Make it so user can keep moving whilst crouched/running after slide ends and they didnt change input key
@@ -21,31 +19,29 @@ public class PlayerController : MonoBehaviour
     // Components
     private CharacterController characterController;
     public Camera characterCamera;
-    [SerializeField] private ShipPartManager shipPartManager;
+    private ShipPartManager shipPartManager;
     private float originalHeight;
 
     // Movement
     private bool walkInput = false;
     private float playerHorizontalSpeed = 0f;
-    [SerializeField] private float walkSpeed = 5f;
-    [SerializeField] private Vector3 move;
-    private Vector3 normalMovement;
-    [SerializeField] private float xMove;
-    [SerializeField] private float yMove;
+    private float walkSpeed = 5f;
+    private Vector3 move;
+    private float xMove;
+    private float yMove;
     private float xMoveOld;
     private float yMoveOld;
 
     // Mouse look
-    [SerializeField] private float mouseSense = 0.5f;
-    [SerializeField] private float xRotation;
-    [SerializeField] private float yRotation;
+    private float mouseSense = 0.5f;
+    private float xRotation;
+    private float yRotation;
 
     // Crouch
     private bool crouchInput = false;
     private float crouchSpeed;
     private float crouchHeight;
-    [SerializeField] private float crouchTransitionSpeed = 100f;
-    private float heightVelocity;
+    private float crouchTransitionSpeed = 100f;
 
     // Running 
     private bool runInput = false;
@@ -55,15 +51,15 @@ public class PlayerController : MonoBehaviour
     private bool isSlide = false;
     private bool canSlide = true;
     private Vector3 slideDirection;
-    public float startSlideSpeed;
+    private float startSlideSpeed;
     private float currentSlideSpeed;
-    public float slideDecay = 17f;
-
-    [Header("Dash Settings")]
-    [SerializeField] private float dashDistance = 7f;
-    [SerializeField] private float dashDuration = 0.2f;
-    [SerializeField] private float dashCooldown = 1f;
-    [SerializeField] private float dashFOVKick = 10f;
+    private float slideDecay = 17f;
+    
+    // Dashing
+    private float dashDistance = 7f;
+    private float dashDuration = 0.2f;
+    private float dashCooldown = 1f;
+    private float dashFOVKick = 10f;
 
     private bool isDashing = false;
     private bool canDash = true;
@@ -73,10 +69,10 @@ public class PlayerController : MonoBehaviour
 
     // Gravity
     private float gravity = -9.81f;
-    [SerializeField] private float gravityMultiplier = 0.001f;
+    private float gravityMultiplier = 0.001f;
 
     // Jumping
-    [SerializeField] private float jumpValue = 0.001f;
+    private float jumpValue = 0.001f;
     private float playerHeightSpeed = 0f;
     private bool jumpInput = false;
     private bool canJump = false;
@@ -597,7 +593,7 @@ public class PlayerController : MonoBehaviour
         crouchHeight = 0.7f * originalHeight;
         //crouchCenter = new Vector3(characterController.center.x, 0.7f * originalHeight, characterController.center.z);
         runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 10;
+        startSlideSpeed = 13;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
     }
 
