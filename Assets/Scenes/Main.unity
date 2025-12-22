@@ -2717,6 +2717,10 @@ PrefabInstance:
       propertyPath: shipPartManager
       value: 
       objectReference: {fileID: 737277551}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: crouchTransitionSpeed
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 6562504523566788359, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
       propertyPath: respawnMenuUI
       value: 
