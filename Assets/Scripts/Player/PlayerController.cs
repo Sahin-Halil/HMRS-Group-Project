@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     public Camera characterCamera;
     [SerializeField] private ShipPartManager shipPartManager;
     private float originalHeight;
+    [SerializeField] private PauseManager pauseManager;
     private PlayerInput playerInput;
     private InputAction walkAction;
     private InputAction runAction;
@@ -46,14 +47,13 @@ public class PlayerController : MonoBehaviour
 
     // Crouch
     private bool crouchInput = false;
-    private float crouchSpeed;
+    [SerializeField] private float crouchSpeed = 2.5f;
     private float crouchHeight;
     [SerializeField] private float crouchTransitionSpeed = 100f;
-    private float heightVelocity;
 
     // Running 
     private bool runInput = false;
-    private float runSpeed;
+    public float runSpeed = 7.5f;
 
     // Sliding
     private bool isSlide = false;
@@ -392,7 +392,6 @@ public class PlayerController : MonoBehaviour
             // CROUCH STATE
             // =======================
             case MovementState.Crouch:
-                // Exit crouch if crouch input is released
                 if (jumpInput && canJump)
                 {
                     state = MovementState.Jump;
@@ -427,8 +426,13 @@ public class PlayerController : MonoBehaviour
             case MovementState.Jump:
                 if (characterController.isGrounded)
                 {
+                    if (crouchInput && canSlide)
+                    {
+                        state = MovementState.Slide;
+                        StartSlide();
+                    }
                     // Transition to crouch if crouch is still pressed
-                    if (crouchInput)
+                    else if (crouchInput)
                     {
                         state = MovementState.Crouch;
                     }
@@ -450,6 +454,10 @@ public class PlayerController : MonoBehaviour
                         state = MovementState.Idle;
                     }
                 }
+                else if (runInput)
+                {
+                    playerHorizontalSpeed = runSpeed;
+                }
                 else if (walkInput)
                 {
                     playerHorizontalSpeed = walkSpeed;
@@ -460,7 +468,6 @@ public class PlayerController : MonoBehaviour
             // SLIDE STATE
             // =======================
             case MovementState.Slide:
-                // If slide has ended, return to idle (state resolution happens next frame)
                 if (jumpInput && canJump)
                 {
                     state = MovementState.Jump;
@@ -543,13 +550,18 @@ public class PlayerController : MonoBehaviour
             playerHeightSpeed = 0f;
         }
         else
-        {
+        { 
             playerHeightSpeed += gravity * gravityMultiplier * Time.deltaTime;
         }
     }
 
     private void MovePlayer()
     {
+        if (pauseManager.getPauseState())
+        {
+            return;
+        }
+
         if (state == MovementState.Dash)
         {
             UpdateDash();
@@ -607,7 +619,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void UpdateCooldowns()
+    private void UpdateCoolDowns()
     {
         if (slideCoolDownTimer > 0f)
         {
@@ -625,10 +637,7 @@ public class PlayerController : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         originalHeight = characterController.height;
-        crouchSpeed = 0.5f * walkSpeed;
-        crouchHeight = 0.7f * originalHeight;
-        //crouchCenter = new Vector3(characterController.center.x, 0.7f * originalHeight, characterController.center.z);
-        runSpeed = 1.5f * walkSpeed;
+        crouchHeight = 0.5f * originalHeight;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
         
         playerInput = GetComponent<PlayerInput>();
@@ -643,7 +652,7 @@ public class PlayerController : MonoBehaviour
     {
         PollHeldActions();
         
-        UpdateCooldowns();
+        UpdateCoolDowns();
 
         if (dashCooldownTimer > 0)
         {
@@ -662,12 +671,8 @@ public class PlayerController : MonoBehaviour
 
         MovePlayer();
 
-        Debug.Log(state);
-        Debug.Log(runInput);
-        if (!isSlide)
-        {
-            //  Debug.Log(speed);
-        }
+        //Debug.Log(state);
+        //Debug.Log(playerHeightSpeed);
 
         MovePlayerCamera();
     }
