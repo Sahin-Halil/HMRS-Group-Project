@@ -401,6 +401,9 @@ public class PlayerController : MonoBehaviour
                     playerHorizontalSpeed = crouchSpeed;
                 }
                 break;
+            // =======================
+            // JUMP STATE
+            // =======================
             case MovementState.Jump:
                 if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
