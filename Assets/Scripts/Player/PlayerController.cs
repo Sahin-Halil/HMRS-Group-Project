@@ -18,8 +18,8 @@ public class PlayerController : MonoBehaviour
 
     // Mouse look
     [SerializeField] private float mouseSense = 0.5f;
-    [SerializeField] private float xRotation;
-    [SerializeField] private float yRotation;
+    [SerializeField] public float xRotation;
+    [SerializeField] public float yRotation;
 
     // Crouch
     [SerializeField] private bool crouchInput = false;
