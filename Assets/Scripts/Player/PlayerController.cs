@@ -158,7 +158,10 @@ public class PlayerController : MonoBehaviour
         jumpInput = true;
 
         // possible for jump to start
-        canJump = true;
+        if (characterController.isGrounded) 
+        {
+            canJump = true;
+        }
     }
 
     // Handles Dash toggling
@@ -207,7 +210,7 @@ public class PlayerController : MonoBehaviour
         currentSlideSpeed -= slideDecay * Time.deltaTime;
 
         bool changedDirection = xMove != xMoveOld || yMove != yMoveOld;
-        bool releasedInput = !runInput || !crouchInput;
+        bool releasedInput = !runInput || !crouchInput || jumpInput;
 
         if (changedDirection || releasedInput || currentSlideSpeed <= 0f)
         {
@@ -366,7 +369,7 @@ public class PlayerController : MonoBehaviour
                     state = MovementState.Jump;
                     StartJump();
                 }
-                else if (crouchInput)
+                else if (characterController.isGrounded && crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -412,7 +415,7 @@ public class PlayerController : MonoBehaviour
                     StartJump();
                 }
                 // Transition to crouch if crouch input is pressed
-                else if (crouchInput)
+                else if (characterController.isGrounded && crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -461,12 +464,12 @@ public class PlayerController : MonoBehaviour
                 {
                     state = MovementState.Walk;
                 }
-                else if (crouchInput && canSlide)
+                else if (characterController.isGrounded && crouchInput && canSlide)
                 {
                     state = MovementState.Slide;
                     StartSlide();
                 }
-                else if (crouchInput)
+                else if (characterController.isGrounded && crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -481,19 +484,19 @@ public class PlayerController : MonoBehaviour
             // CROUCH STATE
             // =======================
             case MovementState.Crouch:
+                //Exit crouch if dash input is pressed
+                if (dashInput && canDash && dashCooldownTimer <= 0)
+                {
+                    state = MovementState.Dash;
+                    StartDash();
+                }
                 // Exit crouch if jump input is pressed
-                if (jumpInput && canJump)
+                else if (jumpInput && canJump)
                 {
                     state = MovementState.Jump;
                     StartJump();
                 }
 
-                //Exit crouch if dash input is pressed
-                else if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
 
                 else if (!crouchInput)
                 {
@@ -579,15 +582,15 @@ public class PlayerController : MonoBehaviour
             // SLIDE STATE
             // =======================
             case MovementState.Slide:
-                if (jumpInput && canJump)
+                if (!isSlide)
                 {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-                else if (!isSlide)
-                {
+                    if (jumpInput && canJump)
+                    {
+                        state = MovementState.Jump;
+                        StartJump();
+                    }
                     // Transition to crouch if crouch is still pressed
-                    if (crouchInput)
+                    else if (crouchInput)
                     {
                         state = MovementState.Crouch;
                     }
@@ -623,7 +626,7 @@ public class PlayerController : MonoBehaviour
             case MovementState.Dash:
                 if (!isDash)
                 {
-                    if (crouchInput)
+                    if (characterController.isGrounded && crouchInput)
                     {
                         state = MovementState.Crouch;
                     }
@@ -721,7 +724,7 @@ public class PlayerController : MonoBehaviour
     {
         if (characterController.isGrounded && playerHeightSpeed <= 0f)
         {
-            playerHeightSpeed = 0f;
+            playerHeightSpeed = -1f;
         }
         else
         { 
@@ -891,6 +894,12 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
 
         MovePlayer();
+
+        Debug.Log(state);
+        //Debug.Log(characterController.isGrounded);
+        Debug.Log(canSlide);
+        //Debug.Log(slideCoolDownTimer);
+        //Debug.Log(runInput);
 
         MovePlayerCamera();
     }
