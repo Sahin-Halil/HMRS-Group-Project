@@ -2710,6 +2710,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1843247279}
     - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: slideDecay
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: slideCoolDown
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
       propertyPath: standingSpeed
       value: 8
       objectReference: {fileID: 0}
@@ -2717,6 +2725,18 @@ PrefabInstance:
       propertyPath: shipPartManager
       value: 
       objectReference: {fileID: 737277551}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: startSlideSpeed
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: gravityMultiplier
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: crouchTransitionSpeed
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 6562504523566788359, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
       propertyPath: respawnMenuUI
       value: 
