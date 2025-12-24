@@ -8406,7 +8406,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentHealth: 0
-  maxHealth: 100
+  maxHealth: 2147483647
 --- !u!136 &1701235742
 CapsuleCollider:
   m_ObjectHideFlags: 0
