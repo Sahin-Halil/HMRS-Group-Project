@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour
@@ -9,7 +7,8 @@ public class EnemyController : MonoBehaviour
     public AIBehaviour behaviourMode = AIBehaviour.Chase;
 
     // Movement settings
-    public float moveSpeed = 0.3f;
+    public float moveSpeed = 2f;
+    public float rotationSpeed = 6f;
     public float detectionRange = 10f;
     public float fleeDistance = 8f;
 
@@ -26,7 +25,7 @@ public class EnemyController : MonoBehaviour
     public bool requireLineOfSight = true;
     public LayerMask obstacleLayer;
 
-    // Internal references and state
+    // Internal
     private Transform player;
     private HealthSystem playerHealth;
     private Vector3 wanderTarget;
@@ -35,15 +34,8 @@ public class EnemyController : MonoBehaviour
     private float lastAttackTime;
     private bool canSeePlayer;
 
-    public enum AIBehaviour
-    {
-        Chase,
-        Flee,
-        Wander,
-        Territorial
-    }
+    public enum AIBehaviour { Chase, Wander }
 
-    // Initializes references and sets initial wander target
     void Start()
     {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -57,10 +49,9 @@ public class EnemyController : MonoBehaviour
         SetNewWanderTarget();
     }
 
-    // Handles AI behaviour updates each frame
     void Update()
     {
-        if (player == null) return;
+        if (!player) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         canSeePlayer = CheckLineOfSight();
@@ -74,53 +65,37 @@ public class EnemyController : MonoBehaviour
                     Wander();
                 break;
 
-            case AIBehaviour.Flee:
-                if (canSeePlayer && distanceToPlayer < detectionRange)
-                    FleeFromPlayer();
-                else
-                    Wander();
-                break;
-
             case AIBehaviour.Wander:
                 Wander();
                 break;
-
-            case AIBehaviour.Territorial:
-                float distanceFromStart = Vector3.Distance(transform.position, startPosition);
-                if (canSeePlayer && distanceToPlayer < detectionRange && distanceFromStart < wanderRadius)
-                    ChasePlayer(distanceToPlayer);
-                else if (distanceFromStart > wanderRadius)
-                {
-                    Vector3 directionHome = (startPosition - transform.position).normalized;
-                    transform.position += directionHome * moveSpeed * Time.deltaTime;
-                }
-                else
-                    Wander();
-                break;
         }
     }
 
-    // Checks if the player is visible based on line of sight
-    bool CheckLineOfSight()
+    // ---------- CORE MOVEMENT HELPERS ----------
+
+    void MoveTowards(Vector3 target)
     {
-        if (!requireLineOfSight) return true;
+        Vector3 dir = (target - transform.position);
+        dir.y = 0;
 
-        Vector3 directionToPlayer = player.position - transform.position;
-
-        if (Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, detectionRange, ~obstacleLayer))
+        if (dir.sqrMagnitude > 0.01f)
         {
-            return hit.transform == player;
+            // Rotate smoothly toward direction
+            Quaternion lookRot = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, rotationSpeed * Time.deltaTime);
+
+            // Move forward
+            transform.position += transform.forward * moveSpeed * Time.deltaTime;
         }
-        return false;
     }
 
-    // Handles chase behaviour and attacking when in range
+    // ---------- BEHAVIOURS ----------
+
     void ChasePlayer(float distanceToPlayer)
     {
         if (distanceToPlayer > attackRange)
         {
-            Vector3 direction = (player.position - transform.position).normalized;
-            transform.position += direction * moveSpeed * Time.deltaTime;
+            MoveTowards(player.position);
         }
         else
         {
@@ -128,39 +103,6 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    // Handles flee behaviour when player is nearby
-    void FleeFromPlayer()
-    {
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        if (distanceToPlayer < fleeDistance)
-        {
-            Vector3 direction = (transform.position - player.position).normalized;
-            transform.position += direction * moveSpeed * 1.2f * Time.deltaTime;
-            transform.LookAt(transform.position + direction);
-        }
-        else
-        {
-            Wander();
-        }
-    }
-
-    // Handles attacking the player with cooldown
-    void AttackPlayer()
-    {
-        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-
-        if (Time.time >= lastAttackTime + attackCooldown)
-        {
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(attackDamage);
-            }
-            lastAttackTime = Time.time;
-        }
-    }
-
-    // Handles random wandering behaviour
     void Wander()
     {
         wanderTimer += Time.deltaTime;
@@ -171,48 +113,45 @@ public class EnemyController : MonoBehaviour
             wanderTimer = 0f;
         }
 
-        Vector3 direction = (wanderTarget - transform.position).normalized;
-        transform.position += direction * (moveSpeed * 0.5f) * Time.deltaTime;
+        MoveTowards(wanderTarget);
 
         if (Vector3.Distance(transform.position, wanderTarget) < 0.5f)
-        {
             SetNewWanderTarget();
+    }
+
+    void AttackPlayer()
+    {
+        // Face the player while attacking
+        Vector3 lookPos = player.position - transform.position;
+        lookPos.y = 0;
+        Quaternion rot = Quaternion.LookRotation(lookPos);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rot, rotationSpeed * Time.deltaTime);
+
+        if (Time.time >= lastAttackTime + attackCooldown)
+        {
+            playerHealth?.TakeDamage(attackDamage);
+            lastAttackTime = Time.time;
         }
     }
 
-    // Picks a new random wander target within radius
+    // ---------- SUPPORT ----------
+
+    bool CheckLineOfSight()
+    {
+        if (!requireLineOfSight)
+            return true;
+
+        Vector3 dir = player.position - transform.position;
+
+        if (Physics.Raycast(transform.position, dir, out RaycastHit hit, detectionRange, ~obstacleLayer))
+            return hit.transform == player;
+
+        return false;
+    }
+
     void SetNewWanderTarget()
     {
-        Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * wanderRadius;
-        wanderTarget = startPosition + new Vector3(randomCircle.x, 0, randomCircle.y);
-    }
-
-    // Visualizes detection and movement ranges in the editor
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-
-        if (behaviourMode == AIBehaviour.Flee)
-        {
-            Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(transform.position, fleeDistance);
-        }
-
-        if (Application.isPlaying)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(startPosition, wanderRadius);
-            Gizmos.DrawLine(transform.position, wanderTarget);
-
-            if (player != null && canSeePlayer)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(transform.position, player.position);
-            }
-        }
+        Vector2 circle = UnityEngine.Random.insideUnitCircle * wanderRadius;
+        wanderTarget = startPosition + new Vector3(circle.x, 0, circle.y);
     }
 }
