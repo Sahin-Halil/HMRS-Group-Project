@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     // Components
     private CharacterController characterController;
     public Camera characterCamera;
+    private Animator animator;
     private ShipPartManager shipPartManager;
     private float originalHeight;
     [SerializeField] private PauseManager pauseManager;
@@ -94,6 +95,15 @@ public class PlayerController : MonoBehaviour
     public AudioClip hitSound;
     int attackCount;
     private bool hasHitThisAttack = false; // Track if we've already hit during this attack
+    
+    // Combo system
+    private int comboCount = 0; // Determines attack animation
+    private int previousComboCount = -1; // Track previous combo to detect changes
+    private bool comboQueued = false; // Track if next attack is queued
+    private float comboResetTime = 1.0f; // Time before combo resets
+    private float timeSinceLastAttack = 0f;
+    private float comboWindowStart = 0.4f; // When combo window opens (40% through animation)
+    private float comboTransitionPoint = 0.75f; // When to start next attack (75% through animation)
 
     // Possible player states
     private enum MovementState
@@ -110,6 +120,7 @@ public class PlayerController : MonoBehaviour
 
     // Players initial state
     private MovementState state = MovementState.Idle;
+    private MovementState previousState = MovementState.Idle;
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
@@ -173,9 +184,19 @@ public class PlayerController : MonoBehaviour
     // Handles Attack toggling
     private void OnFire()
     {
+        // Allow attack if not on cooldown
         if (canAttack && attackCooldownTimer <= 0)
         {
             attackInput = true;
+        }
+        // Allow combo queueing only during combo window (after certain % of attack)
+        else if (isAttack && !comboQueued)
+        {
+            float attackProgress = attackTimeElapsed / attackDuration;
+            if (attackProgress >= comboWindowStart)
+            {
+                comboQueued = true;
+            }
         }
     }
 
@@ -274,6 +295,19 @@ public class PlayerController : MonoBehaviour
         isAttack = true;
         attackTimeElapsed = 0f;
         hasHitThisAttack = false; // Reset hit flag for new attack
+        timeSinceLastAttack = 0f; // Reset combo timer
+        
+        // Progress combo if queued, otherwise reset to first attack
+        if (comboQueued)
+        {
+            comboCount = (comboCount + 1) % 3; // Cycle through 0, 1, 2
+            comboQueued = false;
+        }
+        else
+        {
+            // Reset combo if starting fresh attack (not queued from previous)
+            comboCount = 0;
+        }
     }
 
     // Handles mid attack motion
@@ -281,6 +315,13 @@ public class PlayerController : MonoBehaviour
     {
         attackTimeElapsed += Time.deltaTime;
         float attackProgress = attackTimeElapsed / attackDuration;
+
+        // If combo is queued, transition earlier for smooth chaining
+        if (comboQueued && attackProgress >= comboTransitionPoint)
+        {
+            StopAttack();
+            return;
+        }
 
         if (attackProgress >= 1f)
         {
@@ -327,12 +368,59 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    void handleAnimations(MovementState newState)
+    {
+        bool stateChanged = newState != previousState;
+        bool comboChanged = comboCount != previousComboCount;
+        
+        // Only trigger animation if state changed or combo changed during attack
+        if (!stateChanged && !(newState == MovementState.Attack && comboChanged))
+        {
+            return;
+        }
+
+        if (newState == MovementState.Idle) {
+            animator.CrossFadeInFixedTime("Idle-Animation", 0.2f);
+        }
+        else if (newState == MovementState.Attack)
+        {
+            // Play the correct attack animation based on combo count
+            string attackAnimName = "Attack-Animation-" + (comboCount + 1).ToString();
+            // Use shorter crossfade for combo attacks for snappier feel
+            float fadeTime = comboCount > 0 ? 0.05f : 0.1f;
+            animator.CrossFadeInFixedTime(attackAnimName, fadeTime);
+            previousComboCount = comboCount; // Update after playing animation
+        }
+        // Add other states as needed (Walk, Run, etc.)
+        // For now, non-attack movement states will use Idle animation
+        else if (newState == MovementState.Walk || newState == MovementState.Run || 
+                 newState == MovementState.Crouch || newState == MovementState.Slide ||
+                 newState == MovementState.Jump || newState == MovementState.Dash)
+        {
+            animator.CrossFadeInFixedTime("Idle-Animation", 0.2f);
+        }
+
+        previousState = newState;
+    }
+
     // Handles end of Attack
     private void StopAttack()
     {
         if (!isAttack) return;
         isAttack = false;
-        attackCooldownTimer = attackCooldown;
+        
+        // If combo is queued, start next attack immediately
+        if (comboQueued)
+        {
+            attackCooldownTimer = 0f; // No cooldown for smooth combo
+            canAttack = true; // Allow immediate attack
+            attackInput = true; // Trigger next attack
+            // comboQueued will be cleared by StartAttack()
+        }
+        else
+        {
+            attackCooldownTimer = attackCooldown;
+        }
 
         // Reset hit tracking for next attack
         hasHitThisAttack = false;
@@ -704,6 +792,9 @@ public class PlayerController : MonoBehaviour
                 }
                 break;
         }
+        
+        // Only update animations if state has changed
+        handleAnimations(state);
     }
 
     // Detects collisions with collectible ship parts
@@ -854,12 +945,24 @@ public class PlayerController : MonoBehaviour
                 canAttack = true;
             }
         }
+        
+        // Reset combo if too much time has passed since last attack
+        // But don't reset if we have a combo queued
+        if (!isAttack && !comboQueued)
+        {
+            timeSinceLastAttack += Time.deltaTime;
+            if (timeSinceLastAttack >= comboResetTime)
+            {
+                comboCount = 0;
+            }
+        }
     }
 
     // Setup components and values
     void Awake()
     {
         characterController = GetComponent<CharacterController>();
+        animator = characterCamera.GetComponentInChildren<Animator>();
         Cursor.lockState = CursorLockMode.Locked;
         originalHeight = characterController.height;
         crouchSpeed = 0.5f * walkSpeed;
