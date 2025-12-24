@@ -336,7 +336,6 @@ public class PlayerController : MonoBehaviour
         }
 
         AttackRaycast();
-        // TODO SetAnimations();
     }
 
     void AttackRaycast()
