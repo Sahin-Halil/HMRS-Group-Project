@@ -11,6 +11,9 @@ public class PlayerController : MonoBehaviour
     private ShipPartManager shipPartManager;
     private float originalHeight;
     [SerializeField] private PauseManager pauseManager;
+    [SerializeField] private DieScript playerDeath;
+
+    // Player Inputs
     private PlayerInput playerInput;
     private InputAction walkAction;
     private InputAction runAction;
@@ -734,12 +737,7 @@ public class PlayerController : MonoBehaviour
 
     // Handles player movement
     private void MovePlayer()
-    {
-        if (pauseManager.getPauseState())
-        {
-            return;
-        }
-
+    { 
         if (state == MovementState.Dash)
         {
             UpdateDash();
@@ -883,6 +881,11 @@ public class PlayerController : MonoBehaviour
     // Handles movement and rotation each frame
     void Update()
     {
+        if (pauseManager.getPauseState() || playerDeath.checkDead())
+        {
+            return;
+        }
+
         PollHeldActions();
         
         UpdateCoolDowns();
@@ -896,10 +899,6 @@ public class PlayerController : MonoBehaviour
         MovePlayer();
 
         Debug.Log(state);
-        //Debug.Log(characterController.isGrounded);
-        Debug.Log(canSlide);
-        //Debug.Log(slideCoolDownTimer);
-        //Debug.Log(runInput);
 
         MovePlayerCamera();
     }
