@@ -2706,6 +2706,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1663785222703145451, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: maxOxygen
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 1663785222703145451, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
       propertyPath: oxygenSlider
       value: 
       objectReference: {fileID: 1843247279}
@@ -2713,6 +2717,14 @@ PrefabInstance:
       propertyPath: slideDecay
       value: 17
       objectReference: {fileID: 0}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: playerDeath
+      value: 
+      objectReference: {fileID: 954540893}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: pauseManager
+      value: 
+      objectReference: {fileID: 887885495}
     - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
       propertyPath: slideCoolDown
       value: 1
