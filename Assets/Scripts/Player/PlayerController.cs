@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+using Cursor = UnityEngine.Cursor;
 
 public class PlayerController : MonoBehaviour
 {
@@ -18,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private InputAction crouchAction;
     private InputAction jumpAction;
     private InputAction dashAction;
+    private InputAction attackAction;
 
     // Movement
     private bool walkInput = false;
@@ -51,7 +54,7 @@ public class PlayerController : MonoBehaviour
     public float startSlideSpeed;
     private float currentSlideSpeed = 12f;
     public float slideDecay = 17f;
-    [SerializeField] private float slideCoolDown = 1f;
+    [SerializeField] private float slideCoolDown = 0.5f;
     private float slideCoolDownTimer = 0f;
 
     // Dashing
@@ -75,6 +78,26 @@ public class PlayerController : MonoBehaviour
     private bool jumpInput = false;
     private bool canJump = false;
 
+    // Combat
+    // TODO Make all values private after being satisfied with them
+    private bool attackInput = false;
+    private bool isAttack = false;
+    private bool canAttack = true;
+    private float attackDuration = 0.4f;
+    private float attackTimeElapsed = 0f;
+    private float attackCooldown = 0.5f;
+    private float attackCooldownTimer = 0f;
+    public float attackDistance = 3f;
+    public float attackDelay = 0.4f;
+    public float attackSpeed = 1f;
+    public int attackDamage = 10;
+    public LayerMask attackLayer;
+    public GameObject hitEffect;
+    public AudioClip swordSwing;
+    public AudioClip hitSound;
+    int attackCount;
+    private bool hasHitThisAttack = false; // Track if we've already hit during this attack
+
     // Possible player states
     private enum MovementState
     {
@@ -85,6 +108,7 @@ public class PlayerController : MonoBehaviour
         Slide,
         Jump,
         Dash,
+        Attack
     }
 
     // Players initial state
@@ -149,6 +173,15 @@ public class PlayerController : MonoBehaviour
         if (canDash && dashCooldownTimer <= 0)
         {
             dashInput = true;
+        }
+    }
+
+    // Handles Attack toggling
+    private void OnFire()
+    {
+        if (canAttack && attackCooldownTimer <= 0)
+        {
+            attackInput = true;
         }
     }
 
@@ -240,6 +273,77 @@ public class PlayerController : MonoBehaviour
         dashCooldownTimer = dashCooldown;
     }
 
+    // Handles start attack motion
+    private void StartAttack()
+    {
+        canAttack = false;
+        isAttack = true;
+        attackTimeElapsed = 0f;
+        hasHitThisAttack = false; // Reset hit flag for new attack
+    }
+
+    // Handles mid attack motion
+    private void UpdateAttack()
+    {
+        attackTimeElapsed += Time.deltaTime;
+        float attackProgress = attackTimeElapsed / attackDuration;
+
+        if (attackProgress >= 1f)
+        {
+            StopAttack();
+            return;
+        }
+
+        AttackRaycast();
+        // TODO SetAnimations();
+    }
+
+    void AttackRaycast()
+    {
+        // Only check for hits if we haven't already hit something this attack
+        if (!hasHitThisAttack && Physics.Raycast(characterCamera.transform.position, characterCamera.transform.forward, out RaycastHit hit, attackDistance, attackLayer))
+        {
+            hasHitThisAttack = true; // Mark that we've hit something
+            HitTarget(hit);
+        }
+    }
+
+    void HitTarget(RaycastHit hit)
+    {
+        // audioSource.pitch = 1;
+        // audioSource.PlayOneShot(hitSound);
+
+        // Spawn hit effect at hit point
+        GameObject GO = Instantiate(hitEffect, hit.point, Quaternion.identity);
+        
+        // Deal damage to the enemy if it has an EnemyHealth component
+        EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
+        if (enemyHealth != null)
+        {
+            // Parent the hit effect to the enemy so it follows them
+            GO.transform.SetParent(hit.collider.transform);
+            
+            // Pass the hit effect GameObject to the enemy so it can destroy it on death
+            enemyHealth.TakeDamage(attackDamage, GO);
+            // Destroy the hit effect after 0.7 seconds
+            Destroy(GO, 0.7f);
+            Debug.Log($"Dealt {attackDamage} damage to {hit.collider.gameObject.name}");
+        }
+        
+
+    }
+
+    // Handles end of Attack
+    private void StopAttack()
+    {
+        if (!isAttack) return;
+        isAttack = false;
+        attackCooldownTimer = attackCooldown;
+
+        // Reset hit tracking for next attack
+        hasHitThisAttack = false;
+    }
+
     // Handles players speed depending on current state
     private void PlayerState()
     {
@@ -253,7 +357,12 @@ public class PlayerController : MonoBehaviour
             // IDLE STATE
             // =======================
             case MovementState.Idle:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -291,8 +400,14 @@ public class PlayerController : MonoBehaviour
             // WALK STATE
             // =======================
             case MovementState.Walk:
+                // Transition to attack if attack input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
                 // Transition to dash if dash input is pressed
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -327,7 +442,13 @@ public class PlayerController : MonoBehaviour
             // RUN STATE
             // =======================
             case MovementState.Run:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                // Transition to attack if attack input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -410,7 +531,13 @@ public class PlayerController : MonoBehaviour
             // JUMP STATE
             // =======================
             case MovementState.Jump:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                // Transition to attack if attack input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -533,6 +660,55 @@ public class PlayerController : MonoBehaviour
                     }
                 }
                 break;
+
+            // =======================
+            // ATTACK STATE
+            // =======================
+            case MovementState.Attack:
+                if (!isAttack)
+                {
+                    if (crouchInput)
+                    {
+                        state = MovementState.Crouch;
+                    }
+                    else if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            state = MovementState.Run;
+                        }
+                        else if (walkInput)
+                        {
+                            state = MovementState.Walk;
+                        }
+                    }
+                    else
+                    {
+                        state = MovementState.Idle;
+                    }
+                }
+                else
+                {
+                    UpdateAttack();
+                    // Maintain current movement speed during attack
+                    // Check what speed the player had before attacking
+                    if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            playerHorizontalSpeed = runSpeed;
+                        }
+                        else if (walkInput)
+                        {
+                            playerHorizontalSpeed = walkSpeed;
+                        }
+                    }
+                    else
+                    {
+                        playerHorizontalSpeed = 0;
+                    }
+                }
+                break;
         }
     }
 
@@ -644,9 +820,13 @@ public class PlayerController : MonoBehaviour
         {
             dashInput = false;
         }
+        if (attackInput && !attackAction.IsPressed())
+        {
+            attackInput = false;
+        }
     }
 
-    // Updates cooldowns for dash and slide
+    // Updates cooldowns for dash, slide, and attack
     private void UpdateCoolDowns()
     {
         if (slideCoolDownTimer > 0f)
@@ -664,6 +844,15 @@ public class PlayerController : MonoBehaviour
             if (dashCooldownTimer <= 0)
             {
                 canDash = true;
+            }
+        }
+
+        if (attackCooldownTimer > 0)
+        {
+            attackCooldownTimer -= Time.deltaTime;
+            if (attackCooldownTimer <= 0)
+            {
+                canAttack = true;
             }
         }
     }
@@ -686,6 +875,7 @@ public class PlayerController : MonoBehaviour
         crouchAction = playerInput.actions["Crouch"];
         jumpAction = playerInput.actions["Jump"];
         dashAction = playerInput.actions["Dash"];
+        attackAction = playerInput.actions["Fire"];
     }
 
     // Handles movement and rotation each frame
