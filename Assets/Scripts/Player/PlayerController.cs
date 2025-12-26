@@ -1001,7 +1001,7 @@ public class PlayerController : MonoBehaviour
 
         MovePlayer();
 
-        Debug.Log(state);
+        //Debug.Log(state);
 
         MovePlayerCamera();
     }
