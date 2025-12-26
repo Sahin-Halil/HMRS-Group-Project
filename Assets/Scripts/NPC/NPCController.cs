@@ -54,9 +54,6 @@ public class NPCController : MonoBehaviour
 
     public enum AIBehaviour { Chase, Idle }
 
-    // Fix animation being reset on hit
-    // Add Transitions for all Enemies
-
     void Start()
     {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -106,17 +103,14 @@ public class NPCController : MonoBehaviour
 
                 if (canSeePlayer && distanceToPlayer < detectionRange)
                 {
-                   // if (animator) Debug.Log("Chase");
                     ChasePlayer(distanceToPlayer);
                 }
                 else if (isIdling)
                 {
-                   // if (animator) Debug.Log("Idle");
                     Idle();
                 }
                 else
                 {
-                //    if (animator) Debug.Log("Wander");
                     Wander();
                 }
                 break;
@@ -187,10 +181,9 @@ public class NPCController : MonoBehaviour
 
     void Wander()
     {
-
         Vector3 dir = wanderTarget - transform.position;
         dir.y = 0;
-        if (Vector3.Distance(transform.position, wanderTarget) < 0.5f)
+        if (dir.sqrMagnitude < 0.25f)   
         {
             if (!alreadyIdled && UnityEngine.Random.value < idleChance)
             {
@@ -198,14 +191,12 @@ public class NPCController : MonoBehaviour
                 StartIdle();
                 return;
             }
-            else 
-            {
-                alreadyIdled = false;
-                SetNewWanderTarget();
-            }
+
+            alreadyIdled = false;
+            SetNewWanderTarget();
         }
         // If we are still moving
-        MoveTowards(wanderTarget, 1);
+        MoveTowards(wanderTarget, 1f);
     }
 
     void AttackPlayer()
