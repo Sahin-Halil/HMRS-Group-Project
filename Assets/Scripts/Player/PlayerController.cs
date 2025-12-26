@@ -72,6 +72,7 @@ public class PlayerController : MonoBehaviour
     // Gravity
     private float gravity = -9.81f;
     private float gravityMultiplier = 0.003f;
+    private bool isTouchingWall = false;
 
     // Jumping
     private float jumpValue = 0.003f;
@@ -171,10 +172,20 @@ public class PlayerController : MonoBehaviour
     {
         jumpInput = true;
 
-        // possible for jump to start
-        if (characterController.isGrounded) 
+        // Only allow jump if on ground and surface isn't too steep
+        if (characterController.isGrounded)
         {
-            canJump = true;
+            Vector3 rayOrigin = transform.position + characterController.center;
+            float rayDistance = (characterController.height / 2f) + 0.1f;
+
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, rayDistance))
+            {
+                float groundAngle = Vector3.Angle(hit.normal, Vector3.up);
+                if (groundAngle <= characterController.slopeLimit)
+                {
+                    canJump = true;
+                }
+            }
         }
     }
 
@@ -824,10 +835,25 @@ public class PlayerController : MonoBehaviour
         if (characterController.isGrounded && playerHeightSpeed <= 0f)
         {
             playerHeightSpeed = -1f;
+            isTouchingWall = false;
         }
         else
         { 
-            playerHeightSpeed += gravity * gravityMultiplier * Time.deltaTime;
+            // Use stronger gravity when touching steep walls for natural slip-off
+            float currentGravityMultiplier = isTouchingWall ? gravityMultiplier * 3f : gravityMultiplier;
+            playerHeightSpeed += gravity * currentGravityMultiplier * Time.deltaTime;
+        }
+    }
+
+    // Called by Unity when CharacterController hits a collider during Move
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        float surfaceAngle = Vector3.Angle(hit.normal, Vector3.up);
+        
+        // Mark if touching a steep wall to apply stronger gravity
+        if (surfaceAngle > characterController.slopeLimit && !characterController.isGrounded)
+        {
+            isTouchingWall = true;
         }
     }
 
