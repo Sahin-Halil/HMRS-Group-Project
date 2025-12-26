@@ -33,6 +33,7 @@ public class NPCController : MonoBehaviour
     private Vector3 startPosition;
     private float lastAttackTime;
     private bool canSeePlayer;
+    private Transform sword;
 
     // Animations
     private Animator animator;
@@ -59,6 +60,7 @@ public class NPCController : MonoBehaviour
     void Start()
     {
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        GameObject swordObject = GameObject.FindGameObjectWithTag("Sword");
         animator = GetComponentInChildren<Animator>();
 
         if (animator != null)
@@ -83,7 +85,10 @@ public class NPCController : MonoBehaviour
             player = playerObject.transform;
             playerHealth = playerObject.GetComponent<HealthSystem>();
         }
-
+        if (swordObject != null)
+        {
+            sword = swordObject.transform;
+        }
         startPosition = transform.position;
         SetNewWanderTarget();
     }
@@ -229,7 +234,7 @@ public class NPCController : MonoBehaviour
         Vector3 dir = player.position - transform.position;
 
         if (Physics.Raycast(transform.position, dir, out RaycastHit hit, detectionRange, ~obstacleLayer))
-            return hit.transform == player;
+            return hit.transform == player || hit.transform == sword;
 
         return false;
     }
