@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum ItemType
@@ -26,52 +24,13 @@ public class PickupItem : MonoBehaviour
     public ShipPartType shipPartType;
     public bool isPartTypeAssigned = false;
 
-    public bool requiresKeyPress = false;
-
-    private bool playerInRange = false;
-    private Transform player;
-
-    void Update()
-    {
-        if (requiresKeyPress && playerInRange && Input.GetKeyDown(KeyCode.G))
-        {
-            TryPickup();
-        }
-    }
+    public bool autoPickup = true;
 
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            player = other.transform;
-            playerInRange = true;
-
-            if (!requiresKeyPress)
-            {
-                // Auto-pickup
-                TryPickup();
-            }
-            else
-            {
-                if (InventoryManager.Instance != null)
-                {
-                    InventoryManager.Instance.ShowPickupPrompt(itemName);
-                }
-            }
-        }
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
-            player = null;
-
-            if (requiresKeyPress && InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.HidePickupPrompt();
-            }
+            TryPickup();
         }
     }
 
@@ -83,7 +42,6 @@ public class PickupItem : MonoBehaviour
 
             if (success)
             {
-                InventoryManager.Instance.HidePickupPrompt();
                 gameObject.SetActive(false);
             }
         }
@@ -93,10 +51,10 @@ public class PickupItem : MonoBehaviour
     {
         transform.position = position;
         gameObject.SetActive(true);
-        playerInRange = false;
 
-        Renderer rend = GetComponent<Renderer>();
-        if (rend != null)
+        // Ensure dropped item is visible
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer rend in renderers)
         {
             rend.enabled = true;
         }

@@ -1,10 +1,9 @@
-// Currently extensively debugging
-// Crafting bug freezes the game
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -46,15 +45,6 @@ public class InventoryManager : MonoBehaviour
     public GameObject lifeSupportPartPrefab;
     public GameObject airlockPartPrefab;
 
-    void OnEnable()
-    {
-        Debug.Log("InventoryManager enabled");
-        Debug.Log($"Pieces required - Engine: {piecesRequired[ShipPartType.Engine]}, " +
-                  $"Navigation: {piecesRequired[ShipPartType.Navigation]}, " +
-                  $"LifeSupport: {piecesRequired[ShipPartType.LifeSupport]}, " +
-                  $"Airlock: {piecesRequired[ShipPartType.Airlock]}");
-    }
-
     void Awake()
     {
         if (Instance == null)
@@ -76,7 +66,6 @@ public class InventoryManager : MonoBehaviour
     void Start()
     {
         UpdateInventoryUI();
-        HidePickupPrompt();
 
         if (craftingPanel != null)
         {
@@ -101,13 +90,13 @@ public class InventoryManager : MonoBehaviour
     void Update()
     {
         // Drop item with Q key
-        if (Time.timeScale > 0 && Keyboard.current.qKey.wasPressedThisFrame)
+        if (Time.timeScale > 0 && Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame)
         {
             DropItem();
         }
 
         // Alternative craft input
-        if (craftingPanel != null && craftingPanel.activeSelf)
+        if (craftingPanel != null && craftingPanel.activeSelf && Keyboard.current != null)
         {
             if (Keyboard.current.spaceKey.wasPressedThisFrame ||
                 Keyboard.current.cKey.wasPressedThisFrame)
@@ -250,9 +239,26 @@ public class InventoryManager : MonoBehaviour
 
     void HideCraftingPanel()
     {
+
         if (craftingPanel != null)
         {
             craftingPanel.SetActive(false);
+        }
+
+        // Resume game
+        Time.timeScale = 1f;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // Re-enable player input
+        if (player != null)
+        {
+            PlayerInput playerInput = player.GetComponent<PlayerInput>();
+            if (playerInput != null)
+            {
+                playerInput.actions.Enable();
+            }
         }
     }
 
@@ -429,6 +435,7 @@ public class InventoryManager : MonoBehaviour
             if (slots[i] != null)
             {
                 slots[i].enabled = false;
+                slots[i].color = Color.white;
             }
         }
 
@@ -442,18 +449,7 @@ public class InventoryManager : MonoBehaviour
                 {
                     slots[slotIndex].sprite = inventory[i].itemIcon;
                     slots[slotIndex].enabled = true;
-
-                    // Assembled part takes 2 slots
-                    if (inventory[i].itemType == ItemType.AssembledShipPart)
-                    {
-                        slotIndex++;
-                        if (slotIndex < slots.Length && slots[slotIndex] != null)
-                        {
-                            slots[slotIndex].sprite = inventory[i].itemIcon;
-                            slots[slotIndex].enabled = true;
-                            slots[slotIndex].color = new Color(1f, 1f, 1f, 0.5f);
-                        }
-                    }
+                    slots[i].color = Color.white;
                 }
                 slotIndex++;
             }
@@ -462,30 +458,28 @@ public class InventoryManager : MonoBehaviour
         Debug.Log($"Updated inventory UI. Showing {slotIndex} slots with items");
     }
 
-    public void ShowPickupPrompt(string itemName)
-    {
-        if (pickupPromptText != null)
-        {
-            pickupPromptText.text = $"Press G to pick up {itemName}";
-            pickupPromptText.gameObject.SetActive(true);
-        }
-    }
-
-    public void HidePickupPrompt()
-    {
-        if (pickupPromptText != null)
-        {
-            pickupPromptText.gameObject.SetActive(false);
-        }
-    }
-
     void ShowInventoryFullMessage()
+    {
+        Debug.Log("Inventory Full! Press Q to drop an item.");
+
+        if (pickupPromptText != null)
+        {
+            StartCoroutine(ShowTemporaryInventoryFullMessage());
+        }
+    }
+
+    IEnumerator ShowTemporaryInventoryFullMessage()
     {
         if (pickupPromptText != null)
         {
             pickupPromptText.text = "Inventory Full! Press Q to drop an item.";
+            pickupPromptText.color = Color.red;
             pickupPromptText.gameObject.SetActive(true);
-            Invoke(nameof(HidePickupPrompt), 3f);
+
+            yield return new WaitForSeconds(2f);
+
+            pickupPromptText.gameObject.SetActive(false);
+            pickupPromptText.color = Color.white;
         }
     }
 

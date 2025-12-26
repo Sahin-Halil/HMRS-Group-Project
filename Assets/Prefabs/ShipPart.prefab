@@ -123,8 +123,8 @@ MonoBehaviour:
   itemName: 
   itemIcon: {fileID: 0}
   shipPartType: 0
-  isPartTypeAssigned: 0
-  requiresKeyPress: 1
+  isPartTypeAssigned: 1
+  autoPickup: 1
 --- !u!1 &1557158821905403214
 GameObject:
   m_ObjectHideFlags: 0

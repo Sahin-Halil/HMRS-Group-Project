@@ -531,16 +531,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Detects collisions with collectible ship parts
-    private void OnTriggerEnter(Collider collider)
-    {
-        if (collider.gameObject.CompareTag("ShipPart"))
-        {
-            shipPartManager.AddPart();
-            Destroy(collider.gameObject);
-        }
-    }
-
     // Applies constant gravity to player
     private void ApplyGravity()
     {
@@ -557,7 +547,7 @@ public class PlayerController : MonoBehaviour
     // Handles player movement
     private void MovePlayer()
     {
-        if (pauseManager.getPauseState())
+        if (pauseManager != null && pauseManager.getPauseState())
         {
             return;
         }
@@ -686,6 +676,15 @@ public class PlayerController : MonoBehaviour
         crouchAction = playerInput.actions["Crouch"];
         jumpAction = playerInput.actions["Jump"];
         dashAction = playerInput.actions["Dash"];
+
+        if (shipPartManager == null)
+        {
+            shipPartManager = FindObjectOfType<ShipPartManager>();
+            if (shipPartManager == null)
+            {
+                Debug.LogError("No ShipPartManager found in scene!");
+            }
+        }
     }
 
     // Handles movement and rotation each frame
