@@ -1,14 +1,7 @@
 fileFormatVersion: 2
-guid: 225069e1a2147e04f9ac40a059f69f6a
+guid: d5095431ff0da5e40a466d5e1b38f763
 PrefabImporter:
   externalObjects: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 188552
-  packageName: Monster Mutant 7
-  packageVersion: 1.0
-  assetPath: Assets/MonsterMutant 7/Prefab/Base mesh MonsterMutant7 skin3.prefab
-  uploadId: 417307
