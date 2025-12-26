@@ -336,7 +336,6 @@ public class PlayerController : MonoBehaviour
         }
 
         AttackRaycast();
-        // TODO SetAnimations();
     }
 
     void AttackRaycast()
@@ -368,7 +367,6 @@ public class PlayerController : MonoBehaviour
             enemyHealth.TakeDamage(attackDamage, GO);
             // Destroy the hit effect after 0.7 seconds
             Destroy(GO, 0.7f);
-            Debug.Log($"Dealt {attackDamage} damage to {hit.collider.gameObject.name}");
         }
         
 
@@ -575,6 +573,13 @@ public class PlayerController : MonoBehaviour
             // CROUCH STATE
             // =======================
             case MovementState.Crouch:
+                // Exit crouch if dash input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+
                 //Exit crouch if dash input is pressed
                 if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
