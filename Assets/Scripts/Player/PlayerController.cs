@@ -14,6 +14,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PauseManager pauseManager;
     [SerializeField] private DieScript playerDeath;
 
+    // Audio
+    [SerializeField] private AudioSource attackAudio;
+    [SerializeField] private AudioSource footstepAudio;
+
     // Player Inputs
     private PlayerInput playerInput;
     private InputAction walkAction;
@@ -374,6 +378,11 @@ public class PlayerController : MonoBehaviour
 
     void handleAnimations(MovementState newState)
     {
+        if (animator == null)
+        {
+            return;
+        }
+
         bool stateChanged = newState != previousState;
         bool comboChanged = comboCount != previousComboCount;
 
@@ -814,7 +823,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collider.gameObject.CompareTag("ShipPart"))
         {
-            shipPartManager.addPart();
+            shipPartManager.AddPart();
             Destroy(collider.gameObject);
         }
     }
@@ -984,6 +993,7 @@ public class PlayerController : MonoBehaviour
         crouchAction = playerInput.actions["Crouch"];
         jumpAction = playerInput.actions["Jump"];
         dashAction = playerInput.actions["Dash"];
+        attackAction = playerInput.actions["Fire"];
 
         if (shipPartManager == null)
         {
@@ -993,7 +1003,7 @@ public class PlayerController : MonoBehaviour
                 Debug.LogError("No ShipPartManager found in scene!");
             }
         }
-        attackAction = playerInput.actions["Fire"];
+        
     }
 
     // Handles movement and rotation each frame

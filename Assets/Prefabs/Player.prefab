@@ -220,7 +220,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   respawnMenuUI: {fileID: 0}
   playerInput: {fileID: 4110184154961936350}
-  dieScript: {fileID: 0}
+  dieScript: {fileID: 6562504523566788359}
   maxHealth: 100
   currentHealth: 0
   healthSlider: {fileID: 0}
@@ -237,15 +237,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterCamera: {fileID: 7873193355725905818}
-  shipPartManager: {fileID: 0}
-  standingSpeed: 50
-  move: {x: 0, y: 0, z: 0}
-  xMove: 0
-  yMove: 0
+  pauseManager: {fileID: 0}
+  playerDeath: {fileID: 0}
   mouseSense: 0.5
   xRotation: 0
   yRotation: 0
-  crouchInput: 0
+  crouchSpeed: 2.5
+  runSpeed: 7.5
+  startSlideSpeed: 0
+  slideDecay: 17
+  slideCoolDown: 0.5
+  attackDistance: 3
+  attackDelay: 0.4
+  attackSpeed: 1
+  attackDamage: 10
+  attackLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  hitEffect: {fileID: 0}
+  swordSwing: {fileID: 0}
+  hitSound: {fileID: 0}
 --- !u!114 &4110184154961936350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -330,3 +341,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   respawnMenuUI: {fileID: 0}
+  gameOverText: {fileID: 0}

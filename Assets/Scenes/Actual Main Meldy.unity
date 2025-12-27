@@ -29341,6 +29341,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+      propertyPath: playerDeath
+      value: 
+      objectReference: {fileID: 782347681}
+    - target: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
       propertyPath: pauseManager
       value: 
       objectReference: {fileID: 887885495}
@@ -54754,9 +54758,12 @@ MonoBehaviour:
   gridWidth: 4
   gridHeight: 4
   totalNumbers: 10
+  timeLimit: 10
   gridParent: {fileID: 923698561}
   numberButtonPrefab: {fileID: 42492716387398403, guid: 7acec4a4133d340adbe4bc5bd2cfb0fa, type: 3}
   instructionText: {fileID: 682502272}
+  timerText: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
   buttonNormalColor: {r: 1, g: 1, b: 1, a: 1}
   buttonClickedColor: {r: 1, g: 1, b: 1, a: 0.3}
 --- !u!65 &1628552581
