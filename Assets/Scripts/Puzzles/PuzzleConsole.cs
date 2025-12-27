@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
+using System.Collections;
 
 public abstract class PuzzleConsole : MonoBehaviour
 {
@@ -84,25 +86,141 @@ public abstract class PuzzleConsole : MonoBehaviour
     {
         if (shipPartManager.IsPartPlaced(puzzleType))
         {
-            Debug.Log($"{consoleName} already has a part installed.");
+            if (promptText != null)
+            {
+                StartCoroutine(ShowTemporaryMessage(promptText, "Part already installed!", 2f));
+            }
             return;
         }
 
-        if (shipPartManager.IsPuzzleCompleted(puzzleType))
+        // Check if player has the required assembled part before starting puzzle
+        if (!shipPartManager.IsPuzzleCompleted(puzzleType))
         {
-            if (shipPartManager.HasParts())
+            bool hasPart = PlayerHasRequiredPart();
+
+            if (!hasPart)
+            {
+                string partName = GetPartName(puzzleType);
+                Debug.Log($"Missing required part: {partName}");
+
+                if (promptText != null)
+                {
+                    StartCoroutine(ShowTemporaryMessage(promptText, $"Need {partName} to access this console!", 3f));
+                }
+                return;
+            }
+
+            // Player has the part, start puzzle
+            Debug.Log("Starting puzzle...");
+            StartPuzzle();
+        }
+        else
+        {
+            Debug.Log("Puzzle already complete, trying to place part...");
+            // Puzzle already completed, try to place part
+            if (PlayerHasRequiredPart())
             {
                 PlaceShipPart();
             }
             else
             {
-                Debug.Log("You need to collect a ship part first!");
+                string partName = GetPartName(puzzleType);
+                Debug.Log($"Need {partName} to install");
+
+                if (promptText != null)
+                {
+                    StartCoroutine(ShowTemporaryMessage(promptText, $"Need {partName} to complete installation!", 3f));
+                }
             }
         }
-        else
+    }
+
+    bool PlayerHasRequiredPart()
+    {
+        if (InventoryManager.Instance == null)
         {
-            StartPuzzle();
+            Debug.LogError("InventoryManager not found!");
+            return false;
         }
+
+        // Convert PuzzleType to ShipPartType
+        ShipPartType requiredPartType = ConvertPuzzleTypeToShipPartType(puzzleType);
+        Debug.Log($"Looking for part type: {requiredPartType}");
+
+        // Check if player has the assembled part in inventory
+        List<PickupItem> inventory = InventoryManager.Instance.GetInventory();
+        Debug.Log($"Inventory count: {inventory.Count}");
+
+        for (int i = 0; i < inventory.Count; i++)
+        {
+            if (inventory[i] != null)
+            {
+                Debug.Log($"  Slot {i}: {inventory[i].itemName}, Type: {inventory[i].itemType}, ShipPartType: {inventory[i].shipPartType}");
+
+                if (inventory[i].itemType == ItemType.AssembledShipPart &&
+                    inventory[i].shipPartType == requiredPartType)
+                {
+                    Debug.Log($"Found required part at slot {i}!");
+                    return true;
+                }
+            }
+            else
+            {
+                Debug.Log($"  Slot {i}: NULL");
+            }
+        }
+
+        Debug.Log("Required part not found in inventory");
+        return false;
+    }
+
+    ShipPartType ConvertPuzzleTypeToShipPartType(PuzzleType puzzle)
+    {
+        switch (puzzle)
+        {
+            case PuzzleType.Engine:
+                return ShipPartType.Engine;
+            case PuzzleType.Cockpit:
+                return ShipPartType.Navigation;
+            case PuzzleType.LifeSupport:
+                return ShipPartType.LifeSupport;
+            case PuzzleType.Airlock:
+                return ShipPartType.Airlock;
+            default:
+                return ShipPartType.Engine;
+        }
+    }
+
+    string GetPartName(PuzzleType type)
+    {
+        switch (type)
+        {
+            case PuzzleType.Engine:
+                return "Engine Part";
+            case PuzzleType.Cockpit:
+                return "Navigation Part";
+            case PuzzleType.LifeSupport:
+                return "Life Support Part";
+            case PuzzleType.Airlock:
+                return "Airlock Part";
+            default:
+                return "Ship Part";
+        }
+    }
+
+    IEnumerator ShowTemporaryMessage(TMP_Text textComponent, string message, float duration)
+    {
+        string originalText = textComponent.text;
+        Color originalColor = textComponent.color;
+
+        textComponent.text = message;
+        textComponent.color = Color.yellow;
+        textComponent.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(duration);
+
+        textComponent.text = originalText;
+        textComponent.color = originalColor;
     }
 
     protected void StartPuzzle()
@@ -139,12 +257,44 @@ public abstract class PuzzleConsole : MonoBehaviour
 
         // TODO Find a way to re-enable player movement in player controller
 
+        // Mark puzzle as complete
         shipPartManager.CompletePuzzle(puzzleType);
+
+        // Remove the ship part from inventory since puzzle is complete
+        RemoveShipPartFromInventory();
 
         UpdateConsoleVisual();
         OnPuzzleComplete();
 
-        Debug.Log($"{consoleName} puzzle completed! You can now place a ship part.");
+        Debug.Log($"{consoleName} puzzle completed! Ship part consumed.");
+    }
+
+    void RemoveShipPartFromInventory()
+    {
+        if (InventoryManager.Instance == null) return;
+
+        ShipPartType requiredPartType = ConvertPuzzleTypeToShipPartType(puzzleType);
+        List<PickupItem> inventory = InventoryManager.Instance.GetInventory();
+
+        // Find the assembled part
+        PickupItem partToRemove = null;
+        foreach (PickupItem item in inventory)
+        {
+            if (item != null &&
+                item.itemType == ItemType.AssembledShipPart &&
+                item.shipPartType == requiredPartType)
+            {
+                partToRemove = item;
+                break;
+            }
+        }
+
+        if (partToRemove != null)
+        {
+            InventoryManager.Instance.RemoveItem(partToRemove);
+            Destroy(partToRemove.gameObject);
+            Debug.Log($"Removed {requiredPartType} part from inventory after puzzle completion");
+        }
     }
 
     // Restart the puzzle or let the player try again
@@ -155,23 +305,25 @@ public abstract class PuzzleConsole : MonoBehaviour
 
     void PlaceShipPart()
     {
-        if (shipPartManager.UsePart())
+        // Just mark as placed - part already removed from inventory after puzzle
+        shipPartManager.PlaceShipPart(puzzleType);
+
+        // Update visuals
+        UpdateConsoleVisual();
+        OnPartPlaced();
+        Debug.Log($"Ship part placed at {consoleName}!");
+
+        // Auto-save checkpoint
+        if (GameManager.Instance != null)
         {
-            shipPartManager.PlaceShipPart(puzzleType);
-            UpdateConsoleVisual();
-            OnPartPlaced();
-            Debug.Log($"Ship part placed at {consoleName}!");
+            GameManager.Instance.SetCheckpoint(player.position);
+        }
 
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.SetCheckpoint(player.position);
-            }
-
-            if (shipPartManager.IsShipRepaired())
-            {
-                Debug.Log("ALL SHIP PARTS PLACED! Ship is repaired!");
-                OnShipRepaired();
-            }
+        // Check if ship is fully repaired
+        if (shipPartManager.IsShipRepaired())
+        {
+            Debug.Log("ALL SHIP PARTS PLACED! Ship is repaired!");
+            OnShipRepaired();
         }
     }
 
@@ -204,13 +356,25 @@ public abstract class PuzzleConsole : MonoBehaviour
         }
         else if (shipPartManager.IsPuzzleCompleted(puzzleType))
         {
-            return shipPartManager.HasParts()
-                ? $"Press {interactKey} to Place Ship Part"
-                : "Collect a Ship Part First";
+            if (PlayerHasRequiredPart())
+            {
+                return $"Press {interactKey} to Place {GetPartName(puzzleType)}";
+            }
+            else
+            {
+                return $"Need {GetPartName(puzzleType)} to Place";
+            }
         }
         else
         {
-            return $"Press {interactKey} to Access {consoleName}";
+            if (PlayerHasRequiredPart())
+            {
+                return $"Press {interactKey} to Access {consoleName}";
+            }
+            else
+            {
+                return $"Need {GetPartName(puzzleType)} First!";
+            }
         }
     }
 

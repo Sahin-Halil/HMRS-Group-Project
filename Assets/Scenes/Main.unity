@@ -5603,7 +5603,7 @@ GameObject:
   - component: {fileID: 765291978}
   - component: {fileID: 765291977}
   - component: {fileID: 765291976}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8209,13 +8209,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1059122820}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Logs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1059122820
 Transform:
   m_ObjectHideFlags: 0
@@ -9044,7 +9044,7 @@ GameObject:
   - component: {fileID: 1150477790}
   - component: {fileID: 1150477789}
   - component: {fileID: 1150477788}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FallenLog4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9679,7 +9679,7 @@ GameObject:
   - component: {fileID: 1220877887}
   - component: {fileID: 1220877886}
   - component: {fileID: 1220877885}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FallenLog3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12767,7 +12767,7 @@ GameObject:
   - component: {fileID: 1568337783}
   - component: {fileID: 1568337782}
   - component: {fileID: 1568337781}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FallenLog1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13153,11 +13153,14 @@ MonoBehaviour:
   puzzleCompleteColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   partPlacedColor: {r: 0, g: 1, b: 0, a: 1}
   gridWidth: 4
-  gridHeight: 3
+  gridHeight: 4
   totalNumbers: 10
+  timeLimit: 10
   gridParent: {fileID: 923698561}
   numberButtonPrefab: {fileID: 42492716387398403, guid: 7acec4a4133d340adbe4bc5bd2cfb0fa, type: 3}
   instructionText: {fileID: 682502272}
+  timerText: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
   buttonNormalColor: {r: 1, g: 1, b: 1, a: 1}
   buttonClickedColor: {r: 1, g: 1, b: 1, a: 0.3}
 --- !u!65 &1628552581
@@ -14364,7 +14367,7 @@ GameObject:
   - component: {fileID: 1751562670}
   - component: {fileID: 1751562669}
   - component: {fileID: 1751562668}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FallenLog2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15121,7 +15124,7 @@ GameObject:
   - component: {fileID: 1838200233}
   - component: {fileID: 1838200232}
   - component: {fileID: 1838200231}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FallenLog5
   m_TagString: Untagged
   m_Icon: {fileID: 0}

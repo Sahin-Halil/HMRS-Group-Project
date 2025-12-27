@@ -120,10 +120,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemType: 1
-  itemName: EnginePart
+  itemName: Engine Part
   itemIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   shipPartType: 0
-  requiresKeyPress: 1
+  isPartTypeAssigned: 0
+  autoPickup: 1
 --- !u!1 &6508918115627401537
 GameObject:
   m_ObjectHideFlags: 0

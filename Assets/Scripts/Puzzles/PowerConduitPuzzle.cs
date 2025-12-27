@@ -7,31 +7,114 @@ using TMPro;
 public class PowerConduitPuzzle : PuzzleConsole
 {
     // Puzzle Settings and UI
-    public int gridWidth = 4;
+    public int gridWidth = 3;
     public int gridHeight = 3;
     public int totalNumbers = 10;
+    public float timeLimit = 10f;
 
     public Transform gridParent;
     public GameObject numberButtonPrefab;
     public TMP_Text instructionText;
+    public TMP_Text timerText;
 
+    public Color normalColor = Color.white;
     public Color buttonNormalColor = Color.white;
     public Color buttonClickedColor = new Color(1f, 1f, 1f, 0.3f);
 
     private List<NumberButton> allButtons;
     private int currentNumber = 1; // Start at 1, click up to 10
 
+    private float timeRemaining;
+    private bool puzzleStarted = false;
+
     protected override void OnPuzzleStart()
     {
         allButtons = new List<NumberButton>();
         currentNumber = 1;
+        timeRemaining = timeLimit;
+        puzzleStarted = true;
 
         GenerateNumberGrid();
 
         if (instructionText != null)
         {
-            instructionText.text = "Click the numbers in order: 1 to 10";
+            instructionText.text = $"Click numbers 1 to {totalNumbers} in order!";
         }
+
+        UpdateTimerDisplay();
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+
+        if (!puzzleActive || !puzzleStarted) return;
+
+        // Countdown timer
+        timeRemaining -= Time.deltaTime;
+        UpdateTimerDisplay();
+
+        if (timeRemaining <= 0)
+        {
+            TimeUp();
+        }
+    }
+
+    void UpdateTimerDisplay()
+    {
+        if (timerText != null)
+        {
+            timerText.text = $"Time: {Mathf.CeilToInt(timeRemaining)}s";
+
+            // Change colour based on time remaining
+            if (timeRemaining <= 3f)
+            {
+                timerText.color = Color.red;
+            }
+            else if (timeRemaining <= 5f)
+            {
+                timerText.color = Color.yellow;
+            }
+            else
+            {
+                timerText.color = Color.white;
+            }
+        }
+    }
+
+    void TimeUp()
+    {
+        puzzleStarted = false;
+
+        if (instructionText != null)
+        {
+            instructionText.text = "TIME'S UP! Restarting...";
+            instructionText.color = Color.red;
+        }
+
+        // Restart puzzle
+        StartCoroutine(RestartPuzzle());
+    }
+
+    IEnumerator RestartPuzzle()
+    {
+        yield return new WaitForSeconds(2f);
+
+        // Reset puzzle game
+        currentNumber = 1;
+        timeRemaining = timeLimit;
+        puzzleStarted = true;
+
+        // Regenerate the grid
+        GenerateNumberGrid();
+
+        if (instructionText != null)
+        {
+            instructionText.text = $"Click numbers 1 to {totalNumbers} in order!";
+            instructionText.color = Color.white;
+        }
+
+        UpdateTimerDisplay();
     }
 
     void GenerateNumberGrid()
@@ -93,10 +176,17 @@ public class PowerConduitPuzzle : PuzzleConsole
 
     IEnumerator PuzzleComplete()
     {
+        puzzleStarted = false;
+
         if (instructionText != null)
         {
             instructionText.text = "SUCCESS! Sequence complete!";
             instructionText.color = Color.green;
+        }
+
+        if (timerText != null)
+        {
+            timerText.color = Color.green;
         }
 
         yield return new WaitForSeconds(1.5f);

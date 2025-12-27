@@ -146,15 +146,13 @@ public class InventoryManager : MonoBehaviour
         if (item.itemType == ItemType.AssembledShipPart)
         {
             // Assembled parts take 2 slots
-            if (inventory.Count >= maxSlots - 1)
+            if (inventory.Count > maxSlots - 2)
             {
                 ShowInventoryFullMessage();
                 return false;
             }
 
             inventory.Add(item);
-
-            Debug.Log($"Added assembled {item.shipPartType} part to inventory");
 
             UpdateInventoryUI();
             return true;
@@ -327,14 +325,32 @@ public class InventoryManager : MonoBehaviour
 
         if (prefab != null)
         {
-            GameObject assembledPart = Instantiate(prefab, player.position, Quaternion.identity);
-            PickupItem item = assembledPart.GetComponent<PickupItem>();
+            GameObject assembledPartObj = Instantiate(prefab, player.position, Quaternion.identity);
+            PickupItem item = assembledPartObj.GetComponent<PickupItem>();
 
             if (item != null)
             {
                 item.shipPartType = partType;
-                TryAddItem(item);
+                item.gameObject.SetActive(false);
+
+                // Check there is space in inventory
+                if (inventory.Count > maxSlots - 2)
+                {
+                    Destroy(assembledPartObj);
+                    return;
+                }
+
+                inventory.Add(item);
+                UpdateInventoryUI();
             }
+            else
+            {
+                Destroy(assembledPartObj);
+            }
+        }
+        else
+        {
+            Debug.LogError($"No prefab assigned for {partType}!");
         }
     }
 
@@ -418,8 +434,6 @@ public class InventoryManager : MonoBehaviour
             rend.enabled = true;
         }
 
-        Debug.Log($"Item dropped and should be visible at {dropPos}");
-
         UpdateInventoryUI();
         CheckCraftingAvailability();
     }
@@ -441,21 +455,31 @@ public class InventoryManager : MonoBehaviour
 
         // Enable slots and set sprites
         int slotIndex = 0;
-        for (int i = 0; i < inventory.Count; i++)
+        for (int i = 0; i < inventory.Count && slotIndex < slots.Length; i++)
         {
-            if (inventory[i] != null && slotIndex < slots.Length)
+            if (inventory[i] != null)
             {
                 if (slots[slotIndex] != null)
                 {
                     slots[slotIndex].sprite = inventory[i].itemIcon;
                     slots[slotIndex].enabled = true;
-                    slots[i].color = Color.white;
+                    slots[slotIndex].color = Color.white;
                 }
                 slotIndex++;
+
+                // If assembled part, visually take up a second slot
+                if (inventory[i].itemType == ItemType.AssembledShipPart && slotIndex < slots.Length)
+                {
+                    if (slots[slotIndex] != null)
+                    {
+                        slots[slotIndex].sprite = inventory[i].itemIcon;
+                        slots[slotIndex].enabled = true;
+                        slots[slotIndex].color = new Color(1f, 1f, 1f, 0.5f);
+                    }
+                    slotIndex++;
+                }
             }
         }
-
-        Debug.Log($"Updated inventory UI. Showing {slotIndex} slots with items");
     }
 
     void ShowInventoryFullMessage()
@@ -520,5 +544,14 @@ public class InventoryManager : MonoBehaviour
 
         UpdateInventoryUI();
         CheckCraftingAvailability();
+    }
+
+    public void RemoveItem(PickupItem item)
+    {
+        if (inventory.Contains(item))
+        {
+            inventory.Remove(item);
+            UpdateInventoryUI();
+        }
     }
 }
