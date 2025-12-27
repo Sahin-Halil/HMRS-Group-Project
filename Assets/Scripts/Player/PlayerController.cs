@@ -1,20 +1,27 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+using Cursor = UnityEngine.Cursor;
 
 public class PlayerController : MonoBehaviour
 {
     // Components
     private CharacterController characterController;
     public Camera characterCamera;
+    private Animator animator;
     private ShipPartManager shipPartManager;
     private float originalHeight;
     [SerializeField] private PauseManager pauseManager;
+    [SerializeField] private DieScript playerDeath;
+
+    // Player Inputs
     private PlayerInput playerInput;
     private InputAction walkAction;
     private InputAction runAction;
     private InputAction crouchAction;
     private InputAction jumpAction;
     private InputAction dashAction;
+    private InputAction attackAction;
 
     // Movement
     private bool walkInput = false;
@@ -48,7 +55,7 @@ public class PlayerController : MonoBehaviour
     public float startSlideSpeed;
     private float currentSlideSpeed = 12f;
     public float slideDecay = 17f;
-    [SerializeField] private float slideCoolDown = 1f;
+    [SerializeField] private float slideCoolDown = 0.5f;
     private float slideCoolDownTimer = 0f;
 
     // Dashing
@@ -72,6 +79,35 @@ public class PlayerController : MonoBehaviour
     private bool jumpInput = false;
     private bool canJump = false;
 
+    // Combat
+    // TODO Make all values private after being satisfied with them
+    private bool attackInput = false;
+    private bool isAttack = false;
+    private bool canAttack = true;
+    private float attackDuration = 0.4f;
+    private float attackTimeElapsed = 0f;
+    private float attackCooldown = 0.5f;
+    private float attackCooldownTimer = 0f;
+    public float attackDistance = 3f;
+    public float attackDelay = 0.4f;
+    public float attackSpeed = 1f;
+    public int attackDamage = 10;
+    public LayerMask attackLayer;
+    public GameObject hitEffect;
+    public AudioClip swordSwing;
+    public AudioClip hitSound;
+    int attackCount;
+    private bool hasHitThisAttack = false; // Track if we've already hit during this attack
+
+    // Combo system
+    private int comboCount = 0; // Determines attack animation
+    private int previousComboCount = -1; // Track previous combo to detect changes
+    private bool comboQueued = false; // Track if next attack is queued
+    private float comboResetTime = 1.0f; // Time before combo resets
+    private float timeSinceLastAttack = 0f;
+    private float comboWindowStart = 0.4f; // When combo window opens (40% through animation)
+    private float comboTransitionPoint = 0.75f; // When to start next attack (75% through animation)
+
     // Possible player states
     private enum MovementState
     {
@@ -81,11 +117,13 @@ public class PlayerController : MonoBehaviour
         Crouch,
         Slide,
         Jump,
-        Dash
+        Dash,
+        Attack
     }
 
     // Players initial state
     private MovementState state = MovementState.Idle;
+    private MovementState previousState = MovementState.Idle;
 
     // Called when movement input is detected
     private void OnMove(InputValue value)
@@ -108,7 +146,6 @@ public class PlayerController : MonoBehaviour
     private void OnCrouch()
     {
         crouchInput = true;
-        canSlide = true;
     }
 
     private void HandleCrouchTransition()
@@ -135,7 +172,10 @@ public class PlayerController : MonoBehaviour
         jumpInput = true;
 
         // possible for jump to start
-        canJump = true;
+        if (characterController.isGrounded)
+        {
+            canJump = true;
+        }
     }
 
     // Handles Dash toggling
@@ -144,6 +184,25 @@ public class PlayerController : MonoBehaviour
         if (canDash && dashCooldownTimer <= 0)
         {
             dashInput = true;
+        }
+    }
+
+    // Handles Attack toggling
+    private void OnFire()
+    {
+        // Allow attack if not on cooldown
+        if (canAttack && attackCooldownTimer <= 0)
+        {
+            attackInput = true;
+        }
+        // Allow combo queueing only during combo window (after certain % of attack)
+        else if (isAttack && !comboQueued)
+        {
+            float attackProgress = attackTimeElapsed / attackDuration;
+            if (attackProgress >= comboWindowStart)
+            {
+                comboQueued = true;
+            }
         }
     }
 
@@ -175,7 +234,7 @@ public class PlayerController : MonoBehaviour
         currentSlideSpeed -= slideDecay * Time.deltaTime;
 
         bool changedDirection = xMove != xMoveOld || yMove != yMoveOld;
-        bool releasedInput = !runInput || !crouchInput;
+        bool releasedInput = !runInput || !crouchInput || jumpInput;
 
         if (changedDirection || releasedInput || currentSlideSpeed <= 0f)
         {
@@ -235,6 +294,143 @@ public class PlayerController : MonoBehaviour
         dashCooldownTimer = dashCooldown;
     }
 
+    // Handles start attack motion
+    private void StartAttack()
+    {
+        canAttack = false;
+        isAttack = true;
+        attackTimeElapsed = 0f;
+        hasHitThisAttack = false; // Reset hit flag for new attack
+        timeSinceLastAttack = 0f; // Reset combo timer
+
+        // Progress combo if queued, otherwise reset to first attack
+        if (comboQueued)
+        {
+            comboCount = (comboCount + 1) % 3; // Cycle through 0, 1, 2
+            comboQueued = false;
+        }
+        else
+        {
+            // Reset combo if starting fresh attack (not queued from previous)
+            comboCount = 0;
+        }
+    }
+
+    // Handles mid attack motion
+    private void UpdateAttack()
+    {
+        attackTimeElapsed += Time.deltaTime;
+        float attackProgress = attackTimeElapsed / attackDuration;
+
+        // If combo is queued, transition earlier for smooth chaining
+        if (comboQueued && attackProgress >= comboTransitionPoint)
+        {
+            StopAttack();
+            return;
+        }
+
+        if (attackProgress >= 1f)
+        {
+            StopAttack();
+            return;
+        }
+
+        AttackRaycast();
+    }
+
+    void AttackRaycast()
+    {
+        // Only check for hits if we haven't already hit something this attack
+        if (!hasHitThisAttack && Physics.Raycast(characterCamera.transform.position, characterCamera.transform.forward, out RaycastHit hit, attackDistance, attackLayer))
+        {
+            hasHitThisAttack = true; // Mark that we've hit something
+            HitTarget(hit);
+        }
+    }
+
+    void HitTarget(RaycastHit hit)
+    {
+        // audioSource.pitch = 1;
+        // audioSource.PlayOneShot(hitSound);
+
+        // Spawn hit effect at hit point
+        GameObject GO = Instantiate(hitEffect, hit.point, Quaternion.identity);
+
+        // Deal damage to the enemy if it has an EnemyHealth component
+        EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
+        if (enemyHealth != null)
+        {
+            // Parent the hit effect to the enemy so it follows them
+            GO.transform.SetParent(hit.collider.transform);
+
+            // Pass the hit effect GameObject to the enemy so it can destroy it on death
+            enemyHealth.TakeDamage(attackDamage, GO);
+            // Destroy the hit effect after 0.7 seconds
+            Destroy(GO, 0.7f);
+        }
+
+
+    }
+
+    void handleAnimations(MovementState newState)
+    {
+        bool stateChanged = newState != previousState;
+        bool comboChanged = comboCount != previousComboCount;
+
+        // Only trigger animation if state changed or combo changed during attack
+        if (!stateChanged && !(newState == MovementState.Attack && comboChanged))
+        {
+            return;
+        }
+
+        if (newState == MovementState.Idle)
+        {
+            animator.CrossFadeInFixedTime("Idle-Animation", 0.2f);
+        }
+        else if (newState == MovementState.Attack)
+        {
+            // Play the correct attack animation based on combo count
+            string attackAnimName = "Attack-Animation-" + (comboCount + 1).ToString();
+            // Use shorter crossfade for combo attacks for snappier feel
+            float fadeTime = comboCount > 0 ? 0.05f : 0.1f;
+            animator.CrossFadeInFixedTime(attackAnimName, fadeTime);
+            previousComboCount = comboCount; // Update after playing animation
+        }
+        // Add other states as needed (Walk, Run, etc.)
+        // For now, non-attack movement states will use Idle animation
+        else if (newState == MovementState.Walk || newState == MovementState.Run ||
+                 newState == MovementState.Crouch || newState == MovementState.Slide ||
+                 newState == MovementState.Jump || newState == MovementState.Dash)
+        {
+            animator.CrossFadeInFixedTime("Idle-Animation", 0.2f);
+        }
+
+        previousState = newState;
+    }
+
+    // Handles end of Attack
+    private void StopAttack()
+    {
+        if (!isAttack) return;
+        isAttack = false;
+
+        // If combo is queued, start next attack immediately
+        if (comboQueued)
+        {
+            attackCooldownTimer = 0f; // No cooldown for smooth combo
+            canAttack = true; // Allow immediate attack
+            attackInput = true; // Trigger next attack
+            // comboQueued will be cleared by StartAttack()
+        }
+        else
+        {
+            attackCooldownTimer = attackCooldown;
+        }
+
+        // Reset hit tracking for next attack
+        hasHitThisAttack = false;
+    }
+
     // Handles players speed depending on current state
     private void PlayerState()
     {
@@ -248,7 +444,12 @@ public class PlayerController : MonoBehaviour
             // IDLE STATE
             // =======================
             case MovementState.Idle:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -258,7 +459,7 @@ public class PlayerController : MonoBehaviour
                     state = MovementState.Jump;
                     StartJump();
                 }
-                else if (crouchInput)
+                else if (characterController.isGrounded && crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -286,8 +487,14 @@ public class PlayerController : MonoBehaviour
             // WALK STATE
             // =======================
             case MovementState.Walk:
+                // Transition to attack if attack input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
                 // Transition to dash if dash input is pressed
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -298,7 +505,7 @@ public class PlayerController : MonoBehaviour
                     StartJump();
                 }
                 // Transition to crouch if crouch input is pressed
-                else if (crouchInput)
+                else if (characterController.isGrounded && crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -322,7 +529,13 @@ public class PlayerController : MonoBehaviour
             // RUN STATE
             // =======================
             case MovementState.Run:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                // Transition to attack if attack input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -341,12 +554,12 @@ public class PlayerController : MonoBehaviour
                 {
                     state = MovementState.Walk;
                 }
-                else if (crouchInput && canSlide)
+                else if (characterController.isGrounded && crouchInput && canSlide)
                 {
                     state = MovementState.Slide;
                     StartSlide();
                 }
-                else if (crouchInput)
+                else if (characterController.isGrounded && crouchInput)
                 {
                     state = MovementState.Crouch;
                 }
@@ -361,19 +574,26 @@ public class PlayerController : MonoBehaviour
             // CROUCH STATE
             // =======================
             case MovementState.Crouch:
+                // Exit crouch if dash input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+
+                //Exit crouch if dash input is pressed
+                if (dashInput && canDash && dashCooldownTimer <= 0)
+                {
+                    state = MovementState.Dash;
+                    StartDash();
+                }
                 // Exit crouch if jump input is pressed
-                if (jumpInput && canJump)
+                else if (jumpInput && canJump)
                 {
                     state = MovementState.Jump;
                     StartJump();
                 }
 
-                //Exit crouch if dash input is pressed
-                else if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
 
                 else if (!crouchInput)
                 {
@@ -405,7 +625,13 @@ public class PlayerController : MonoBehaviour
             // JUMP STATE
             // =======================
             case MovementState.Jump:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
+                // Transition to attack if attack input is pressed
+                if (attackInput && canAttack && attackCooldownTimer <= 0)
+                {
+                    state = MovementState.Attack;
+                    StartAttack();
+                }
+                else if (dashInput && canDash && dashCooldownTimer <= 0)
                 {
                     state = MovementState.Dash;
                     StartDash();
@@ -453,15 +679,15 @@ public class PlayerController : MonoBehaviour
             // SLIDE STATE
             // =======================
             case MovementState.Slide:
-                if (jumpInput && canJump)
+                if (!isSlide)
                 {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-                else if (!isSlide)
-                {
+                    if (jumpInput && canJump)
+                    {
+                        state = MovementState.Jump;
+                        StartJump();
+                    }
                     // Transition to crouch if crouch is still pressed
-                    if (crouchInput)
+                    else if (crouchInput)
                     {
                         state = MovementState.Crouch;
                     }
@@ -497,7 +723,7 @@ public class PlayerController : MonoBehaviour
             case MovementState.Dash:
                 if (!isDash)
                 {
-                    if (crouchInput)
+                    if (characterController.isGrounded && crouchInput)
                     {
                         state = MovementState.Crouch;
                     }
@@ -528,6 +754,68 @@ public class PlayerController : MonoBehaviour
                     }
                 }
                 break;
+
+            // =======================
+            // ATTACK STATE
+            // =======================
+            case MovementState.Attack:
+                if (!isAttack)
+                {
+                    if (crouchInput)
+                    {
+                        state = MovementState.Crouch;
+                    }
+                    else if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            state = MovementState.Run;
+                        }
+                        else if (walkInput)
+                        {
+                            state = MovementState.Walk;
+                        }
+                    }
+                    else
+                    {
+                        state = MovementState.Idle;
+                    }
+                }
+                else
+                {
+                    UpdateAttack();
+                    // Maintain current movement speed during attack
+                    // Check what speed the player had before attacking
+                    if (hasMovementInput)
+                    {
+                        if (runInput)
+                        {
+                            playerHorizontalSpeed = runSpeed;
+                        }
+                        else if (walkInput)
+                        {
+                            playerHorizontalSpeed = walkSpeed;
+                        }
+                    }
+                    else
+                    {
+                        playerHorizontalSpeed = 0;
+                    }
+                }
+                break;
+        }
+
+        // Only update animations if state has changed
+        handleAnimations(state);
+    }
+
+    // Detects collisions with collectible ship parts
+    private void OnTriggerEnter(Collider collider)
+    {
+        if (collider.gameObject.CompareTag("ShipPart"))
+        {
+            shipPartManager.addPart();
+            Destroy(collider.gameObject);
         }
     }
 
@@ -536,7 +824,7 @@ public class PlayerController : MonoBehaviour
     {
         if (characterController.isGrounded && playerHeightSpeed <= 0f)
         {
-            playerHeightSpeed = 0f;
+            playerHeightSpeed = -1f;
         }
         else
         {
@@ -547,11 +835,6 @@ public class PlayerController : MonoBehaviour
     // Handles player movement
     private void MovePlayer()
     {
-        if (pauseManager != null && pauseManager.getPauseState())
-        {
-            return;
-        }
-
         if (state == MovementState.Dash)
         {
             UpdateDash();
@@ -634,9 +917,13 @@ public class PlayerController : MonoBehaviour
         {
             dashInput = false;
         }
+        if (attackInput && !attackAction.IsPressed())
+        {
+            attackInput = false;
+        }
     }
 
-    // Updates cooldowns for dash and slide
+    // Updates cooldowns for dash, slide, and attack
     private void UpdateCoolDowns()
     {
         if (slideCoolDownTimer > 0f)
@@ -656,12 +943,33 @@ public class PlayerController : MonoBehaviour
                 canDash = true;
             }
         }
+
+        if (attackCooldownTimer > 0)
+        {
+            attackCooldownTimer -= Time.deltaTime;
+            if (attackCooldownTimer <= 0)
+            {
+                canAttack = true;
+            }
+        }
+
+        // Reset combo if too much time has passed since last attack
+        // But don't reset if we have a combo queued
+        if (!isAttack && !comboQueued)
+        {
+            timeSinceLastAttack += Time.deltaTime;
+            if (timeSinceLastAttack >= comboResetTime)
+            {
+                comboCount = 0;
+            }
+        }
     }
 
     // Setup components and values
     void Awake()
     {
         characterController = GetComponent<CharacterController>();
+        animator = characterCamera.GetComponentInChildren<Animator>();
         Cursor.lockState = CursorLockMode.Locked;
         originalHeight = characterController.height;
         crouchSpeed = 0.5f * walkSpeed;
@@ -685,11 +993,17 @@ public class PlayerController : MonoBehaviour
                 Debug.LogError("No ShipPartManager found in scene!");
             }
         }
+        attackAction = playerInput.actions["Fire"];
     }
 
     // Handles movement and rotation each frame
     void Update()
     {
+        if (pauseManager.getPauseState() || playerDeath.checkDead())
+        {
+            return;
+        }
+
         PollHeldActions();
 
         UpdateCoolDowns();
@@ -701,9 +1015,6 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
 
         MovePlayer();
-
-        Debug.Log(state);
-        Debug.Log(runInput);
 
         MovePlayerCamera();
     }

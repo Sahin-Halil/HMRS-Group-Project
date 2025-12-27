@@ -58,7 +58,7 @@ public class DieScript : MonoBehaviour
     // Toggles death state
     public void toggleDeathStatus()
     {
-        isDead = !isDead;
+        isDead = true;
     }
 
     // Returns current death state
