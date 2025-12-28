@@ -823,7 +823,7 @@ public class PlayerController : MonoBehaviour
     {
         if (characterController.isGrounded && playerHeightSpeed <= 0f)
         {
-            playerHeightSpeed = -1f;
+            playerHeightSpeed = -0.01f;
         }
         else
         { 
@@ -1005,6 +1005,8 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
 
         MovePlayer();
+
+        //Debug.Log(state);
 
         MovePlayerCamera();
     }

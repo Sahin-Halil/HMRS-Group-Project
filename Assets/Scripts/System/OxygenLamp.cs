@@ -14,9 +14,26 @@ public class OxygenLamp : MonoBehaviour
             oxygen = other.GetComponent<PlayerOxygen>();
             oxygen.RefillOxygen(Time.deltaTime * 2);
         }
-        else if (other.CompareTag("Enemy"))
+        if (other.CompareTag("Enemy"))
         {
-            Object.Destroy(other);
+            Vector3 away = (other.transform.position - transform.position).normalized;
+            other.transform.position += away * 2f * Time.deltaTime;
+        }
+    }
+
+    // Handles trigger stay events
+    void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            oxygen = other.GetComponent<PlayerOxygen>();
+            oxygen.RefillOxygen(Time.deltaTime * 2);
+        }
+        if (other.CompareTag("Enemy"))
+        {
+            // Push enemy back out of the zone
+            Vector3 dir = (other.transform.position - transform.position).normalized;
+            other.transform.position += dir * 3f * Time.deltaTime;
         }
     }
 
