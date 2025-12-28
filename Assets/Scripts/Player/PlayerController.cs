@@ -74,9 +74,15 @@ public class PlayerController : MonoBehaviour
     private float gravityMultiplier = 0.003f;
     private bool isTouchingWall = false;
 
+    // Slope Sliding
+    private bool isOnSteepSlope = false;
+    private Vector3 slopeSlideDirection;
+    [SerializeField] private float slopeSlideSpeed = 8f;
+    [SerializeField] private float maxSlopeAngle = 45f; // Maximum walkable angle
+
     // Jumping
     private float jumpValue = 0.003f;
-    private float playerHeightSpeed = 0f;
+    private float playerHeightSpeed = -0.01f;
     private bool jumpInput = false;
     private bool canJump = false;
 
@@ -172,20 +178,11 @@ public class PlayerController : MonoBehaviour
     {
         jumpInput = true;
 
-        // Only allow jump if on ground and surface isn't too steep
-        if (characterController.isGrounded)
+        // Allow jump if on ground - slope sliding will handle steep surfaces naturally
+        // Also allow small jumps while sliding down steep slopes for natural feel
+        if (characterController.isGrounded || isOnSteepSlope)
         {
-            Vector3 rayOrigin = transform.position + characterController.center;
-            float rayDistance = (characterController.height / 2f) + 0.1f;
-
-            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, rayDistance))
-            {
-                float groundAngle = Vector3.Angle(hit.normal, Vector3.up);
-                if (groundAngle <= characterController.slopeLimit)
-                {
-                    canJump = true;
-                }
-            }
+            canJump = true;
         }
     }
 
@@ -223,7 +220,9 @@ public class PlayerController : MonoBehaviour
         canJump = false;
 
         // Apply vertical velocity formula
-        playerHeightSpeed = Mathf.Sqrt(2f * jumpValue * -gravity * gravityMultiplier);
+        // Reduce jump strength significantly when on steep slopes for tiny natural jumps
+        float effectiveJumpValue = isOnSteepSlope ? jumpValue * 0.3f : jumpValue;
+        playerHeightSpeed = Mathf.Sqrt(2f * effectiveJumpValue * -gravity * gravityMultiplier);
     }
 
     // Handles start slide motion
@@ -829,18 +828,82 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Checks if player is on a steep slope and should slide down
+    // Uses multiple raycasts to detect steep terrain even when standing on protruding vertices
+    private void CheckSlopeSliding()
+    {
+        isOnSteepSlope = false;
+
+        if (!characterController.isGrounded)
+        {
+            return;
+        }
+
+        Vector3 rayOrigin = transform.position + characterController.center;
+        float rayDistance = (characterController.height / 2f) + 0.3f;
+        float checkRadius = characterController.radius * 0.8f;
+
+        // Cast multiple rays in a circle around the player to detect steep slopes
+        // This catches cases where player stands on a flat vertex but surrounding terrain is steep
+        Vector3 steepestNormal = Vector3.up;
+        float steepestAngle = 0f;
+        bool foundSteepSlope = false;
+
+        // Check center ray
+        if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit centerHit, rayDistance))
+        {
+            float angle = Vector3.Angle(centerHit.normal, Vector3.up);
+            if (angle > maxSlopeAngle && angle < 90f)
+            {
+                foundSteepSlope = true;
+                steepestAngle = angle;
+                steepestNormal = centerHit.normal;
+            }
+        }
+
+        // Check 8 rays around the player in a circle
+        for (int i = 0; i < 8; i++)
+        {
+            float angle = i * 45f;
+            Vector3 offset = Quaternion.Euler(0, angle, 0) * Vector3.forward * checkRadius;
+            Vector3 rayPos = rayOrigin + offset;
+
+            if (Physics.Raycast(rayPos, Vector3.down, out RaycastHit hit, rayDistance))
+            {
+                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                if (slopeAngle > maxSlopeAngle && slopeAngle < 90f)
+                {
+                    foundSteepSlope = true;
+                    if (slopeAngle > steepestAngle)
+                    {
+                        steepestAngle = slopeAngle;
+                        steepestNormal = hit.normal;
+                    }
+                }
+            }
+        }
+
+        if (foundSteepSlope)
+        {
+            isOnSteepSlope = true;
+            // Calculate slide direction down the steepest slope found
+            slopeSlideDirection = Vector3.ProjectOnPlane(Vector3.down, steepestNormal).normalized;
+        }
+    }
+
     // Applies constant gravity to player
     private void ApplyGravity()
     {
-        if (characterController.isGrounded && playerHeightSpeed <= 0f)
+        // Don't reset gravity if on steep slope - let the slide physics work
+        if (characterController.isGrounded && playerHeightSpeed <= 0f && !isOnSteepSlope)
         {
             playerHeightSpeed = -1f;
             isTouchingWall = false;
         }
         else
         { 
-            // Use stronger gravity when touching steep walls for natural slip-off
-            float currentGravityMultiplier = isTouchingWall ? gravityMultiplier * 3f : gravityMultiplier;
+            // Use stronger gravity when touching steep walls or on steep slopes for natural slip-off
+            float currentGravityMultiplier = (isTouchingWall || isOnSteepSlope) ? gravityMultiplier * 3f : gravityMultiplier;
             playerHeightSpeed += gravity * currentGravityMultiplier * Time.deltaTime;
         }
     }
@@ -901,6 +964,24 @@ public class PlayerController : MonoBehaviour
 
         // Apply speed and delta Time
         horizontalMove *= playerHorizontalSpeed * Time.deltaTime;
+
+        // If on a steep slope, apply sliding force that overrides player input
+        if (isOnSteepSlope)
+        {
+            // Override player horizontal movement with strong sliding force
+            // This ensures they slip off even when trying to move forward
+            Vector3 slideForce = slopeSlideDirection * slopeSlideSpeed * Time.deltaTime;
+            
+            // Reduce player's control on steep slopes (keep only 20% of their input)
+            horizontalMove *= 0.2f;
+            
+            // Apply the slide force - this dominates over player input
+            horizontalMove += slideForce;
+            
+            // Apply strong downward force to ensure player slides off vertices
+            // This overrides the normal grounded behavior
+            playerHeightSpeed = Mathf.Min(playerHeightSpeed, -5f);
+        }
 
         // Moves player in vertical direction
         Vector3 verticalMove = transform.up * playerHeightSpeed;
@@ -1003,6 +1084,12 @@ public class PlayerController : MonoBehaviour
         startSlideSpeed = 13;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
         
+        // Use CharacterController's slopeLimit if not set in inspector
+        if (maxSlopeAngle == 0f)
+        {
+            maxSlopeAngle = characterController.slopeLimit;
+        }
+        
         playerInput = GetComponent<PlayerInput>();
         walkAction = playerInput.actions["Move"];
         runAction = playerInput.actions["Run"];
@@ -1027,6 +1114,8 @@ public class PlayerController : MonoBehaviour
         PlayerState();
 
         HandleCrouchTransition();
+
+        CheckSlopeSliding();
 
         ApplyGravity();
 
