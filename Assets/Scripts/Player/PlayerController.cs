@@ -894,6 +894,10 @@ public class PlayerController : MonoBehaviour
     // Applies constant gravity to player
     private void ApplyGravity()
     {
+        if (characterController.isGrounded)
+        {
+            isTouchingWall = false;
+        }
         // Don't reset gravity if on steep slope - let the slide physics work
         if (characterController.isGrounded && playerHeightSpeed <= 0f && !isOnSteepSlope)
         {
