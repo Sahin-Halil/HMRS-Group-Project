@@ -29,10 +29,14 @@ public class NPCController : MonoBehaviour
     // Internal
     private Transform player;
     private HealthSystem playerHealth;
-    private Vector3 wanderTarget;
     private Vector3 startPosition;
     private float lastAttackTime;
     private bool canSeePlayer;
+
+    // Wander 
+    private Vector3 wanderTarget;
+    public float wanderTimeout = 10f;   
+    private float nextWanderResetTime = 0f;
 
     // Animations
     private Animator animator;
@@ -41,7 +45,7 @@ public class NPCController : MonoBehaviour
     public string[] runAnimations;
     public string[] attackAnimations;
 
-    private int animIndex = 0;
+    private int animIndex = -1;
     private float animEndTime = 0f;
 
     // Idle 
@@ -88,7 +92,7 @@ public class NPCController : MonoBehaviour
     void Update()
     {
         if (!player) return;
-
+        
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         canSeePlayer = CheckLineOfSight();
 
@@ -177,7 +181,12 @@ public class NPCController : MonoBehaviour
     {
         Vector3 dir = wanderTarget - transform.position;
         dir.y = 0;
-        if (dir.sqrMagnitude < 0.25f)   
+
+        bool reachedTarget = dir.sqrMagnitude < 0.25f;
+        bool timedOut = Time.time >= nextWanderResetTime;
+
+        // If we reached the target OR we've been stuck too long
+        if (reachedTarget || timedOut)
         {
             if (!alreadyIdled && UnityEngine.Random.value < idleChance)
             {
@@ -187,9 +196,10 @@ public class NPCController : MonoBehaviour
             }
 
             alreadyIdled = false;
-            SetNewWanderTarget();
+            SetNewWanderTarget();   
         }
-        // If we are still moving
+
+        // Keep moving toward target
         MoveTowards(wanderTarget, 1f);
     }
 
@@ -234,6 +244,8 @@ public class NPCController : MonoBehaviour
     {
         Vector2 circle = UnityEngine.Random.insideUnitCircle * wanderRadius;
         wanderTarget = startPosition + new Vector3(circle.x, 0, circle.y);
+
+        nextWanderResetTime = Time.time + wanderTimeout;
     }
 
 
@@ -246,12 +258,20 @@ public class NPCController : MonoBehaviour
         if (currentAnimations == animSet && Time.time < animEndTime)
             return;
 
+        // If we switched to a different set (idle → run, run → attack etc.)
+        if (currentAnimations != animSet)
+        {
+            currentAnimations = animSet;
+            animIndex = -1;        // reset so we start from 0 next time
+        }
         currentAnimations = animSet;
         // Loop through animations in sequence
         animIndex = (animIndex + 1) % animSet.Length;
+        //Debug.Log(animIndex);
         string nextAnim = animSet[animIndex];
-        //Debug.Log(nextAnim);
+        Debug.Log(nextAnim);
         AnimationClip clip = animator.runtimeAnimatorController.animationClips.First(c => c.name == nextAnim);
+
         float clipLength = clip.length;
 
         animEndTime = Time.time + clipLength;
