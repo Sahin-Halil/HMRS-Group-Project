@@ -897,8 +897,7 @@ public class PlayerController : MonoBehaviour
         // Don't reset gravity if on steep slope - let the slide physics work
         if (characterController.isGrounded && playerHeightSpeed <= 0f && !isOnSteepSlope)
         {
-            playerHeightSpeed = -1f;
-            isTouchingWall = false;
+            playerHeightSpeed = -0.01f;
         }
         else
         { 
@@ -1120,6 +1119,8 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
 
         MovePlayer();
+
+        //Debug.Log(state);
 
         MovePlayerCamera();
     }
