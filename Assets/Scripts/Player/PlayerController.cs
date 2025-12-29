@@ -145,7 +145,7 @@ public class PlayerController : MonoBehaviour
     private void OnLook(InputValue value)
     {
         Vector2 mouseInput = value.Get<Vector2>();
-        xRotation = xRotation + (mouseInput.x * mouseSense);
+        xRotation = (xRotation + (mouseInput.x * mouseSense)) % 360f;
         yRotation = Mathf.Clamp(yRotation - (mouseInput.y * mouseSense), -90f, 90f);
     }
 
