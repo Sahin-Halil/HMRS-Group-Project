@@ -3893,7 +3893,7 @@ MonoBehaviour:
   settingsMenuUI: {fileID: 1245443757}
   pauseMenuUI: {fileID: 280874209}
   sensitivitySlider: {fileID: 911619626}
-  controller: {fileID: 0}
+  controller: {fileID: 782347687}
 --- !u!4 &501079716
 Transform:
   m_ObjectHideFlags: 0
@@ -6129,6 +6129,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7f98f287465cc4cd4821346371aa7a61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &782347687 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5837627451698827889, guid: 2cfea391b1829a449bebfbdca55479d5, type: 3}
+  m_PrefabInstance: {fileID: 782347677}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdfd112678e7e344ea7805f3174c156e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &800887921

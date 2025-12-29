@@ -25,6 +25,20 @@ public class PickupItem : MonoBehaviour
     public bool isPartTypeAssigned = false;
 
     public bool autoPickup = true;
+    public int slotSize = 1;
+
+    void Awake()
+    {
+        // Auto-assign slot size based on item type
+        if (itemType == ItemType.AssembledShipPart)
+        {
+            slotSize = 2;
+        }
+        else
+        {
+            slotSize = 1;
+        }
+    }
 
     void OnTriggerEnter(Collider other)
     {

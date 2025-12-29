@@ -189,7 +189,7 @@ public class PowerConduitPuzzle : PuzzleConsole
             timerText.color = Color.green;
         }
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSecondsRealtime(1.5f);
 
         PuzzleSolved();
     }

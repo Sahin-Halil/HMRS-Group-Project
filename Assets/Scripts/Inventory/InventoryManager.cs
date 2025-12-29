@@ -106,6 +106,19 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    int GetUsedSlots()
+    {
+        int used = 0;
+        foreach (var item in inventory)
+        {
+            if (item != null)
+            {
+                used += item.slotSize;
+            }
+        }
+        return used;
+    }
+
     public bool TryAddItem(PickupItem item)
     {
         if (item.itemType == ItemType.DataLog)
@@ -118,7 +131,7 @@ public class InventoryManager : MonoBehaviour
         {
             Debug.Log($"Attempting to add ship part piece. Current inventory: {inventory.Count}/{maxSlots}");
 
-            if (inventory.Count >= maxSlots)
+            if (GetUsedSlots() + item.slotSize > maxSlots)
             {
                 Debug.Log("Inventory full!");
                 ShowInventoryFullMessage();
@@ -146,7 +159,7 @@ public class InventoryManager : MonoBehaviour
         if (item.itemType == ItemType.AssembledShipPart)
         {
             // Assembled parts take 2 slots
-            if (inventory.Count > maxSlots - 2)
+            if (GetUsedSlots() + item.slotSize > maxSlots)
             {
                 ShowInventoryFullMessage();
                 return false;
@@ -334,7 +347,7 @@ public class InventoryManager : MonoBehaviour
                 item.gameObject.SetActive(false);
 
                 // Check there is space in inventory
-                if (inventory.Count > maxSlots - 2)
+                if (GetUsedSlots() + item.slotSize > maxSlots)
                 {
                     Destroy(assembledPartObj);
                     return;
@@ -552,6 +565,7 @@ public class InventoryManager : MonoBehaviour
         {
             inventory.Remove(item);
             UpdateInventoryUI();
+            CheckCraftingAvailability();
         }
     }
 }
