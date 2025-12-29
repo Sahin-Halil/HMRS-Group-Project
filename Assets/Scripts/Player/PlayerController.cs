@@ -1,5 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using Cursor = UnityEngine.Cursor;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class PlayerController : MonoBehaviour
     private ShipPartManager shipPartManager;
     private float originalHeight;
     [SerializeField] private PauseManager pauseManager;
+    [SerializeField] private DieScript playerDeath; // Ensure this is assigned in Inspector
     private PlayerInput playerInput;
     private InputAction walkAction;
     private InputAction runAction;
@@ -87,638 +89,186 @@ public class PlayerController : MonoBehaviour
     // Players initial state
     private MovementState state = MovementState.Idle;
 
-    // Called when movement input is detected
+    // ===================== INPUT CALLBACKS =====================
+
     private void OnMove(InputValue value)
     {
+        Debug.Log("OnMove CALLED");
         walkInput = true;
         Vector2 moveInput = value.Get<Vector2>();
         xMove = moveInput.x;
         yMove = moveInput.y;
     }
 
-    // Called when mouse input is detected
     private void OnLook(InputValue value)
     {
         Vector2 mouseInput = value.Get<Vector2>();
-        xRotation = xRotation + (mouseInput.x * mouseSense);
-        yRotation = Mathf.Clamp(yRotation - (mouseInput.y * mouseSense), -90f, 90f);
+        xRotation += mouseInput.x * mouseSense;
+        yRotation = Mathf.Clamp(yRotation - mouseInput.y * mouseSense, -90f, 90f);
     }
 
-    // Handles crouch toggling
-    private void OnCrouch()
-    {
-        crouchInput = true;
-        canSlide = true;
-    }
+    private void OnRun() => runInput = true;
+    private void OnCrouch() => crouchInput = true;
 
-    private void HandleCrouchTransition()
-    {
-        float targetHeight = crouchInput ? crouchHeight : originalHeight;
-
-        // Use crouchTransitionSpeed to control the smoothing time
-        characterController.height = Mathf.Lerp(
-            characterController.height,
-            targetHeight,
-            crouchTransitionSpeed * Time.deltaTime
-        );
-    }
-
-    // Handles Run toggling
-    private void OnRun()
-    {
-        runInput = true;
-    }
-
-    // Handles Jump toggling
     private void OnJump()
     {
         jumpInput = true;
-
-        // possible for jump to start
-        canJump = true;
+        if (characterController.isGrounded)
+            StartJump();
     }
 
-    // Handles Dash toggling
     private void OnDash()
     {
         if (canDash && dashCooldownTimer <= 0)
-        {
             dashInput = true;
-        }
     }
 
-    // Starts start Jump motion
+    // ===================== CORE LOGIC =====================
+
     private void StartJump()
     {
         canJump = false;
-
-        // Apply vertical velocity formula
         playerHeightSpeed = Mathf.Sqrt(2f * jumpValue * -gravity * gravityMultiplier);
+        state = MovementState.Jump;
     }
 
-    // Handles start slide motion
-    private void StartSlide()
-    {
-        canSlide = false;
-        isSlide = true;
-        currentSlideSpeed = startSlideSpeed;
-
-        slideDirection = transform.right * xMove + transform.forward * yMove;
-
-        xMoveOld = xMove;
-        yMoveOld = yMove;
-    }
-
-    // Updates mid slide motion
-    private void UpdateSlide()
-    {
-        currentSlideSpeed -= slideDecay * Time.deltaTime;
-
-        bool changedDirection = xMove != xMoveOld || yMove != yMoveOld;
-        bool releasedInput = !runInput || !crouchInput;
-
-        if (changedDirection || releasedInput || currentSlideSpeed <= 0f)
-        {
-            isSlide = false;
-            slideCoolDownTimer = slideCoolDown;
-        }
-    }
-
-    // Handles start dash motion
     private void StartDash()
     {
         canDash = false;
         isDash = true;
         dashTimeElapsed = 0f;
 
-        Vector3 inputDirection = transform.right * xMove + transform.forward * yMove;
-
-        if (inputDirection.magnitude > 0.1f)
-        {
-            dashDirection = inputDirection.normalized;
-        }
-        else
-        {
-            dashDirection = transform.forward;
-        }
+        Vector3 inputDir = transform.right * xMove + transform.forward * yMove;
+        dashDirection = inputDir.magnitude > 0.1f ? inputDir.normalized : transform.forward;
     }
 
-    // Handles mid dash motion
     private void UpdateDash()
     {
         dashTimeElapsed += Time.deltaTime;
-        float dashProgress = dashTimeElapsed / dashDuration;
-
-        if (dashProgress >= 1f)
+        if (dashTimeElapsed >= dashDuration)
         {
-            StopDash();
-            return;
+            isDash = false;
+            dashCooldownTimer = dashCooldown;
         }
 
         float dashSpeed = dashDistance / dashDuration;
-        Vector3 dashMovement = dashDirection * dashSpeed * Time.deltaTime;
-        Vector3 verticalMove = transform.up * playerHeightSpeed * Time.deltaTime;
-
-        CollisionFlags collisionFlags = characterController.Move(dashMovement + verticalMove);
-
-        if ((collisionFlags & CollisionFlags.Sides) != 0)
-        {
-            StopDash();
-        }
+        characterController.Move(dashDirection * dashSpeed * Time.deltaTime);
     }
 
-    // Handles end of Dash
-    private void StopDash()
-    {
-        if (!isDash) return;
-        isDash = false;
-        dashCooldownTimer = dashCooldown;
-    }
-
-    // Handles players speed depending on current state
-    private void PlayerState()
-    {
-        // True if the player is providing any movement input
-        bool hasMovementInput = xMove != 0 || yMove != 0;
-
-        // State machine controlling player movement behaviour
-        switch (state)
-        {
-            // =======================
-            // IDLE STATE
-            // =======================
-            case MovementState.Idle:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
-                else if (jumpInput && canJump)
-                {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-                else if (crouchInput)
-                {
-                    state = MovementState.Crouch;
-                }
-                // Start moving if there is movement input
-                else if (hasMovementInput)
-                {
-                    // Prefer running if run input is active
-                    if (runInput)
-                    {
-                        state = MovementState.Run;
-                    }
-                    // Otherwise walk
-                    else if (walkInput)
-                    {
-                        state = MovementState.Walk;
-                    }
-                }
-                else
-                {
-                    playerHorizontalSpeed = 0;
-                }
-                break;
-
-            // =======================
-            // WALK STATE
-            // =======================
-            case MovementState.Walk:
-                // Transition to dash if dash input is pressed
-                if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
-                else if (jumpInput && canJump)
-                {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-                // Transition to crouch if crouch input is pressed
-                else if (crouchInput)
-                {
-                    state = MovementState.Crouch;
-                }
-                // Stop moving if movement input is released
-                else if (!hasMovementInput)
-                {
-                    state = MovementState.Idle;
-                }
-                // Transition to run if run input is pressed
-                else if (runInput)
-                {
-                    state = MovementState.Run;
-                }
-                // Continue walking
-                else
-                {
-                    playerHorizontalSpeed = walkSpeed;
-                }
-                break;
-            // =======================
-            // RUN STATE
-            // =======================
-            case MovementState.Run:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
-                else if (jumpInput && canJump)
-                {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-                // Stop moving if movement input is released
-                else if (!hasMovementInput)
-                {
-                    state = MovementState.Idle;
-                }
-                else if (!runInput)
-                {
-                    state = MovementState.Walk;
-                }
-                else if (crouchInput && canSlide)
-                {
-                    state = MovementState.Slide;
-                    StartSlide();
-                }
-                else if (crouchInput)
-                {
-                    state = MovementState.Crouch;
-                }
-                // Continue running
-                else
-                {
-                    playerHorizontalSpeed = runSpeed;
-                }
-                break;
-
-            // =======================
-            // CROUCH STATE
-            // =======================
-            case MovementState.Crouch:
-                // Exit crouch if jump input is pressed
-                if (jumpInput && canJump)
-                {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-
-                //Exit crouch if dash input is pressed
-                else if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
-
-                else if (!crouchInput)
-                {
-                    // If moving, decide whether to run or walk
-                    if (hasMovementInput)
-                    {
-                        if (runInput)
-                        {
-                            state = MovementState.Run;
-                        }
-                        else if (walkInput)
-                        {
-                            state = MovementState.Walk;
-                        }
-                    }
-                    // Otherwise return to idle
-                    else
-                    {
-                        state = MovementState.Idle;
-                    }
-                }
-                // Continue crouch movement
-                else
-                {
-                    playerHorizontalSpeed = crouchSpeed;
-                }
-                break;
-            // =======================
-            // JUMP STATE
-            // =======================
-            case MovementState.Jump:
-                if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
-                else if (characterController.isGrounded)
-                {
-                    if (crouchInput && canSlide)
-                    {
-                        state = MovementState.Slide;
-                        StartSlide();
-                    }
-                    // Transition to crouch if crouch is still pressed
-                    else if (crouchInput)
-                    {
-                        state = MovementState.Crouch;
-                    }
-                    else if (hasMovementInput)
-                    {
-                        if (runInput)
-                        {
-                            state = MovementState.Run;
-                        }
-                        else if (walkInput)
-                        {
-                            state = MovementState.Walk;
-                        }
-                    }
-                    // Otherwise return to idle
-                    else
-                    {
-                        state = MovementState.Idle;
-                    }
-                }
-                else if (runInput)
-                {
-                    playerHorizontalSpeed = runSpeed;
-                }
-                else if (walkInput)
-                {
-                    playerHorizontalSpeed = walkSpeed;
-                }
-                break;
-
-            // =======================
-            // SLIDE STATE
-            // =======================
-            case MovementState.Slide:
-                if (jumpInput && canJump)
-                {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-                else if (!isSlide)
-                {
-                    // Transition to crouch if crouch is still pressed
-                    if (crouchInput)
-                    {
-                        state = MovementState.Crouch;
-                    }
-                    // If still moving, decide whether to run or walk
-                    else if (hasMovementInput)
-                    {
-                        if (runInput)
-                        {
-                            state = MovementState.Run;
-                        }
-                        else if (walkInput)
-                        {
-                            state = MovementState.Walk;
-                        }
-                    }
-                    // Otherwise return to idle
-                    else
-                    {
-                        state = MovementState.Idle;
-                    }
-                }
-                // While sliding, update slide physics and apply slide speed
-                else
-                {
-                    UpdateSlide();
-                    playerHorizontalSpeed = currentSlideSpeed;
-                }
-                break;
-
-            // =======================
-            // DASH STATE
-            // =======================
-            case MovementState.Dash:
-                if (!isDash)
-                {
-                    if (crouchInput)
-                    {
-                        state = MovementState.Crouch;
-                    }
-                    else if (hasMovementInput)
-                    {
-                        if (runInput)
-                        {
-                            state = MovementState.Run;
-                        }
-                        else if (walkInput)
-                        {
-                            state = MovementState.Walk;
-                        }
-                    }
-                    else
-                    {
-                        state = MovementState.Idle;
-                    }
-                }
-                else
-                {
-                    dashTimeElapsed += Time.deltaTime;
-                    float dashProgress = dashTimeElapsed / dashDuration;
-
-                    if (dashProgress >= 1f)
-                    {
-                        StopDash();
-                    }
-                }
-                break;
-        }
-    }
-
-    // Detects collisions with collectible ship parts
-    private void OnTriggerEnter(Collider collider)
-    {
-        if (collider.gameObject.CompareTag("ShipPart"))
-        {
-            shipPartManager.addPart();
-            Destroy(collider.gameObject);
-        }
-    }
-
-    // Applies constant gravity to player
     private void ApplyGravity()
     {
-        if (characterController.isGrounded && playerHeightSpeed <= 0f)
-        {
-            playerHeightSpeed = 0f;
-        }
+        if (characterController.isGrounded && playerHeightSpeed < 0)
+            playerHeightSpeed = -0.01f;
         else
-        { 
             playerHeightSpeed += gravity * gravityMultiplier * Time.deltaTime;
-        }
     }
 
-    // Handles player movement
     private void MovePlayer()
     {
-        if (pauseManager.getPauseState())
-        {
-            return;
-        }
-
         if (state == MovementState.Dash)
         {
             UpdateDash();
             return;
         }
 
-        // Moves player in horizontal direction
-        Vector3 horizontalDirection = transform.right * xMove + transform.forward * yMove;
-        Vector3 horizontalMove;
+        Vector3 horizontal = (transform.right * xMove + transform.forward * yMove);
+        if (horizontal.magnitude > 1) horizontal.Normalize();
 
-        if (state == MovementState.Slide)
-        {
-            horizontalMove = slideDirection;
-        }
-        else if (state == MovementState.Dash && isDash)
-        {
-            float dashSpeed = dashDistance / dashDuration;
-            horizontalMove = dashDirection * dashSpeed * Time.deltaTime;
-            Vector3 dashVerticalMove = transform.up * playerHeightSpeed * Time.deltaTime;
-            
-            CollisionFlags collisionFlags = characterController.Move(horizontalMove + dashVerticalMove);
-            
-            if ((collisionFlags & CollisionFlags.Sides) != 0)
-            {
-                StopDash();
-            }
-            return;
-        }
-        else
-        {
-            horizontalMove = horizontalDirection;
-        }
+        horizontal *= playerHorizontalSpeed * Time.deltaTime;
+        Vector3 vertical = Vector3.up * playerHeightSpeed;
 
-        // Normalise for multi horizontal directional movement
-        if (horizontalMove.magnitude > 1)
-        {
-            horizontalMove.Normalize();
-        }
-
-        // Apply speed and delta Time
-        horizontalMove *= playerHorizontalSpeed * Time.deltaTime;
-
-        // Moves player in vertical direction
-        Vector3 verticalMove = transform.up * playerHeightSpeed;
-
-        // Combine both horizontal and vertical movement
-        move = horizontalMove + verticalMove;
-
-        // Move player
-        characterController.Move(move);
+        characterController.Move(horizontal + vertical);
     }
 
-    // Handles camera movement
-    private void MovePlayerCamera()
+    private void MoveCamera()
     {
         transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
 
-    // Polls inputs to make sure they are false when not pressed
-    private void PollHeldActions()
+    private void UpdateState()
     {
-        if (walkInput && !walkAction.IsPressed())
+        bool hasMove = xMove != 0 || yMove != 0;
+
+        switch (state)
         {
-            walkInput = false;
-        }
-        if (runInput && !runAction.IsPressed())
-        {
-            runInput = false;
-        }
-        if (crouchInput && !crouchAction.IsPressed()) 
-        {
-            crouchInput = false;
-        }
-        if (jumpInput && !jumpAction.IsPressed())
-        {
-            jumpInput = false;
-        }
-        if (dashInput && !dashAction.IsPressed())
-        {
-            dashInput = false;
+            case MovementState.Idle:
+                playerHorizontalSpeed = 0;
+                if (dashInput) { state = MovementState.Dash; StartDash(); }
+                else if (jumpInput) StartJump();
+                else if (hasMove) state = runInput ? MovementState.Run : MovementState.Walk;
+                break;
+
+            case MovementState.Walk:
+                playerHorizontalSpeed = walkSpeed;
+                if (!hasMove) state = MovementState.Idle;
+                if (runInput) state = MovementState.Run;
+                break;
+
+            case MovementState.Run:
+                playerHorizontalSpeed = runSpeed;
+                if (!hasMove) state = MovementState.Idle;
+                if (!runInput) state = MovementState.Walk;
+                break;
+
+            case MovementState.Jump:
+                if (characterController.isGrounded)
+                    state = hasMove ? MovementState.Walk : MovementState.Idle;
+                break;
+
+            case MovementState.Dash:
+                if (!isDash)
+                    state = MovementState.Idle;
+                break;
         }
     }
 
-    // Updates cooldowns for dash and slide
-    private void UpdateCoolDowns()
+    private void ResetInputs()
     {
-        if (slideCoolDownTimer > 0f)
-        {
-            slideCoolDownTimer -= Time.deltaTime;
-            if (slideCoolDownTimer <= 0f)
-            {
-                canSlide = true;
-            }
-        }
-
-        if (dashCooldownTimer > 0)
-        {
-            dashCooldownTimer -= Time.deltaTime;
-            if (dashCooldownTimer <= 0)
-            {
-                canDash = true;
-            }
-        }
+        if (!walkAction.IsPressed()) walkInput = false;
+        if (!runAction.IsPressed()) runInput = false;
+        if (!crouchAction.IsPressed()) crouchInput = false;
+        if (!jumpAction.IsPressed()) jumpInput = false;
+        if (!dashAction.IsPressed()) dashInput = false;
     }
 
-    // Setup components and values
-    void Awake()
+    // ===================== UNITY =====================
+
+    private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-        Cursor.lockState = CursorLockMode.Locked;
-        originalHeight = characterController.height;
-        crouchSpeed = 0.5f * walkSpeed;
-        crouchHeight = 0.7f * originalHeight;
-        runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 13;
-        mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
-        
         playerInput = GetComponent<PlayerInput>();
+
         walkAction = playerInput.actions["Move"];
         runAction = playerInput.actions["Run"];
         crouchAction = playerInput.actions["Crouch"];
         jumpAction = playerInput.actions["Jump"];
         dashAction = playerInput.actions["Dash"];
+
+        mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // Handles movement and rotation each frame
-    void Update()
+    private void Update()
     {
-        PollHeldActions();
-        
-        UpdateCoolDowns();
+        if (pauseManager != null && pauseManager.getPauseState())
+            return;
 
-        PlayerState();
-
-        HandleCrouchTransition();
-
+        ResetInputs();
+        UpdateState();
         ApplyGravity();
-
         MovePlayer();
+        MoveCamera();
 
-        Debug.Log(state);
-        Debug.Log(runInput);
-
-        MovePlayerCamera();
+        if (dashCooldownTimer > 0)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+            if (dashCooldownTimer <= 0) canDash = true;
+        }
     }
 
-    // Below are required for sensitivity slider in settings
-    // Getter for sensitivity
+    // ===================== SETTINGS =====================
+
     public float GetSensitivity() => mouseSense;
-
-    // Setter for sensitivity
     public void SetSensitivity(float sensitivity) => mouseSense = sensitivity;
-
-    // Returns reference to ShipPartManager
-    public ShipPartManager GetShipPartManager()
-    {
-        return shipPartManager;
-    }
 }
