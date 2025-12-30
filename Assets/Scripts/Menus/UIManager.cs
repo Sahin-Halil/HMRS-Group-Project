@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-
+// Pls work
 public class UIManager : MonoBehaviour
 {
     // UI references and player components
