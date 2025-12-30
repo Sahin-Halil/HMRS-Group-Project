@@ -5,7 +5,7 @@ using UnityEngine;
 public class WinScreen : MonoBehaviour
 {
     // References to pause and ship part managers
-    [SerializeField] private PauseManager pauseManager;
+    [SerializeField] private UIManager uiManager;
     [SerializeField] private ShipPartManager shipPartManager;
 
     // Handles win or insufficient parts when player enters trigger
@@ -13,13 +13,13 @@ public class WinScreen : MonoBehaviour
     {
         if (other.CompareTag("Player") && shipPartManager.getParts() == 5)
         {
-            pauseManager.Win();
+            uiManager.Win();
             return;
         }
 
         else if (other.CompareTag("Player") && shipPartManager.getParts() < 5)
         {
-            pauseManager.NotEnoughParts(true);
+            uiManager.NotEnoughParts(true);
         }
     }
 
@@ -27,6 +27,6 @@ public class WinScreen : MonoBehaviour
     public void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player") && shipPartManager.getParts() < 5)
-            pauseManager.NotEnoughParts(false);
+            uiManager.NotEnoughParts(false);
     }
 }

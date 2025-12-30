@@ -2,15 +2,19 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public class PauseManager : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
     // UI references and player components
+    [SerializeField] private GameObject startMenuUI;
     [SerializeField] private GameObject pauseMenuUI;
     [SerializeField] private GameObject settingsMenuUI;
     [SerializeField] private GameObject winMenuUI;
     [SerializeField] private GameObject notEnoughPartsUI;
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private DieScript playerDeath;
+
+    // Input Actions
+    private InputAction pauseAction;
 
     // State tracking
     private bool isPaused = false;
@@ -22,12 +26,25 @@ public class PauseManager : MonoBehaviour
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
         hasWon = false;
+        
+        // Get the Pause action from the PlayerInput component and subscribe to it
+        pauseAction = playerInput.actions["Pause"];
+        pauseAction.performed += ctx => OnPause();
     }
 
-    // Checks every frame to see if the player has pressed the escape key to open the settings menu
-    void Update()
+    private void OnDestroy()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame && !playerDeath.checkDead() && !hasWon)
+        // Unsubscribe from the action when the object is destroyed
+        if (pauseAction != null)
+        {
+            pauseAction.performed -= ctx => OnPause();
+        }
+    }
+
+    // Handles pause toggling (can be called from UI buttons or input action)
+    public void OnPause()
+    {
+        if (!playerDeath.checkDead() && !hasWon)
         {
             if (isPaused) { ResumeGame(); }
             else { PauseGame(); }
@@ -107,5 +124,10 @@ public class PauseManager : MonoBehaviour
     public bool getPauseState() 
     {
         return isPaused;
+    }
+
+    public void openStartMenu()
+    {
+
     }
 }
