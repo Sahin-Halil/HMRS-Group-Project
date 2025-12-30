@@ -11,7 +11,7 @@ public abstract class PuzzleConsole : MonoBehaviour
     public PuzzleType puzzleType;
     public string consoleName = "Console";
 
-    public KeyCode interactKey = KeyCode.E;
+    public KeyCode interactKey = KeyCode.C;
     public float interactionRange = 3f;
 
     // UI References
@@ -69,7 +69,7 @@ public abstract class PuzzleConsole : MonoBehaviour
 
             if (playerInRange && !puzzleActive && Keyboard.current != null)
             {
-                if (Keyboard.current.eKey.wasPressedThisFrame)
+                if (Keyboard.current.cKey.wasPressedThisFrame)
                 {
                     TryInteract();
                 }

@@ -10,7 +10,7 @@ public class ShipPartManager : MonoBehaviour
 
     // Ship part tracking and UI reference
     [SerializeField] private int collectedParts = 0;
-    [SerializeField] private int totalPartsNeeded = 4;
+    [SerializeField] private int totalPartsNeeded = 12;
 
     [SerializeField] private TMP_Text shipPartText;
     [SerializeField] private TMP_Text completionText;
@@ -40,7 +40,7 @@ public class ShipPartManager : MonoBehaviour
         }
     }
 
-    void Update()
+    void Start()
     {
         UpdateUI();
     }
@@ -50,6 +50,11 @@ public class ShipPartManager : MonoBehaviour
         if (shipPartText != null)
         {
             shipPartText.text = "Ship Parts: " + collectedParts.ToString() + "/" + totalPartsNeeded.ToString();
+            Debug.Log($"Updated ship part text: {collectedParts}/{totalPartsNeeded}");
+        }
+        else
+        {
+            Debug.LogError("Ship Part Text is not assigned!");
         }
 
         if (completionText != null)
@@ -64,6 +69,7 @@ public class ShipPartManager : MonoBehaviour
     {
         collectedParts++;
         Debug.Log($"Ship part collected! Total: {collectedParts}/{totalPartsNeeded}");
+        UpdateUI();
     }
 
     // Check if player has parts available
@@ -146,6 +152,7 @@ public class ShipPartManager : MonoBehaviour
                 break;
         }
         Debug.Log($"{puzzleType} ship part placed!");
+        UpdateUI();
     }
 
     // Check if ship part is already placed
