@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public int maxLives = 3;
     public int currentLives;
 
+    private int gameplayLockCount = 0;
     private int checkpointShipParts = 0;
     private bool[] checkpointPuzzlesCompleted = new bool[4];
     private bool[] checkpointPartsPlaced = new bool[4];
@@ -27,6 +28,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -178,4 +180,32 @@ public class GameManager : MonoBehaviour
         currentLives = maxLives;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+
+    public void LockGameplay()
+    {
+        gameplayLockCount++;
+
+        if (gameplayLockCount == 1)
+        {
+            if (playerInput != null)
+                playerInput.actions.Disable();
+        }
+    }
+
+    public void UnlockGameplay()
+    {
+        gameplayLockCount = Mathf.Max(0, gameplayLockCount - 1);
+
+        if (gameplayLockCount == 0)
+        {
+            if (playerInput != null)
+                playerInput.actions.Enable();
+        }
+    }
+
+    public bool IsGameplayLocked()
+    {
+        return gameplayLockCount > 0;
+    }
+
 }

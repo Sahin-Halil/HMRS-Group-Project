@@ -1009,6 +1009,8 @@ public class PlayerController : MonoBehaviour
     // Handles camera movement
     private void MovePlayerCamera()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameplayLocked())
+            return;
         transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }

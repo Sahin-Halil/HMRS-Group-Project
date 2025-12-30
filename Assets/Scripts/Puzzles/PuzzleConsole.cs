@@ -69,10 +69,11 @@ public abstract class PuzzleConsole : MonoBehaviour
 
             if (playerInRange && !puzzleActive && Keyboard.current != null)
             {
-                if (Keyboard.current.cKey.wasPressedThisFrame)
+                if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame)
                 {
                     TryInteract();
                 }
+
             }
         }
 
@@ -236,7 +237,7 @@ public abstract class PuzzleConsole : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        // TODO Find a way to disable player movement in player controller
+        GameManager.Instance.LockGameplay();
 
         OnPuzzleStart();
         Debug.Log($"Started {consoleName} puzzle");
@@ -255,7 +256,7 @@ public abstract class PuzzleConsole : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // TODO Find a way to re-enable player movement in player controller
+        GameManager.Instance.UnlockGameplay();
 
         // Mark puzzle as complete
         shipPartManager.CompletePuzzle(puzzleType);
