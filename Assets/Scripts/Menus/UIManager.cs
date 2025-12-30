@@ -10,6 +10,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject settingsMenuUI;
     [SerializeField] private GameObject winMenuUI;
     [SerializeField] private GameObject notEnoughPartsUI;
+    [SerializeField] private GameObject HUD;
+    [SerializeField] private GameObject startSettingsMenuUI;
+    [SerializeField] private GameObject creditsMenuUI;
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private DieScript playerDeath;
 
@@ -24,12 +27,14 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         pauseMenuUI.SetActive(false);
-        Time.timeScale = 1f;
+        Time.timeScale = 0f; // Pause game until they click Start
         hasWon = false;
         
         // Get the Pause action from the PlayerInput component and subscribe to it
         pauseAction = playerInput.actions["Pause"];
         pauseAction.performed += ctx => OnPause();
+
+        OpenMainMenu();
     }
 
     private void OnDestroy()
@@ -44,6 +49,9 @@ public class UIManager : MonoBehaviour
     // Handles pause toggling (can be called from UI buttons or input action)
     public void OnPause()
     {
+        // Check if objects still exist (they might be destroyed during scene reload)
+        if (pauseMenuUI == null || playerDeath == null) return;
+        
         if (!playerDeath.checkDead() && !hasWon)
         {
             if (isPaused) { ResumeGame(); }
@@ -54,6 +62,8 @@ public class UIManager : MonoBehaviour
     // Pauses game by stopping timescale to 0, and locking all player movement
     public void PauseGame()
     {
+        if (pauseMenuUI == null || playerInput == null) return;
+        
         isPaused = true;
         Time.timeScale = 0f;
         pauseMenuUI.SetActive(true);
@@ -65,6 +75,8 @@ public class UIManager : MonoBehaviour
     // Resumes game by undoing all the actions taken by PauseGame()
     public void ResumeGame()
     {
+        if (pauseMenuUI == null || settingsMenuUI == null || playerInput == null) return;
+        
         isPaused = false;
         Time.timeScale = 1f;
         pauseMenuUI.SetActive(false);
@@ -77,7 +89,8 @@ public class UIManager : MonoBehaviour
     // Exits the game or returns to the title screen
     public void ExitGame()
     {
-        Application.Quit();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        OpenMainMenu();
     }
 
     // Opens settings menu from pause menu
@@ -101,6 +114,7 @@ public class UIManager : MonoBehaviour
     // Restarts the current scene
     public void RestartGame()
     {
+        Time.timeScale = 1f; // Reset time scale before reloading
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -126,8 +140,47 @@ public class UIManager : MonoBehaviour
         return isPaused;
     }
 
-    public void openStartMenu()
+    public void StartGame() 
     {
+        startMenuUI.SetActive(false);
+        Time.timeScale = 1f; // Unpause the game
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        HUD.SetActive(true);
 
+        playerInput.actions.Enable();
+    }
+
+    public void OpenMainMenu()
+    {
+        startMenuUI.SetActive(true);
+        pauseMenuUI.SetActive(false);
+        settingsMenuUI.SetActive(false);
+        winMenuUI.SetActive(false);
+        notEnoughPartsUI.SetActive(false);
+        creditsMenuUI.SetActive(false);
+        HUD.SetActive(false);
+        
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        playerInput.actions.Disable();
+    }
+
+    public void OpenStartSettings() 
+    {
+        startSettingsMenuUI.SetActive(true);
+        startMenuUI.SetActive(false);
+    }
+
+    public void CloseStartSettings()
+    {
+        startMenuUI.SetActive(true);
+        startSettingsMenuUI.SetActive(false);
+    }
+
+    public void OpenCredits()
+    {
+        startMenuUI.SetActive(false);
+        creditsMenuUI.SetActive(true);
     }
 }
