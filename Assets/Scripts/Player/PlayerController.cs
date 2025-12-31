@@ -1104,10 +1104,7 @@ public class PlayerController : MonoBehaviour
         animator = characterCamera.GetComponentInChildren<Animator>();
         Cursor.lockState = CursorLockMode.Locked;
         originalHeight = characterController.height;
-        crouchSpeed = 0.5f * walkSpeed;
         crouchHeight = 0.7f * originalHeight;
-        runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 13;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
         
         // Use CharacterController's slopeLimit if not set in inspector
