@@ -2,15 +2,22 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public class PauseManager : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
     // UI references and player components
+    [SerializeField] private GameObject startMenuUI;
     [SerializeField] private GameObject pauseMenuUI;
     [SerializeField] private GameObject settingsMenuUI;
     [SerializeField] private GameObject winMenuUI;
     [SerializeField] private GameObject notEnoughPartsUI;
+    [SerializeField] private GameObject HUD;
+    [SerializeField] private GameObject startSettingsMenuUI;
+    [SerializeField] private GameObject creditsMenuUI;
     [SerializeField] private PlayerInput playerInput;
     [SerializeField] private DieScript playerDeath;
+
+    // Input Actions
+    private InputAction pauseAction;
 
     // State tracking
     private bool isPaused = false;
@@ -20,14 +27,32 @@ public class PauseManager : MonoBehaviour
     private void Start()
     {
         pauseMenuUI.SetActive(false);
-        Time.timeScale = 1f;
+        Time.timeScale = 0f; // Pause game until they click Start
         hasWon = false;
+        
+        // Get the Pause action from the PlayerInput component and subscribe to it
+        pauseAction = playerInput.actions["Pause"];
+        pauseAction.performed += ctx => OnPause();
+
+        OpenMainMenu();
     }
 
-    // Checks every frame to see if the player has pressed the escape key to open the settings menu
-    void Update()
+    private void OnDestroy()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame && !playerDeath.checkDead() && !hasWon)
+        // Unsubscribe from the action when the object is destroyed
+        if (pauseAction != null)
+        {
+            pauseAction.performed -= ctx => OnPause();
+        }
+    }
+
+    // Handles pause toggling (can be called from UI buttons or input action)
+    public void OnPause()
+    {
+        // Check if objects still exist (they might be destroyed during scene reload)
+        if (pauseMenuUI == null || playerDeath == null) return;
+        
+        if (!playerDeath.checkDead() && !hasWon)
         {
             if (isPaused) { ResumeGame(); }
             else { PauseGame(); }
@@ -37,6 +62,8 @@ public class PauseManager : MonoBehaviour
     // Pauses game by stopping timescale to 0, and locking all player movement
     public void PauseGame()
     {
+        if (pauseMenuUI == null || playerInput == null) return;
+        
         isPaused = true;
         Time.timeScale = 0f;
         pauseMenuUI.SetActive(true);
@@ -48,6 +75,8 @@ public class PauseManager : MonoBehaviour
     // Resumes game by undoing all the actions taken by PauseGame()
     public void ResumeGame()
     {
+        if (pauseMenuUI == null || settingsMenuUI == null || playerInput == null) return;
+        
         isPaused = false;
         Time.timeScale = 1f;
         pauseMenuUI.SetActive(false);
@@ -60,7 +89,8 @@ public class PauseManager : MonoBehaviour
     // Exits the game or returns to the title screen
     public void ExitGame()
     {
-        Application.Quit();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        OpenMainMenu();
     }
 
     // Opens settings menu from pause menu
@@ -84,6 +114,7 @@ public class PauseManager : MonoBehaviour
     // Restarts the current scene
     public void RestartGame()
     {
+        Time.timeScale = 1f; // Reset time scale before reloading
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -107,5 +138,49 @@ public class PauseManager : MonoBehaviour
     public bool getPauseState() 
     {
         return isPaused;
+    }
+
+    public void StartGame() 
+    {
+        startMenuUI.SetActive(false);
+        Time.timeScale = 1f; // Unpause the game
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        HUD.SetActive(true);
+
+        playerInput.actions.Enable();
+    }
+
+    public void OpenMainMenu()
+    {
+        startMenuUI.SetActive(true);
+        pauseMenuUI.SetActive(false);
+        settingsMenuUI.SetActive(false);
+        winMenuUI.SetActive(false);
+        notEnoughPartsUI.SetActive(false);
+        creditsMenuUI.SetActive(false);
+        HUD.SetActive(false);
+        
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        playerInput.actions.Disable();
+    }
+
+    public void OpenStartSettings() 
+    {
+        startSettingsMenuUI.SetActive(true);
+        startMenuUI.SetActive(false);
+    }
+
+    public void CloseStartSettings()
+    {
+        startMenuUI.SetActive(true);
+        startSettingsMenuUI.SetActive(false);
+    }
+
+    public void OpenCredits()
+    {
+        startMenuUI.SetActive(false);
+        creditsMenuUI.SetActive(true);
     }
 }

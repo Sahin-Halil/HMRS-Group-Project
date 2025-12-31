@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private ShipPartManager shipPartManager;
     private float originalHeight;
-    [SerializeField] private PauseManager pauseManager;
+    [SerializeField] private UIManager uiManager;
     [SerializeField] private DieScript playerDeath;
 
     // Player Inputs
@@ -35,8 +35,10 @@ public class PlayerController : MonoBehaviour
 
     // Mouse look
     private float mouseSense = 0.5f;
+    private float gamepadSensitivityMultiplier = 200f; // Multiplier to convert mouse sens to gamepad sens
     private float xRotation;
     private float yRotation;
+    private Vector2 lookInput; // Store current look input
 
     // Crouch
     private bool crouchInput = false;
@@ -144,9 +146,7 @@ public class PlayerController : MonoBehaviour
     // Called when mouse input is detected
     private void OnLook(InputValue value)
     {
-        Vector2 mouseInput = value.Get<Vector2>();
-        xRotation = (xRotation + (mouseInput.x * mouseSense)) % 360f;
-        yRotation = Mathf.Clamp(yRotation - (mouseInput.y * mouseSense), -90f, 90f);
+        lookInput = value.Get<Vector2>();
     }
 
     // Handles crouch toggling
@@ -894,6 +894,10 @@ public class PlayerController : MonoBehaviour
     // Applies constant gravity to player
     private void ApplyGravity()
     {
+        if (characterController.isGrounded)
+        {
+            isTouchingWall = false;
+        }
         // Don't reset gravity if on steep slope - let the slide physics work
         if (characterController.isGrounded && playerHeightSpeed <= 0f && !isOnSteepSlope)
         {
@@ -995,6 +999,29 @@ public class PlayerController : MonoBehaviour
     // Handles camera movement
     private void MovePlayerCamera()
     {
+        // Detect if using gamepad by checking current control scheme
+        bool isGamepad = playerInput.currentControlScheme == "Gamepad";
+        
+        if (isGamepad)
+        {
+            // Gamepad: Scale sensitivity by multiplier and apply with Time.deltaTime for smooth movement
+            float gamepadSens = mouseSense * gamepadSensitivityMultiplier;
+            xRotation = (xRotation + (lookInput.x * gamepadSens * Time.deltaTime)) % 360f;
+            yRotation = Mathf.Clamp(yRotation - (lookInput.y * gamepadSens * Time.deltaTime), -90f, 90f);
+        }
+        else
+        {
+            // Mouse: Apply directly (delta is already frame-independent)
+            xRotation = (xRotation + (lookInput.x * mouseSense)) % 360f;
+            yRotation = Mathf.Clamp(yRotation - (lookInput.y * mouseSense), -90f, 90f);
+            // Clear mouse delta after applying (mouse sends delta, gamepad sends continuous values)
+            lookInput = Vector2.zero;
+        }
+        
+        // Normalize rotation values to prevent NaN/Infinity issues
+        if (float.IsNaN(xRotation) || float.IsInfinity(xRotation)) xRotation = 0f;
+        if (float.IsNaN(yRotation) || float.IsInfinity(yRotation)) yRotation = 0f;
+        
         transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
@@ -1089,6 +1116,12 @@ public class PlayerController : MonoBehaviour
             maxSlopeAngle = characterController.slopeLimit;
         }
         
+        // Initialize rotation values from current transform rotation
+        xRotation = transform.eulerAngles.y;
+        yRotation = characterCamera.transform.localEulerAngles.x;
+        // Handle angle wrapping for camera pitch
+        if (yRotation > 180f) yRotation -= 360f;
+        
         playerInput = GetComponent<PlayerInput>();
         walkAction = playerInput.actions["Move"];
         runAction = playerInput.actions["Run"];
@@ -1101,7 +1134,7 @@ public class PlayerController : MonoBehaviour
     // Handles movement and rotation each frame
     void Update()
     {
-        if (pauseManager.getPauseState() || playerDeath.checkDead())
+        if (uiManager.getPauseState() || playerDeath.checkDead())
         {
             return;
         }
@@ -1119,8 +1152,6 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
 
         MovePlayer();
-
-        //Debug.Log(state);
 
         MovePlayerCamera();
     }
