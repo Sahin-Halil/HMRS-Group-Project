@@ -11,8 +11,6 @@
 3. Switch to "My Assets"
 4. Search for "Sci-Fi Construction Kit Modular"
 5. Click Download, then Import
-6. **Only import:** Prefabs/Structures, Art/
-7. **Skip:** Demo folder (not needed)
 
 **Project Usage:**
 - Used for indoor ship environment in Main scene
