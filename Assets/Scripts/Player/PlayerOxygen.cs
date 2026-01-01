@@ -27,6 +27,12 @@ public class PlayerOxygen : MonoBehaviour
     // Handles oxygen depletion and death trigger
     private void Update()
     {
+        if (GameManager.Instance == null)
+            return;
+
+        if (GameManager.Instance.IsGameplayLocked())
+            return;
+
         currentOxygen -= Time.deltaTime;
         if (currentOxygen < 0f) currentOxygen = 0f;
         else if (currentOxygen > maxOxygen) currentOxygen = maxOxygen;
