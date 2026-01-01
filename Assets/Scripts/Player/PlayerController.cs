@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
     public float startSlideSpeed;
     private float currentSlideSpeed = 12f;
     public float slideDecay = 17f;
-    [SerializeField] private float slideCoolDown = 0.5f;
+    private float slideCoolDown = 0.5f;
     private float slideCoolDownTimer = 0f;
 
     // Dashing
