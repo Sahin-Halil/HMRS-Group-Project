@@ -168,6 +168,26 @@ public class PlayerController : MonoBehaviour
         );
     }
 
+    bool CanStandUp()
+    {
+        float radius = characterController.radius * 0.7f;
+        float standHeight = originalHeight;
+        Vector3 origin = transform.position + Vector3.up * (radius + 0.05f);
+
+        float checkDistance = standHeight - characterController.height;
+
+        return !Physics.SphereCast(
+            origin,
+            radius * 0.9f,
+            Vector3.up,
+            out _,
+            checkDistance,
+            ~0,
+            QueryTriggerInteraction.Ignore
+        );
+    }
+
+
     // Handles Run toggling
     private void OnRun()
     {
@@ -464,6 +484,9 @@ public class PlayerController : MonoBehaviour
         // True if the player is providing any movement input
         bool hasMovementInput = xMove != 0 || yMove != 0;
 
+        // Check if player can stand
+        bool canStand = CanStandUp();
+
         // State machine controlling player movement behaviour
         switch (state)
         {
@@ -601,45 +624,53 @@ public class PlayerController : MonoBehaviour
             // CROUCH STATE
             // =======================
             case MovementState.Crouch:
-                // Exit crouch if dash input is pressed
-                if (attackInput && canAttack && attackCooldownTimer <= 0)
-                {
-                    state = MovementState.Attack;
-                    StartAttack();
-                }
-
-                //Exit crouch if dash input is pressed
-                if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
-                // Exit crouch if jump input is pressed
-                else if (jumpInput && canJump)
-                {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-
-
-                else if (!crouchInput)
-                {
-                    // If moving, decide whether to run or walk
-                    if (hasMovementInput)
+                if (canStand) 
+                { 
+                    // Exit crouch if dash input is pressed
+                    if (attackInput && canAttack && attackCooldownTimer <= 0)
                     {
-                        if (runInput)
+                        state = MovementState.Attack;
+                        StartAttack();
+                    }
+
+                    //Exit crouch if dash input is pressed
+                    if (dashInput && canDash && dashCooldownTimer <= 0)
+                    {
+                        state = MovementState.Dash;
+                        StartDash();
+                    }
+                    // Exit crouch if jump input is pressed
+                    else if (jumpInput && canJump)
+                    {
+                        state = MovementState.Jump;
+                        StartJump();
+                    }
+
+
+                    else if (!crouchInput)
+                    {
+                        // If moving, decide whether to run or walk
+                        if (hasMovementInput)
                         {
-                            state = MovementState.Run;
+                            if (runInput)
+                            {
+                                state = MovementState.Run;
+                            }
+                            else if (walkInput)
+                            {
+                                state = MovementState.Walk;
+                            }
                         }
-                        else if (walkInput)
+                        // Otherwise return to idle
+                        else
                         {
-                            state = MovementState.Walk;
+                            state = MovementState.Idle;
                         }
                     }
-                    // Otherwise return to idle
+                    // Continue crouch movement
                     else
                     {
-                        state = MovementState.Idle;
+                        playerHorizontalSpeed = crouchSpeed;
                     }
                 }
                 // Continue crouch movement
@@ -708,7 +739,11 @@ public class PlayerController : MonoBehaviour
             case MovementState.Slide:
                 if (!isSlide)
                 {
-                    if (jumpInput && canJump)
+                    if (!canStand)
+                    {
+                        state = MovementState.Crouch;
+                    }
+                    else if (jumpInput && canJump)
                     {
                         state = MovementState.Jump;
                         StartJump();
@@ -1057,7 +1092,11 @@ public class PlayerController : MonoBehaviour
         }
         if (crouchInput && !crouchAction.IsPressed()) 
         {
-            crouchInput = false;
+            // Only allow uncrouch if there is space above
+            if (CanStandUp())
+            {
+                crouchInput = false;
+            }
         }
         if (jumpInput && !jumpAction.IsPressed())
         {
@@ -1154,12 +1193,13 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-
         PollHeldActions();
         
         UpdateCoolDowns();
 
         PlayerState();
+        Debug.Log(state);
+        //Debug.Log(playerHorizontalSpeed);
 
         HandleCrouchTransition();
 
