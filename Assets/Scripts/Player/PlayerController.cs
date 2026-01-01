@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
@@ -11,12 +11,8 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private ShipPartManager shipPartManager;
     private float originalHeight;
-    [SerializeField] private PauseManager pauseManager;
+    [SerializeField] private UIManager uiManager;
     [SerializeField] private DieScript playerDeath;
-
-    // Audio
-    [SerializeField] private AudioSource attackAudio;
-    [SerializeField] private AudioSource footstepAudio;
 
     // Player Inputs
     private PlayerInput playerInput;
@@ -39,8 +35,10 @@ public class PlayerController : MonoBehaviour
 
     // Mouse look
     [SerializeField] private float mouseSense = 0.5f;
+    private float gamepadSensitivityMultiplier = 200f; // Multiplier to convert mouse sens to gamepad sens
     [SerializeField] public float xRotation;
     [SerializeField] public float yRotation;
+    private Vector2 lookInput; // Store current look input
 
     // Crouch
     private bool crouchInput = false;
@@ -109,7 +107,7 @@ public class PlayerController : MonoBehaviour
     public AudioClip hitSound;
     int attackCount;
     private bool hasHitThisAttack = false; // Track if we've already hit during this attack
-
+    
     // Combo system
     private int comboCount = 0; // Determines attack animation
     private int previousComboCount = -1; // Track previous combo to detect changes
@@ -148,9 +146,7 @@ public class PlayerController : MonoBehaviour
     // Called when mouse input is detected
     private void OnLook(InputValue value)
     {
-        Vector2 mouseInput = value.Get<Vector2>();
-        xRotation = xRotation + (mouseInput.x * mouseSense);
-        yRotation = Mathf.Clamp(yRotation - (mouseInput.y * mouseSense), -90f, 90f);
+        lookInput = value.Get<Vector2>();
     }
 
     // Handles crouch toggling
@@ -316,7 +312,7 @@ public class PlayerController : MonoBehaviour
         attackTimeElapsed = 0f;
         hasHitThisAttack = false; // Reset hit flag for new attack
         timeSinceLastAttack = 0f; // Reset combo timer
-
+        
         // Progress combo if queued, otherwise reset to first attack
         if (comboQueued)
         {
@@ -369,20 +365,20 @@ public class PlayerController : MonoBehaviour
 
         // Spawn hit effect at hit point
         GameObject GO = Instantiate(hitEffect, hit.point, Quaternion.identity);
-
+        
         // Deal damage to the enemy if it has an EnemyHealth component
         EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
         if (enemyHealth != null)
         {
             // Parent the hit effect to the enemy so it follows them
             GO.transform.SetParent(hit.collider.transform);
-
+            
             // Pass the hit effect GameObject to the enemy so it can destroy it on death
             enemyHealth.TakeDamage(attackDamage, GO);
             // Destroy the hit effect after 0.7 seconds
             Destroy(GO, 0.7f);
         }
-
+        
 
     }
 
@@ -391,19 +387,19 @@ public class PlayerController : MonoBehaviour
         if (animator == null)
         {
             return;
-        }
 
+        }
+        
         bool stateChanged = newState != previousState;
         bool comboChanged = comboCount != previousComboCount;
-
+        
         // Only trigger animation if state changed or combo changed during attack
         if (!stateChanged && !(newState == MovementState.Attack && comboChanged))
         {
             return;
         }
 
-        if (newState == MovementState.Idle)
-        {
+        if (newState == MovementState.Idle) {
             animator.CrossFadeInFixedTime("Idle-Animation", 0.2f);
         }
         else if (newState == MovementState.Attack)
@@ -417,7 +413,7 @@ public class PlayerController : MonoBehaviour
         }
         // Add other states as needed (Walk, Run, etc.)
         // For now, non-attack movement states will use Idle animation
-        else if (newState == MovementState.Walk || newState == MovementState.Run ||
+        else if (newState == MovementState.Walk || newState == MovementState.Run || 
                  newState == MovementState.Crouch || newState == MovementState.Slide ||
                  newState == MovementState.Jump || newState == MovementState.Dash)
         {
@@ -432,7 +428,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!isAttack) return;
         isAttack = false;
-
+        
         // If combo is queued, start next attack immediately
         if (comboQueued)
         {
@@ -823,7 +819,7 @@ public class PlayerController : MonoBehaviour
                 }
                 break;
         }
-
+        
         // Only update animations if state has changed
         handleAnimations(state);
     }
@@ -914,7 +910,7 @@ public class PlayerController : MonoBehaviour
             playerHeightSpeed = -0.01f;
         }
         else
-        {
+        { 
             // Use stronger gravity when touching steep walls or on steep slopes for natural slip-off
             float currentGravityMultiplier = (isTouchingWall || isOnSteepSlope) ? gravityMultiplier * 3f : gravityMultiplier;
             playerHeightSpeed += gravity * currentGravityMultiplier * Time.deltaTime;
@@ -925,7 +921,7 @@ public class PlayerController : MonoBehaviour
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         float surfaceAngle = Vector3.Angle(hit.normal, Vector3.up);
-
+        
         // Mark if touching a steep wall to apply stronger gravity
         if (surfaceAngle > characterController.slopeLimit && !characterController.isGrounded)
         {
@@ -935,7 +931,7 @@ public class PlayerController : MonoBehaviour
 
     // Handles player movement
     private void MovePlayer()
-    {
+    { 
         if (state == MovementState.Dash)
         {
             UpdateDash();
@@ -955,9 +951,9 @@ public class PlayerController : MonoBehaviour
             float dashSpeed = dashDistance / dashDuration;
             horizontalMove = dashDirection * dashSpeed * Time.deltaTime;
             Vector3 dashVerticalMove = transform.up * playerHeightSpeed * Time.deltaTime;
-
+            
             CollisionFlags collisionFlags = characterController.Move(horizontalMove + dashVerticalMove);
-
+            
             if ((collisionFlags & CollisionFlags.Sides) != 0)
             {
                 StopDash();
@@ -984,13 +980,13 @@ public class PlayerController : MonoBehaviour
             // Override player horizontal movement with strong sliding force
             // This ensures they slip off even when trying to move forward
             Vector3 slideForce = slopeSlideDirection * slopeSlideSpeed * Time.deltaTime;
-
+            
             // Reduce player's control on steep slopes (keep only 20% of their input)
             horizontalMove *= 0.2f;
-
+            
             // Apply the slide force - this dominates over player input
             horizontalMove += slideForce;
-
+            
             // Apply strong downward force to ensure player slides off vertices
             // This overrides the normal grounded behavior
             playerHeightSpeed = Mathf.Min(playerHeightSpeed, -5f);
@@ -1010,7 +1006,32 @@ public class PlayerController : MonoBehaviour
     private void MovePlayerCamera()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsGameplayLocked())
+
             return;
+
+        // Detect if using gamepad by checking current control scheme
+        bool isGamepad = playerInput.currentControlScheme == "Gamepad";
+        
+        if (isGamepad)
+        {
+            // Gamepad: Scale sensitivity by multiplier and apply with Time.deltaTime for smooth movement
+            float gamepadSens = mouseSense * gamepadSensitivityMultiplier;
+            xRotation = (xRotation + (lookInput.x * gamepadSens * Time.deltaTime)) % 360f;
+            yRotation = Mathf.Clamp(yRotation - (lookInput.y * gamepadSens * Time.deltaTime), -90f, 90f);
+        }
+        else
+        {
+            // Mouse: Apply directly (delta is already frame-independent)
+            xRotation = (xRotation + (lookInput.x * mouseSense)) % 360f;
+            yRotation = Mathf.Clamp(yRotation - (lookInput.y * mouseSense), -90f, 90f);
+            // Clear mouse delta after applying (mouse sends delta, gamepad sends continuous values)
+            lookInput = Vector2.zero;
+        }
+        
+        // Normalize rotation values to prevent NaN/Infinity issues
+        if (float.IsNaN(xRotation) || float.IsInfinity(xRotation)) xRotation = 0f;
+        if (float.IsNaN(yRotation) || float.IsInfinity(yRotation)) yRotation = 0f;
+        
         transform.rotation = Quaternion.Euler(0f, xRotation, 0f);
         characterCamera.transform.localRotation = Quaternion.Euler(yRotation, 0f, 0f);
     }
@@ -1026,7 +1047,7 @@ public class PlayerController : MonoBehaviour
         {
             runInput = false;
         }
-        if (crouchInput && !crouchAction.IsPressed())
+        if (crouchInput && !crouchAction.IsPressed()) 
         {
             crouchInput = false;
         }
@@ -1073,7 +1094,7 @@ public class PlayerController : MonoBehaviour
                 canAttack = true;
             }
         }
-
+        
         // Reset combo if too much time has passed since last attack
         // But don't reset if we have a combo queued
         if (!isAttack && !comboQueued)
@@ -1093,18 +1114,21 @@ public class PlayerController : MonoBehaviour
         animator = characterCamera.GetComponentInChildren<Animator>();
         Cursor.lockState = CursorLockMode.Locked;
         originalHeight = characterController.height;
-        crouchSpeed = 0.5f * walkSpeed;
         crouchHeight = 0.7f * originalHeight;
-        runSpeed = 1.5f * walkSpeed;
-        startSlideSpeed = 13;
         mouseSense = PlayerPrefs.GetFloat("MouseSensitivity", mouseSense);
-
+        
         // Use CharacterController's slopeLimit if not set in inspector
         if (maxSlopeAngle == 0f)
         {
             maxSlopeAngle = characterController.slopeLimit;
         }
-
+        
+        // Initialize rotation values from current transform rotation
+        xRotation = transform.eulerAngles.y;
+        yRotation = characterCamera.transform.localEulerAngles.x;
+        // Handle angle wrapping for camera pitch
+        if (yRotation > 180f) yRotation -= 360f;
+        
         playerInput = GetComponent<PlayerInput>();
         walkAction = playerInput.actions["Move"];
         runAction = playerInput.actions["Run"];
@@ -1116,24 +1140,26 @@ public class PlayerController : MonoBehaviour
         if (shipPartManager == null)
         {
             shipPartManager = FindObjectOfType<ShipPartManager>();
+
             if (shipPartManager == null)
+
             {
                 Debug.LogError("No ShipPartManager found in scene!");
+
             }
         }
-
     }
 
     // Handles movement and rotation each frame
     void Update()
     {
-        if (pauseManager.getPauseState() || playerDeath.checkDead())
+        if (uiManager.getPauseState() || playerDeath.checkDead())
         {
             return;
         }
 
         PollHeldActions();
-
+        
         UpdateCoolDowns();
 
         PlayerState();
@@ -1145,8 +1171,6 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
 
         MovePlayer();
-
-        //Debug.Log(state);
 
         MovePlayerCamera();
     }
