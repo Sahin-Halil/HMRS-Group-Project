@@ -72,6 +72,7 @@ All gameplay assets that have not been created by us are included in this sectio
 
 - Spaceship: "Federation Corvette F3" by **CGPitbull**
 - Lava Texture: "Free Lava Shader" by **AYproduct**
+- Lava Assets: "Stylized Lava materials" by **Rob luo**
 - Terrain Textures: "Terrain Sample Asset Pack" by **Unity Technologies**
 - Sword Model: "FREE - Low Poly Swords - RPG Weapons" by **Blink**
 - Arms-Enemy: "Monster Mutant 7" by **Panchenko Lyudmila**
