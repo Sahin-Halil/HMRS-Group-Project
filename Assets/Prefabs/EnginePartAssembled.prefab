@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &337773809366273719
+--- !u!1 &5386168828165599666
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,49 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6363549385627943186}
-  - component: {fileID: 7290498370818565888}
-  - component: {fileID: 1922644186299318821}
-  - component: {fileID: 7213115782900307314}
-  - component: {fileID: 4119387822115832765}
+  - component: {fileID: 3849247731239676010}
+  - component: {fileID: 8047352907967583923}
+  - component: {fileID: 3074287823953849083}
+  - component: {fileID: 6104774383111204638}
+  - component: {fileID: 5716342422881417614}
   m_Layer: 0
-  m_Name: ShipPart
-  m_TagString: ShipPart
+  m_Name: EnginePartAssembled
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6363549385627943186
+--- !u!4 &3849247731239676010
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 337773809366273719}
+  m_GameObject: {fileID: 5386168828165599666}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 103.97, y: 1, z: 241.41}
+  m_LocalPosition: {x: 35.65927, y: 1.6199999, z: 20.55}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8336736424806183002}
+  - {fileID: 4527429306004792187}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7290498370818565888
+--- !u!33 &8047352907967583923
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 337773809366273719}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &1922644186299318821
+  m_GameObject: {fileID: 5386168828165599666}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &3074287823953849083
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 337773809366273719}
+  m_GameObject: {fileID: 5386168828165599666}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -64,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 21085cfc4f7ff8a4291ed42a85f27537, type: 2}
+  - {fileID: 2100000, guid: b8396b76e2a4945dda5cca518f4bb8da, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -86,13 +86,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &7213115782900307314
-SphereCollider:
+--- !u!65 &6104774383111204638
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 337773809366273719}
+  m_GameObject: {fileID: 5386168828165599666}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -105,28 +105,28 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4119387822115832765
+--- !u!114 &5716342422881417614
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 337773809366273719}
+  m_GameObject: {fileID: 5386168828165599666}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8201be4c320014e08ba362cb013030ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemType: 0
-  itemName: Ship Part Piece
+  itemType: 1
+  itemName: Engine Part
   itemIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   shipPartType: 0
   isPartTypeAssigned: 0
   autoPickup: 1
   slotSize: 1
---- !u!1 &1557158821905403214
+--- !u!1 &6508918115627401537
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -134,8 +134,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8336736424806183002}
-  - component: {fileID: 3951022534236684902}
+  - component: {fileID: 4527429306004792187}
+  - component: {fileID: 1306937452719287868}
   m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
@@ -143,35 +143,35 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8336736424806183002
+--- !u!4 &4527429306004792187
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1557158821905403214}
+  m_GameObject: {fileID: 6508918115627401537}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6363549385627943186}
+  m_Father: {fileID: 3849247731239676010}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!108 &3951022534236684902
+--- !u!108 &1306937452719287868
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1557158821905403214}
+  m_GameObject: {fileID: 6508918115627401537}
   m_Enabled: 1
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 0.9418457, b: 0, a: 1}
-  m_Intensity: 1
-  m_Range: 10
+  m_Color: {r: 0.9252193, g: 0.3726415, b: 1, a: 1}
+  m_Intensity: 2
+  m_Range: 3
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
