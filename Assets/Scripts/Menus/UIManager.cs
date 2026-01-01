@@ -22,19 +22,33 @@ public class UIManager : MonoBehaviour
     // State tracking
     private bool isPaused = false;
     private bool hasWon = false;
+    
+    // Static flag to track if this is a restart (persists across scene reloads)
+    private static bool isRestarting = false;
 
     // Makes sure that game is not paused when starting
     private void Start()
     {
         pauseMenuUI.SetActive(false);
-        Time.timeScale = 0f; // Pause game until they click Start
         hasWon = false;
         
         // Get the Pause action from the PlayerInput component and subscribe to it
         pauseAction = playerInput.actions["Pause"];
         pauseAction.performed += ctx => OnPause();
 
-        OpenMainMenu();
+        // Check if this is a restart or first load
+        if (isRestarting)
+        {
+            // If restarting, skip the main menu and start the game directly
+            isRestarting = false;
+            StartGame();
+        }
+        else
+        {
+            // First time loading - show the start menu
+            Time.timeScale = 0f; // Pause game until they click Start
+            OpenMainMenu();
+        }
     }
 
     private void OnDestroy()
@@ -114,6 +128,7 @@ public class UIManager : MonoBehaviour
     // Restarts the current scene
     public void RestartGame()
     {
+        isRestarting = true; // Set flag so Start() knows this is a restart
         Time.timeScale = 1f; // Reset time scale before reloading
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

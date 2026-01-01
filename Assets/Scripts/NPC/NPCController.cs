@@ -267,9 +267,7 @@ public class NPCController : MonoBehaviour
         currentAnimations = animSet;
         // Loop through animations in sequence
         animIndex = (animIndex + 1) % animSet.Length;
-        //Debug.Log(animIndex);
         string nextAnim = animSet[animIndex];
-        Debug.Log(nextAnim);
         AnimationClip clip = animator.runtimeAnimatorController.animationClips.First(c => c.name == nextAnim);
 
         float clipLength = clip.length;

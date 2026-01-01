@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     public Camera characterCamera;
     private Animator animator;
     private ShipPartManager shipPartManager;
+    private AudioSource audioSource;
     private float originalHeight;
     [SerializeField] private UIManager uiManager;
     [SerializeField] private DieScript playerDeath;
@@ -57,7 +58,7 @@ public class PlayerController : MonoBehaviour
     public float startSlideSpeed;
     private float currentSlideSpeed = 12f;
     public float slideDecay = 17f;
-    [SerializeField] private float slideCoolDown = 0.5f;
+    private float slideCoolDown = 0.5f;
     private float slideCoolDownTimer = 0f;
 
     // Dashing
@@ -344,6 +345,9 @@ public class PlayerController : MonoBehaviour
             // Reset combo if starting fresh attack (not queued from previous)
             comboCount = 0;
         }
+        
+        // Play swing sound with randomized pitch
+        PlaySwingSound();
     }
 
     // Handles mid attack motion
@@ -380,8 +384,12 @@ public class PlayerController : MonoBehaviour
 
     void HitTarget(RaycastHit hit)
     {
-        // audioSource.pitch = 1;
-        // audioSource.PlayOneShot(hitSound);
+        // Play hit sound with randomized pitch
+        if (audioSource != null && hitSound != null)
+        {
+            audioSource.pitch = Random.Range(0.8f, 1.2f);
+            audioSource.PlayOneShot(hitSound);
+        }
 
         // Spawn hit effect at hit point
         GameObject GO = Instantiate(hitEffect, hit.point, Quaternion.identity);
@@ -400,6 +408,16 @@ public class PlayerController : MonoBehaviour
         }
         
 
+    }
+
+    // Plays swing sound with randomized pitch
+    private void PlaySwingSound()
+    {   
+        if (audioSource != null && swordSwing != null)
+        {
+            audioSource.pitch = Random.Range(0.8f, 1.2f);
+            audioSource.PlayOneShot(swordSwing);
+        }
     }
 
     void handleAnimations(MovementState newState)
@@ -1159,6 +1177,7 @@ public class PlayerController : MonoBehaviour
         if (yRotation > 180f) yRotation -= 360f;
         
         playerInput = GetComponent<PlayerInput>();
+        audioSource = GetComponent<AudioSource>();
         walkAction = playerInput.actions["Move"];
         runAction = playerInput.actions["Run"];
         crouchAction = playerInput.actions["Crouch"];
