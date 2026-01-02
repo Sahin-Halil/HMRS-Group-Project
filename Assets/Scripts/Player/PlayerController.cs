@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
@@ -73,8 +73,8 @@ public class PlayerController : MonoBehaviour
     private float dashTimeElapsed = 0f;
 
     // Gravity
-    private float gravity = -9.81f;
-    private float gravityMultiplier = 0.003f;
+    private float gravity = -11.00f;
+    private float gravityMultiplier = 1.8f;
     private bool isTouchingWall = false;
 
     // Slope Sliding
@@ -84,8 +84,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxSlopeAngle = 45f; // Maximum walkable angle
 
     // Jumping
-    private float jumpValue = 0.003f;
-    private float playerHeightSpeed = -0.01f;
+    private float jumpValue = 1.8f;
+    private float playerHeightSpeed = -2.0f;
     private bool jumpInput = false;
     private bool canJump = false;
 
@@ -101,7 +101,7 @@ public class PlayerController : MonoBehaviour
     public float attackDistance = 3f;
     public float attackDelay = 0.4f;
     public float attackSpeed = 1f;
-    public float attackDamage = 10f;
+    public int attackDamage = 10;
     public LayerMask attackLayer;
     public GameObject hitEffect;
     public AudioClip swordSwing;
@@ -243,7 +243,6 @@ public class PlayerController : MonoBehaviour
         // Apply vertical velocity formula
         // Reduce jump strength significantly when on steep slopes for tiny natural jumps
         float effectiveJumpValue = isOnSteepSlope ? jumpValue * 0.3f : jumpValue;
-        Debug.Log(effectiveJumpValue);
         playerHeightSpeed = Mathf.Sqrt(2f * effectiveJumpValue * -gravity * gravityMultiplier);
     }
 
@@ -626,7 +625,7 @@ public class PlayerController : MonoBehaviour
             // =======================
             case MovementState.Crouch:
                 if (canStand) 
-                {
+                { 
                     // Exit crouch if dash input is pressed
                     if (attackInput && canAttack && attackCooldownTimer <= 0)
                     {
@@ -635,7 +634,7 @@ public class PlayerController : MonoBehaviour
                     }
 
                     //Exit crouch if dash input is pressed
-                    else if (dashInput && canDash && dashCooldownTimer <= 0)
+                    if (dashInput && canDash && dashCooldownTimer <= 0)
                     {
                         state = MovementState.Dash;
                         StartDash();
@@ -851,11 +850,7 @@ public class PlayerController : MonoBehaviour
                     // Check what speed the player had before attacking
                     if (hasMovementInput)
                     {
-                        if (crouchInput)
-                        {
-                            playerHorizontalSpeed = crouchSpeed;
-                        }
-                        else if (runInput)
+                        if (runInput)
                         {
                             playerHorizontalSpeed = runSpeed;
                         }
@@ -959,7 +954,7 @@ public class PlayerController : MonoBehaviour
         // Don't reset gravity if on steep slope - let the slide physics work
         if (characterController.isGrounded && playerHeightSpeed <= 0f && !isOnSteepSlope)
         {
-            playerHeightSpeed = -0.01f;
+            playerHeightSpeed = -2.0f;
         }
         else
         { 
@@ -1045,7 +1040,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Moves player in vertical direction
-        Vector3 verticalMove = transform.up * playerHeightSpeed;
+        Vector3 verticalMove = transform.up * playerHeightSpeed * Time.deltaTime;
 
         // Combine both horizontal and vertical movement
         move = horizontalMove + verticalMove;
@@ -1203,7 +1198,6 @@ public class PlayerController : MonoBehaviour
         UpdateCoolDowns();
 
         PlayerState();
-        Debug.Log(state);
 
         HandleCrouchTransition();
 
