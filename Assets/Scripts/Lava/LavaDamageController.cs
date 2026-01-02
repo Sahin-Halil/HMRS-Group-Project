@@ -2,17 +2,25 @@ using UnityEngine;
 
 public class LavaDamageController : MonoBehaviour
 {
-    public float damagePerSecond = 25f;   
+    public float damagePerSecond = 1000f;   
 
     private void OnTriggerStay(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        //if (!other.CompareTag("Player")) return;
 
         // Damage player if next to lavas
-        HealthSystem hp = other.GetComponent<HealthSystem>();
-        if (hp != null)
+        if (other.CompareTag("Player"))
         {
-            Debug.Log("hello");
+            HealthSystem hp = other.GetComponent<HealthSystem>();
+            if (hp != null)
+            {
+                Debug.Log("hello");
+                hp?.TakeDamage(damagePerSecond * Time.deltaTime);
+            }
+        }
+        else if (other.CompareTag("Enemy"))
+        {
+            EnemyHealth hp = other.GetComponent<EnemyHealth>();
             hp?.TakeDamage(damagePerSecond * Time.deltaTime);
         }
     }

@@ -991,6 +991,10 @@ PrefabInstance:
       propertyPath: m_Center.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 897580799856471155, guid: d4655329e7fa84bb18adecdcc6d4c702, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2196653160664923058, guid: d4655329e7fa84bb18adecdcc6d4c702, type: 3}
       propertyPath: animator
       value: 
