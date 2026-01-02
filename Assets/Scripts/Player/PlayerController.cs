@@ -101,7 +101,7 @@ public class PlayerController : MonoBehaviour
     public float attackDistance = 3f;
     public float attackDelay = 0.4f;
     public float attackSpeed = 1f;
-    public int attackDamage = 10;
+    public float attackDamage = 10f;
     public LayerMask attackLayer;
     public GameObject hitEffect;
     public AudioClip swordSwing;
@@ -243,6 +243,7 @@ public class PlayerController : MonoBehaviour
         // Apply vertical velocity formula
         // Reduce jump strength significantly when on steep slopes for tiny natural jumps
         float effectiveJumpValue = isOnSteepSlope ? jumpValue * 0.3f : jumpValue;
+        Debug.Log(effectiveJumpValue);
         playerHeightSpeed = Mathf.Sqrt(2f * effectiveJumpValue * -gravity * gravityMultiplier);
     }
 
@@ -625,7 +626,7 @@ public class PlayerController : MonoBehaviour
             // =======================
             case MovementState.Crouch:
                 if (canStand) 
-                { 
+                {
                     // Exit crouch if dash input is pressed
                     if (attackInput && canAttack && attackCooldownTimer <= 0)
                     {
@@ -634,7 +635,7 @@ public class PlayerController : MonoBehaviour
                     }
 
                     //Exit crouch if dash input is pressed
-                    if (dashInput && canDash && dashCooldownTimer <= 0)
+                    else if (dashInput && canDash && dashCooldownTimer <= 0)
                     {
                         state = MovementState.Dash;
                         StartDash();
@@ -850,7 +851,11 @@ public class PlayerController : MonoBehaviour
                     // Check what speed the player had before attacking
                     if (hasMovementInput)
                     {
-                        if (runInput)
+                        if (crouchInput)
+                        {
+                            playerHorizontalSpeed = crouchSpeed;
+                        }
+                        else if (runInput)
                         {
                             playerHorizontalSpeed = runSpeed;
                         }
@@ -1199,7 +1204,6 @@ public class PlayerController : MonoBehaviour
 
         PlayerState();
         Debug.Log(state);
-        //Debug.Log(playerHorizontalSpeed);
 
         HandleCrouchTransition();
 
