@@ -35,10 +35,10 @@ public class PlayerController : MonoBehaviour
     private float yMoveOld;
 
     // Mouse look
-    private float mouseSense = 0.5f;
+    [SerializeField] private float mouseSense = 0.5f;
     private float gamepadSensitivityMultiplier = 200f; // Multiplier to convert mouse sens to gamepad sens
-    private float xRotation;
-    private float yRotation;
+    [SerializeField] public float xRotation;
+    [SerializeField] public float yRotation;
     private Vector2 lookInput; // Store current look input
 
     // Crouch
@@ -422,6 +422,12 @@ public class PlayerController : MonoBehaviour
 
     void handleAnimations(MovementState newState)
     {
+        if (animator == null)
+        {
+            return;
+
+        }
+        
         bool stateChanged = newState != previousState;
         bool comboChanged = comboCount != previousComboCount;
         
@@ -876,7 +882,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collider.gameObject.CompareTag("ShipPart"))
         {
-            shipPartManager.addPart();
+            shipPartManager.AddPart();
             Destroy(collider.gameObject);
         }
     }
@@ -1052,6 +1058,10 @@ public class PlayerController : MonoBehaviour
     // Handles camera movement
     private void MovePlayerCamera()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameplayLocked())
+
+            return;
+
         // Detect if using gamepad by checking current control scheme
         bool isGamepad = playerInput.currentControlScheme == "Gamepad";
         
@@ -1184,6 +1194,18 @@ public class PlayerController : MonoBehaviour
         jumpAction = playerInput.actions["Jump"];
         dashAction = playerInput.actions["Dash"];
         attackAction = playerInput.actions["Fire"];
+
+        if (shipPartManager == null)
+        {
+            shipPartManager = FindObjectOfType<ShipPartManager>();
+
+            if (shipPartManager == null)
+
+            {
+                Debug.LogError("No ShipPartManager found in scene!");
+
+            }
+        }
     }
 
     // Handles movement and rotation each frame

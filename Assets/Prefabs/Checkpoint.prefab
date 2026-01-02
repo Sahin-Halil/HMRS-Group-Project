@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1030902709581752212}
   - component: {fileID: 6356885969804462874}
   - component: {fileID: 138685817760253610}
-  - component: {fileID: 3408453628578633900}
+  - component: {fileID: 3048989183568716751}
   m_Layer: 0
   m_Name: Checkpoint
   m_TagString: Untagged
@@ -108,7 +108,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
---- !u!114 &3408453628578633900
+--- !u!114 &3048989183568716751
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -117,9 +117,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7809467798958878535}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9645f8c479aa44ea99024d3e5ab0fde1, type: 3}
+  m_Script: {fileID: 11500000, guid: 94e04172f3b7e4fce9c0a0fa74765263, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 0
-  inactiveColour: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  activeColour: {r: 0, g: 1, b: 0, a: 1}
+  inactiveColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  activeColor: {r: 0, g: 1, b: 0, a: 1}
+  saveOnActivate: 1
