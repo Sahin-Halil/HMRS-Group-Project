@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LavaDamageController : MonoBehaviour
 {
-    public float damagePerSecond = 25f;   
+    public float damagePerSecond = 1000f;   
 
     private void OnTriggerStay(Collider other)
     {
