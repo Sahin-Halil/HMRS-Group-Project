@@ -12,7 +12,6 @@ public class LavaDamageController : MonoBehaviour
         HealthSystem hp = other.GetComponent<HealthSystem>();
         if (hp != null)
         {
-            Debug.Log("hello");
             hp?.TakeDamage(damagePerSecond * Time.deltaTime);
         }
     }
