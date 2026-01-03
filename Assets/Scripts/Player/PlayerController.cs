@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     public Camera characterCamera;
     private Animator animator;
     private ShipPartManager shipPartManager;
+    private AudioSource audioSource;
     private float originalHeight;
     [SerializeField] private UIManager uiManager;
     [SerializeField] private DieScript playerDeath;
@@ -57,7 +58,7 @@ public class PlayerController : MonoBehaviour
     public float startSlideSpeed;
     private float currentSlideSpeed = 12f;
     public float slideDecay = 17f;
-    [SerializeField] private float slideCoolDown = 0.5f;
+    private float slideCoolDown = 0.5f;
     private float slideCoolDownTimer = 0f;
 
     // Dashing
@@ -72,8 +73,8 @@ public class PlayerController : MonoBehaviour
     private float dashTimeElapsed = 0f;
 
     // Gravity
-    private float gravity = -9.81f;
-    private float gravityMultiplier = 0.003f;
+    private float gravity = -11.00f;
+    private float gravityMultiplier = 1.8f;
     private bool isTouchingWall = false;
 
     // Slope Sliding
@@ -83,8 +84,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxSlopeAngle = 45f; // Maximum walkable angle
 
     // Jumping
-    private float jumpValue = 0.003f;
-    private float playerHeightSpeed = -0.01f;
+    private float jumpValue = 1.8f;
+    private float playerHeightSpeed = -2.0f;
     private bool jumpInput = false;
     private bool canJump = false;
 
@@ -166,6 +167,26 @@ public class PlayerController : MonoBehaviour
             crouchTransitionSpeed * Time.deltaTime
         );
     }
+
+    bool CanStandUp()
+    {
+        float radius = characterController.radius * 0.7f;
+        float standHeight = originalHeight;
+        Vector3 origin = transform.position + Vector3.up * (radius + 0.05f);
+
+        float checkDistance = standHeight - characterController.height;
+
+        return !Physics.SphereCast(
+            origin,
+            radius * 0.9f,
+            Vector3.up,
+            out _,
+            checkDistance,
+            ~0,
+            QueryTriggerInteraction.Ignore
+        );
+    }
+
 
     // Handles Run toggling
     private void OnRun()
@@ -324,6 +345,9 @@ public class PlayerController : MonoBehaviour
             // Reset combo if starting fresh attack (not queued from previous)
             comboCount = 0;
         }
+        
+        // Play swing sound with randomized pitch
+        PlaySwingSound();
     }
 
     // Handles mid attack motion
@@ -360,8 +384,12 @@ public class PlayerController : MonoBehaviour
 
     void HitTarget(RaycastHit hit)
     {
-        // audioSource.pitch = 1;
-        // audioSource.PlayOneShot(hitSound);
+        // Play hit sound with randomized pitch
+        if (audioSource != null && hitSound != null)
+        {
+            audioSource.pitch = Random.Range(0.8f, 1.2f);
+            audioSource.PlayOneShot(hitSound);
+        }
 
         // Spawn hit effect at hit point
         GameObject GO = Instantiate(hitEffect, hit.point, Quaternion.identity);
@@ -380,6 +408,16 @@ public class PlayerController : MonoBehaviour
         }
         
 
+    }
+
+    // Plays swing sound with randomized pitch
+    private void PlaySwingSound()
+    {   
+        if (audioSource != null && swordSwing != null)
+        {
+            audioSource.pitch = Random.Range(0.8f, 1.2f);
+            audioSource.PlayOneShot(swordSwing);
+        }
     }
 
     void handleAnimations(MovementState newState)
@@ -445,6 +483,9 @@ public class PlayerController : MonoBehaviour
     {
         // True if the player is providing any movement input
         bool hasMovementInput = xMove != 0 || yMove != 0;
+
+        // Check if player can stand
+        bool canStand = CanStandUp();
 
         // State machine controlling player movement behaviour
         switch (state)
@@ -583,45 +624,53 @@ public class PlayerController : MonoBehaviour
             // CROUCH STATE
             // =======================
             case MovementState.Crouch:
-                // Exit crouch if dash input is pressed
-                if (attackInput && canAttack && attackCooldownTimer <= 0)
-                {
-                    state = MovementState.Attack;
-                    StartAttack();
-                }
-
-                //Exit crouch if dash input is pressed
-                if (dashInput && canDash && dashCooldownTimer <= 0)
-                {
-                    state = MovementState.Dash;
-                    StartDash();
-                }
-                // Exit crouch if jump input is pressed
-                else if (jumpInput && canJump)
-                {
-                    state = MovementState.Jump;
-                    StartJump();
-                }
-
-
-                else if (!crouchInput)
-                {
-                    // If moving, decide whether to run or walk
-                    if (hasMovementInput)
+                if (canStand) 
+                { 
+                    // Exit crouch if dash input is pressed
+                    if (attackInput && canAttack && attackCooldownTimer <= 0)
                     {
-                        if (runInput)
+                        state = MovementState.Attack;
+                        StartAttack();
+                    }
+
+                    //Exit crouch if dash input is pressed
+                    if (dashInput && canDash && dashCooldownTimer <= 0)
+                    {
+                        state = MovementState.Dash;
+                        StartDash();
+                    }
+                    // Exit crouch if jump input is pressed
+                    else if (jumpInput && canJump)
+                    {
+                        state = MovementState.Jump;
+                        StartJump();
+                    }
+
+
+                    else if (!crouchInput)
+                    {
+                        // If moving, decide whether to run or walk
+                        if (hasMovementInput)
                         {
-                            state = MovementState.Run;
+                            if (runInput)
+                            {
+                                state = MovementState.Run;
+                            }
+                            else if (walkInput)
+                            {
+                                state = MovementState.Walk;
+                            }
                         }
-                        else if (walkInput)
+                        // Otherwise return to idle
+                        else
                         {
-                            state = MovementState.Walk;
+                            state = MovementState.Idle;
                         }
                     }
-                    // Otherwise return to idle
+                    // Continue crouch movement
                     else
                     {
-                        state = MovementState.Idle;
+                        playerHorizontalSpeed = crouchSpeed;
                     }
                 }
                 // Continue crouch movement
@@ -690,7 +739,11 @@ public class PlayerController : MonoBehaviour
             case MovementState.Slide:
                 if (!isSlide)
                 {
-                    if (jumpInput && canJump)
+                    if (!canStand)
+                    {
+                        state = MovementState.Crouch;
+                    }
+                    else if (jumpInput && canJump)
                     {
                         state = MovementState.Jump;
                         StartJump();
@@ -901,7 +954,7 @@ public class PlayerController : MonoBehaviour
         // Don't reset gravity if on steep slope - let the slide physics work
         if (characterController.isGrounded && playerHeightSpeed <= 0f && !isOnSteepSlope)
         {
-            playerHeightSpeed = -0.01f;
+            playerHeightSpeed = -2.0f;
         }
         else
         { 
@@ -987,7 +1040,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Moves player in vertical direction
-        Vector3 verticalMove = transform.up * playerHeightSpeed;
+        Vector3 verticalMove = transform.up * playerHeightSpeed * Time.deltaTime;
 
         // Combine both horizontal and vertical movement
         move = horizontalMove + verticalMove;
@@ -1039,7 +1092,11 @@ public class PlayerController : MonoBehaviour
         }
         if (crouchInput && !crouchAction.IsPressed()) 
         {
-            crouchInput = false;
+            // Only allow uncrouch if there is space above
+            if (CanStandUp())
+            {
+                crouchInput = false;
+            }
         }
         if (jumpInput && !jumpAction.IsPressed())
         {
@@ -1120,6 +1177,7 @@ public class PlayerController : MonoBehaviour
         if (yRotation > 180f) yRotation -= 360f;
         
         playerInput = GetComponent<PlayerInput>();
+        audioSource = GetComponent<AudioSource>();
         walkAction = playerInput.actions["Move"];
         runAction = playerInput.actions["Run"];
         crouchAction = playerInput.actions["Crouch"];
@@ -1135,7 +1193,6 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-
         PollHeldActions();
         
         UpdateCoolDowns();
