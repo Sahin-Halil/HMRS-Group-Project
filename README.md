@@ -80,6 +80,13 @@ All gameplay assets that have not been created by us are included in this sectio
 - Legs-Enemy: "Fantastic Creature #1" by **Panchenko Lyudmila**
 - Creep-Enemy: "Creep Horror Creature" by **AC Game Assets**
 
+#### Self Made Assets and Sounds
+
+- Light Logo
+- Pinkie Slime NPC & associated sounds
+- Sword swing sounds and impact sounds
+- All UI designs and elements
+
 ### Academic Integrity
 This project follows Queen Mary University of London's Academic Integrity and Misconduct Policy.
 All generative-AI or external tool usage is acknowledged in this README and the group submission form.
