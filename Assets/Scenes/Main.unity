@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.063338056, g: 0.06410211, b: 0.066037714, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
@@ -1299,6 +1299,7 @@ Transform:
   - {fileID: 1649732397}
   - {fileID: 1804345891}
   - {fileID: 96112076}
+  - {fileID: 1549681732}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &64328875
@@ -4764,7 +4765,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 57832047}
     m_Modifications:
     - target: {fileID: 5191145080247569593, guid: 0f173b41a3f580848aea46a1d55ae2ce, type: 3}
       propertyPath: behaviourMode
@@ -4776,15 +4777,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8065324967705584779, guid: 0f173b41a3f580848aea46a1d55ae2ce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -226.2735
+      value: -622.54974
       objectReference: {fileID: 0}
     - target: {fileID: 8065324967705584779, guid: 0f173b41a3f580848aea46a1d55ae2ce, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.651184
+      value: -56.05237
       objectReference: {fileID: 0}
     - target: {fileID: 8065324967705584779, guid: 0f173b41a3f580848aea46a1d55ae2ce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 312.8653
+      value: 154.70323
       objectReference: {fileID: 0}
     - target: {fileID: 8065324967705584779, guid: 0f173b41a3f580848aea46a1d55ae2ce, type: 3}
       propertyPath: m_LocalRotation.w
@@ -15026,6 +15027,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8065324967705584779, guid: 0f173b41a3f580848aea46a1d55ae2ce, type: 3}
   m_PrefabInstance: {fileID: 626704182}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1549681732 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8065324967705584779, guid: 0f173b41a3f580848aea46a1d55ae2ce, type: 3}
+  m_PrefabInstance: {fileID: 372257647}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1554322453
 GameObject:
   m_ObjectHideFlags: 0
@@ -22287,7 +22293,6 @@ SceneRoots:
   - {fileID: 1554322457}
   - {fileID: 737277552}
   - {fileID: 346828163}
-  - {fileID: 372257647}
   - {fileID: 1732607757}
   - {fileID: 604723360}
   - {fileID: 57832047}
