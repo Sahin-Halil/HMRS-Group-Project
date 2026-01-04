@@ -51,14 +51,27 @@ public class RebindKey : MonoBehaviour
             .OnComplete(op =>
             {
                 op.Dispose();
+
+                string newPath = action.action.bindings[bindingIndex].effectivePath;
+
+                // Check against all other bindings in the action map
+                if (BindingAlreadyUsed(newPath, action.action, bindingIndex))
+                {
+                    LoadBindingOverride();   
+                    UpdateLabel();
+                }
+                else
+                {
+                    SaveBindingOverride();
+                    UpdateLabel();
+                }
+
                 rebindButton.interactable = true;
-                SaveBindingOverride();
-                UpdateLabel();
             })
             .Start();
     }
 
-    // Updates on-screen label to show current binding
+    // Updates on screen label to show current binding
     private void UpdateLabel()
     {
         if (bindingIndex >= 0)
@@ -86,5 +99,23 @@ public class RebindKey : MonoBehaviour
         string overridePath = PlayerPrefs.GetString(saveKey, "");
         if (!string.IsNullOrEmpty(overridePath))
             action.action.ApplyBindingOverride(bindingIndex, overridePath);
+    }
+
+    private bool BindingAlreadyUsed(string newPath, InputAction exceptAction, int exceptBindingIndex)
+    {
+        foreach (var a in action.action.actionMap.actions)
+        {
+            for (int i = 0; i < a.bindings.Count; i++)
+            {
+                // Skip the binding we're currently rebinding
+                if (a == exceptAction && i == exceptBindingIndex)
+                    continue;
+
+                if (a.bindings[i].effectivePath == newPath)
+                    return true;
+            }
+        }
+
+        return false;
     }
 }
