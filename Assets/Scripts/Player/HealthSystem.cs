@@ -7,17 +7,20 @@ public class HealthSystem : MonoBehaviour
 {
     // Game Components
     [SerializeField] private GameObject respawnMenuUI;
-    [SerializeField] private PlayerInput playerInput;
-    [SerializeField] private DieScript dieScript;
+    private PlayerInput playerInput;
 
     // Health 
     public float maxHealth = 100f;
     public float currentHealth;
     public Slider healthSlider;
 
+    // Death state
+    private bool isDead = false;
+
     // Initialize health values and UI
     void Start()
     {
+        playerInput = GetComponent<PlayerInput>();
         currentHealth = maxHealth;
         if (healthSlider != null)
         {
@@ -40,7 +43,24 @@ public class HealthSystem : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            dieScript.Die();
+            Die();
         }
+    }
+
+    // Handles player death logic and UI activation
+    public void Die()
+    {
+        isDead = true;
+        respawnMenuUI.SetActive(true);
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        playerInput.actions.Disable();
+    }
+
+    // Returns current death state
+    public bool checkDead()
+    {
+        return isDead;
     }
 }

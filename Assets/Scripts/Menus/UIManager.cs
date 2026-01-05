@@ -14,7 +14,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject startSettingsMenuUI;
     [SerializeField] private GameObject creditsMenuUI;
     [SerializeField] private PlayerInput playerInput;
-    [SerializeField] private DieScript playerDeath;
+    [SerializeField] private HealthSystem playerDeath;
 
     // Input Actions
     private InputAction pauseAction;

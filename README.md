@@ -85,6 +85,8 @@ All gameplay assets that have not been created by us are included in this sectio
 - Light Logo
 - Pinkie Slime NPC & associated sounds
 - Sword swing sounds and impact sounds
+- Sword Animation
+- Cave system in blender 
 - All UI designs and elements
 
 ### Academic Integrity

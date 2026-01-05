@@ -17,7 +17,6 @@ GameObject:
   - component: {fileID: 2778904669071397768}
   - component: {fileID: 5481889506923476554}
   - component: {fileID: 8437181281200004629}
-  - component: {fileID: 281696211532664871}
   - component: {fileID: 8985771796809799330}
   m_Layer: 0
   m_Name: PlayerGoat
@@ -129,8 +128,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   respawnMenuUI: {fileID: 0}
-  playerInput: {fileID: 2778904669071397768}
-  dieScript: {fileID: 281696211532664871}
   maxHealth: 100
   currentHealth: 0
   healthSlider: {fileID: 0}
@@ -148,10 +145,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterCamera: {fileID: 407019452281371206}
   uiManager: {fileID: 0}
-  playerDeath: {fileID: 281696211532664871}
-  mouseSense: 0.5
-  xRotation: 0
-  yRotation: 0
+  playerDeath: {fileID: 1275461867402017506}
   crouchSpeed: 2.5
   runSpeed: 7.5
   startSlideSpeed: 12
@@ -165,7 +159,7 @@ MonoBehaviour:
   attackLayer:
     serializedVersion: 2
     m_Bits: 8
-  hitEffect: {fileID: 0}
+  hitEffect: {fileID: 3258163343273320360}
   swordSwing: {fileID: 8300000, guid: 1adf577cfd8ce824c853b305b870d2f0, type: 3}
   hitSound: {fileID: 8300000, guid: 2e3b3e15480ca4f47b5faaf3e8ffdfc8, type: 3}
 --- !u!114 &2778904669071397768
@@ -238,21 +232,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   oxygenSlider: {fileID: 0}
   maxOxygen: 10000
-  dieScript: {fileID: 281696211532664871}
---- !u!114 &281696211532664871
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3031386434641829274}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3491f376350f094796f943548cb184b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  respawnMenuUI: {fileID: 0}
-  gameOverText: {fileID: 0}
+  dieScript: {fileID: 1275461867402017506}
 --- !u!82 &8985771796809799330
 AudioSource:
   m_ObjectHideFlags: 0

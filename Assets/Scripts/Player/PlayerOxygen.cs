@@ -6,7 +6,7 @@ public class PlayerOxygen : MonoBehaviour
     // Oxygen and UI references
     [SerializeField] private Slider oxygenSlider;
     [SerializeField] private float maxOxygen = 50f;
-    [SerializeField] private DieScript dieScript;
+    [SerializeField] private HealthSystem dieScript;
 
     // Players oxygen level
     private float currentOxygen;

@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
     private AudioSource audioSource;
     private float originalHeight;
     [SerializeField] private UIManager uiManager;
-    [SerializeField] private DieScript playerDeath;
+    [SerializeField] private HealthSystem playerDeath;
 
     // Player Inputs
     private PlayerInput playerInput;
