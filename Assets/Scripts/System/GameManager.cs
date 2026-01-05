@@ -11,7 +11,6 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public Transform player;
     [HideInInspector] public HealthSystem playerHealth;
     [HideInInspector] public PlayerOxygen playerOxygen;
-    [HideInInspector] public DieScript playerDieScript;
     [HideInInspector] public PlayerInput playerInput;
 
     // Checkpoint System
@@ -78,7 +77,6 @@ public class GameManager : MonoBehaviour
             player = playerObj.transform;
             playerHealth = playerObj.GetComponent<HealthSystem>();
             playerOxygen = playerObj.GetComponent<PlayerOxygen>();
-            playerDieScript = playerObj.GetComponent<DieScript>();
             playerInput = playerObj.GetComponent<PlayerInput>();
         }
     }
@@ -211,12 +209,6 @@ public class GameManager : MonoBehaviour
         else
         {
             player.position = currentCheckpoint;
-        }
-
-        // Reset death status
-        if (playerDieScript != null)
-        {
-            playerDieScript.ResetDeathStatus();
         }
 
         // Restore health

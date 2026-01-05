@@ -12,9 +12,6 @@ public class ShipPartManager : MonoBehaviour
     [SerializeField] private int collectedParts = 0;
     [SerializeField] private int totalPartsNeeded = 12;
 
-    [SerializeField] private TMP_Text shipPartText;
-    [SerializeField] private TMP_Text completionText;
-
     // Console tracking
     public bool enginePuzzleCompleted = false;
     public bool cockpitPuzzleCompleted = false;
@@ -39,36 +36,11 @@ public class ShipPartManager : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        UpdateUI();
-    }
-
-    void UpdateUI()
-    {
-        if (shipPartText != null)
-        {
-            shipPartText.text = "Ship Parts: " + collectedParts.ToString() + "/" + totalPartsNeeded.ToString();
-            Debug.Log($"Updated ship part text: {collectedParts}/{totalPartsNeeded}");
-        }
-        else
-        {
-            Debug.LogError("Ship Part Text is not assigned!");
-        }
-
-        if (completionText != null)
-        {
-            int partsPlaced = GetPlacedPartsCount();
-            completionText.text = "Parts Installed: " + partsPlaced.ToString() + "/" + totalPartsNeeded.ToString();
-        }
-    }
-
     // Increases collected ship part count
     public void AddPart()
     {
         collectedParts++;
         Debug.Log($"Ship part collected! Total: {collectedParts}/{totalPartsNeeded}");
-        UpdateUI();
     }
 
     // Check if player has parts available
@@ -98,7 +70,6 @@ public class ShipPartManager : MonoBehaviour
         if (collectedParts > 0)
         {
             collectedParts--;
-            UpdateUI();
         }
         else
         {
@@ -123,7 +94,14 @@ public class ShipPartManager : MonoBehaviour
         }
     }
 
-    // Mark puzzle as completed
+    public bool AreAllPuzzlesCompleted()
+    {
+        return enginePuzzleCompleted &&
+               cockpitPuzzleCompleted &&
+               lifeSupportPuzzleCompleted &&
+               airlockPuzzleCompleted;
+    }
+
     public void CompletePuzzle(PuzzleType puzzleType)
     {
         switch (puzzleType)
@@ -142,6 +120,26 @@ public class ShipPartManager : MonoBehaviour
                 break;
         }
         Debug.Log($"{puzzleType} puzzle completed!");
+
+        // Check if all puzzles are complete
+        if (AreAllPuzzlesCompleted())
+        {
+            TriggerWin();
+        }
+    }
+
+    private void TriggerWin()
+    {
+        UIManager uiManager = FindObjectOfType<UIManager>();
+
+        if (uiManager != null)
+        {
+            uiManager.Win();
+        }
+        else
+        {
+            Debug.LogError("UIManager not found in scene! Can't show win menu.");
+        }
     }
 
     // Mark ship part as placed
@@ -163,7 +161,6 @@ public class ShipPartManager : MonoBehaviour
                 break;
         }
         Debug.Log($"{puzzleType} ship part placed!");
-        UpdateUI();
     }
 
     // Check if ship part is already placed

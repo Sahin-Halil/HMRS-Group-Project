@@ -10,7 +10,6 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private GameObject winMenuUI;
     [SerializeField] private GameObject notEnoughPartsUI;
     [SerializeField] private PlayerInput playerInput;
-    [SerializeField] private DieScript playerDeath;
 
     // State tracking
     private bool isPaused = false;
