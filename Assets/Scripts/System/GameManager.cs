@@ -279,31 +279,42 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (ShipPartManager.Instance != null)
+        ShipPartManager shipPartManager = FindObjectOfType<ShipPartManager>();
+
+        if (shipPartManager == null)
+        {
+            // Create a new one if it doesn't exist
+            GameObject shipPartManagerObj = new GameObject("ShipPartManager");
+            shipPartManager = shipPartManagerObj.AddComponent<ShipPartManager>();
+        }
+
+        if (shipPartManager != null)
         {
             Debug.Log($"Target ship parts: {checkpointShipParts}");
 
-            while (ShipPartManager.Instance.GetParts() > 0)
+            // Reset to zero first
+            while (shipPartManager.GetParts() > 0)
             {
-                ShipPartManager.Instance.UsePart();
+                shipPartManager.UsePart();
             }
 
+            // Add back saved parts
             for (int i = 0; i < checkpointShipParts; i++)
             {
-                ShipPartManager.Instance.AddPart();
+                shipPartManager.AddPart();
             }
 
             // Restore puzzle completion states
-            ShipPartManager.Instance.enginePuzzleCompleted = checkpointPuzzlesCompleted[0];
-            ShipPartManager.Instance.cockpitPuzzleCompleted = checkpointPuzzlesCompleted[1];
-            ShipPartManager.Instance.lifeSupportPuzzleCompleted = checkpointPuzzlesCompleted[2];
-            ShipPartManager.Instance.airlockPuzzleCompleted = checkpointPuzzlesCompleted[3];
+            shipPartManager.enginePuzzleCompleted = checkpointPuzzlesCompleted[0];
+            shipPartManager.cockpitPuzzleCompleted = checkpointPuzzlesCompleted[1];
+            shipPartManager.lifeSupportPuzzleCompleted = checkpointPuzzlesCompleted[2];
+            shipPartManager.airlockPuzzleCompleted = checkpointPuzzlesCompleted[3];
 
             // Restore part placement states
-            ShipPartManager.Instance.enginePartPlaced = checkpointPartsPlaced[0];
-            ShipPartManager.Instance.cockpitPartPlaced = checkpointPartsPlaced[1];
-            ShipPartManager.Instance.lifeSupportPartPlaced = checkpointPartsPlaced[2];
-            ShipPartManager.Instance.airlockPartPlaced = checkpointPartsPlaced[3];
+            shipPartManager.enginePartPlaced = checkpointPartsPlaced[0];
+            shipPartManager.cockpitPartPlaced = checkpointPartsPlaced[1];
+            shipPartManager.lifeSupportPartPlaced = checkpointPartsPlaced[2];
+            shipPartManager.airlockPartPlaced = checkpointPartsPlaced[3];
         }
     }
 

@@ -81,4 +81,7 @@ Assets/Sci-Fi Styled Modular Pack
 !Assets/Sci-Fi Styled Modular Pack.gitkeep
 
 /Assets/Scenes/Main 1.unity
-/Assets/Scenes/Main 1.meta
+Assets/Scenes/Main 1.unity.meta
+
+/Assets/Scenes/Level2Init.unity
+Assets/Scenes/Level2Init.unity.meta
