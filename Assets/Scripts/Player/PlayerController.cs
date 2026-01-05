@@ -687,7 +687,7 @@ public class PlayerController : MonoBehaviour
                     }
 
                     //Exit crouch if dash input is pressed
-                    if (dashInput && canDash && dashCooldownTimer <= 0)
+                    else if (dashInput && canDash && dashCooldownTimer <= 0)
                     {
                         state = MovementState.Dash;
                         StartDash();
