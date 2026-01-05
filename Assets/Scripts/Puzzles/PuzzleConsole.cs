@@ -12,7 +12,7 @@ public abstract class PuzzleConsole : MonoBehaviour
     public string consoleName = "Console";
 
     public KeyCode interactKey = KeyCode.C;
-    public float interactionRange = 3f;
+    public float interactionRange = 8f;
     private bool puzzleWasStarted = false;
 
     // UI References
@@ -228,6 +228,13 @@ public abstract class PuzzleConsole : MonoBehaviour
     protected void StartPuzzle()
     {
         puzzleActive = true;
+        puzzleWasStarted = true;
+
+        // Hide prompt immediately when puzzle starts
+        if (promptText != null)
+        {
+            promptText.gameObject.SetActive(false);
+        }
 
         if (puzzleUI != null)
         {

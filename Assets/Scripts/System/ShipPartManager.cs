@@ -94,6 +94,18 @@ public class ShipPartManager : MonoBehaviour
         return collectedParts;
     }
 
+    public void DecrementPart()
+    {
+        if (collectedParts > 0)
+        {
+            collectedParts--;
+            UpdateUI();
+        }
+        else
+        {
+            Debug.LogWarning("Tried to decrement ship parts when count is already 0!");
+        }
+    }
     // Check if specific console puzzle is completed
     public bool IsPuzzleCompleted(PuzzleType puzzleType)
     {

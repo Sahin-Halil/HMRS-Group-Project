@@ -36,6 +36,11 @@ public class UIManager : MonoBehaviour
         pauseAction = playerInput.actions["Pause"];
         pauseAction.performed += OnPause;
 
+        // Get current scene info
+        Scene currentScene = SceneManager.GetActiveScene();
+        string sceneName = currentScene.name;
+        int sceneBuildIndex = currentScene.buildIndex;
+
         // Check if this scene load is due to a checkpoint respawn
         if (GameManager.Instance != null && GameManager.Instance.IsRespawning())
         {
@@ -49,12 +54,19 @@ public class UIManager : MonoBehaviour
         {
             isRestarting = false;
             StartGame();
+            return;
+        }
+
+        // Determine if this is the first scene
+        if (sceneBuildIndex == 0 || sceneName == "Main")
+        {
+            // First scene - show main menu
+            Time.timeScale = 0f;
+            OpenMainMenu();
         }
         else
         {
-            // First time loading - show the start menu
-            Time.timeScale = 0f; // Pause game until they click Start
-            OpenMainMenu();
+            StartGame();
         }
     }
 

@@ -407,7 +407,7 @@ public class InventoryManager : MonoBehaviour
             Debug.Log($"Decreased {itemToDrop.shipPartType} pieces to {partPieces[itemToDrop.shipPartType]}");
             if (ShipPartManager.Instance != null)
             {
-                ShipPartManager.Instance.UsePart(); // decrement UI count
+                ShipPartManager.Instance.DecrementPart();
             }
         }
 

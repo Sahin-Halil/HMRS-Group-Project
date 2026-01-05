@@ -121,7 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 0
   itemName: Ship Part Piece
-  itemIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  itemIcon: {fileID: -1561796954, guid: 649aa630ee09c4c04879ef7ea1970a90, type: 3}
   shipPartType: 0
   isPartTypeAssigned: 0
   autoPickup: 1

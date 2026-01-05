@@ -215,7 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 1
   itemName: Life Support Part
-  itemIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  itemIcon: {fileID: -718507973, guid: fda3c104ae4bd4b33bf6df23018f42fe, type: 3}
   shipPartType: 2
   isPartTypeAssigned: 0
   autoPickup: 1

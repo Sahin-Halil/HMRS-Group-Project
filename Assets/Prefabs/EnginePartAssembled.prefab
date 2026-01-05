@@ -121,7 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 1
   itemName: Engine Part
-  itemIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  itemIcon: {fileID: -73671772, guid: 56d4682ec37964f6bbca43c63e21e2e4, type: 3}
   shipPartType: 0
   isPartTypeAssigned: 0
   autoPickup: 1

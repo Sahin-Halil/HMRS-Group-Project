@@ -121,7 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemType: 1
   itemName: Airlock Part
-  itemIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  itemIcon: {fileID: -1479578116, guid: b368c2eaf587d43dbaa6087c26ef35a8, type: 3}
   shipPartType: 3
   isPartTypeAssigned: 0
   autoPickup: 1
