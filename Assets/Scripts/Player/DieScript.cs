@@ -23,19 +23,28 @@ public class DieScript : MonoBehaviour
     {
         if (isDead) return;
 
-        toggleDeathStatus();
+        isDead = true;
+        Debug.Log("Die() called");
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.PlayerDied();
             int remainingLives = GameManager.Instance.GetRemainingLives();
+            Debug.Log($"After death, remaining lives: {remainingLives}");
+
             if (remainingLives <= 0)
             {
                 ShowGameOverScreen();
             }
+            else
+            {
+                // Still have lives - GameManager handle auto-respawn
+                Debug.Log("Auto-respawning at checkpoint...");
+            }
         }
         else
         {
+            // No GameManager - show game over
             ShowGameOverScreen();
         }
     }
@@ -52,7 +61,11 @@ public class DieScript : MonoBehaviour
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        playerInput.actions.Disable();
+
+        if (playerInput != null)
+        {
+            playerInput.actions.Disable();
+        }
     }
 
     // Toggles death state
@@ -74,4 +87,17 @@ public class DieScript : MonoBehaviour
             isDead = false;
         }
     }
+
+    public void RestartFromGameOver()
+    {
+        Debug.Log("Restarting game from Game Over");
+
+        Time.timeScale = 1f;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RestartGame();
+        }
+    }
+
 }

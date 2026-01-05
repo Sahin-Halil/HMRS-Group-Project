@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 2818845266781639634}
   - component: {fileID: 4625537183139787398}
   - component: {fileID: 5459274771336128211}
-  - component: {fileID: 3308222160435057151}
   m_Layer: 0
   m_Name: EngineConsole
   m_TagString: Untagged
@@ -107,40 +106,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3308222160435057151
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2277641001157226074}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b71bc772023f845e6b935504fd06974d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  puzzleType: 0
-  consoleName: Engine Console
-  interactKey: 99
-  interactionRange: 3
-  puzzleUI: {fileID: 2644821008182455178}
-  promptText: {fileID: 0}
-  statusText: {fileID: 0}
-  consoleRenderer: {fileID: 4625537183139787398}
-  originalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  puzzleCompleteColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  partPlacedColor: {r: 0, g: 1, b: 0, a: 1}
-  gridWidth: 4
-  gridHeight: 4
-  totalNumbers: 10
-  timeLimit: 10
-  gridParent: {fileID: 2773645613689848676}
-  numberButtonPrefab: {fileID: 42492716387398403, guid: 7acec4a4133d340adbe4bc5bd2cfb0fa, type: 3}
-  instructionText: {fileID: 1916121907474340626}
-  timerText: {fileID: 0}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  buttonNormalColor: {r: 1, g: 1, b: 1, a: 1}
-  buttonClickedColor: {r: 1, g: 1, b: 1, a: 0.3}
 --- !u!1 &2644821008182455178
 GameObject:
   m_ObjectHideFlags: 0

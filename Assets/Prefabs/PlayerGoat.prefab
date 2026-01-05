@@ -148,6 +148,9 @@ MonoBehaviour:
   characterCamera: {fileID: 407019452281371206}
   uiManager: {fileID: 0}
   playerDeath: {fileID: 281696211532664871}
+  mouseSense: 0.5
+  xRotation: 0
+  yRotation: 0
   crouchSpeed: 2.5
   runSpeed: 7.5
   startSlideSpeed: 12
@@ -248,6 +251,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   respawnMenuUI: {fileID: 0}
+  gameOverText: {fileID: 0}
 --- !u!82 &8985771796809799330
 AudioSource:
   m_ObjectHideFlags: 0

@@ -1,27 +1,34 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    // Player References
-    [SerializeField] private PlayerInput playerInput;
-    public Transform player;
-    public HealthSystem playerHealth;
-    public PlayerOxygen playerOxygen;
-    public DieScript playerDieScript;
+    // Player References - find at runtime
+    [HideInInspector] public Transform player;
+    [HideInInspector] public HealthSystem playerHealth;
+    [HideInInspector] public PlayerOxygen playerOxygen;
+    [HideInInspector] public DieScript playerDieScript;
+    [HideInInspector] public PlayerInput playerInput;
 
     // Checkpoint System
     public Vector3 currentCheckpoint;
     public int maxLives = 3;
     public int currentLives;
+    public string currentScene;
 
     private int gameplayLockCount = 0;
     private int checkpointShipParts = 0;
     private bool[] checkpointPuzzlesCompleted = new bool[4];
     private bool[] checkpointPartsPlaced = new bool[4];
+    private bool isRespawning = false;
+
+    private List<string> checkpointCollectedPieceNames = new List<string>();
+    private int checkpointKeyCards = 0;
+    private List<int> checkpointCollectedCardNumbers = new List<int>();
 
     void Awake()
     {
@@ -29,6 +36,7 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -39,12 +47,50 @@ public class GameManager : MonoBehaviour
         currentLives = maxLives;
     }
 
-    // Set initial checkpoint to player's starting position
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        FindPlayerReferences();
+
+        // If we're respawning, restore checkpoint position
+        if (isRespawning && currentScene == scene.name)
+        {
+            Invoke(nameof(RespawnAtCheckpoint), 0.2f);
+        }
+        // Otherwise, set initial checkpoint for new scene
+        else if (player != null && !isRespawning)
+        {
+            currentCheckpoint = player.position;
+            currentScene = scene.name;
+            SaveCheckpoint();
+        }
+    }
+
+    void FindPlayerReferences()
+    {
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+            playerHealth = playerObj.GetComponent<HealthSystem>();
+            playerOxygen = playerObj.GetComponent<PlayerOxygen>();
+            playerDieScript = playerObj.GetComponent<DieScript>();
+            playerInput = playerObj.GetComponent<PlayerInput>();
+        }
+    }
+
     void Start()
     {
+        FindPlayerReferences();
+
         if (player != null)
         {
             currentCheckpoint = player.position;
+            currentScene = SceneManager.GetActiveScene().name;
         }
 
         SaveCheckpoint();
@@ -53,12 +99,31 @@ public class GameManager : MonoBehaviour
     public void SetCheckpoint(Vector3 position)
     {
         currentCheckpoint = position;
+        currentScene = SceneManager.GetActiveScene().name;
         SaveCheckpoint();
+        Debug.Log($"Checkpoint saved at {position} in {currentScene}. Lives remaining: {currentLives}");
     }
 
-    // Save ship parts and puzzle progress at checkpoint
-    void SaveCheckpoint()
+    public void SaveCheckpoint()
     {
+        // Save key cards (outdoor)
+        if (KeyCardManager.Instance != null)
+        {
+            checkpointKeyCards = KeyCardManager.Instance.GetCollectedCards();
+        }
+
+        // Save key card objects that were collected
+        checkpointCollectedCardNumbers.Clear();
+        KeyCard[] allCards = FindObjectsOfType<KeyCard>(true);
+        foreach (KeyCard card in allCards)
+        {
+            if (!card.gameObject.activeInHierarchy)
+            {
+                checkpointCollectedCardNumbers.Add(card.cardNumber);
+            }
+        }
+
+        // Save ship parts (indoor)
         if (ShipPartManager.Instance != null)
         {
             checkpointShipParts = ShipPartManager.Instance.GetParts();
@@ -73,22 +138,67 @@ public class GameManager : MonoBehaviour
             checkpointPartsPlaced[2] = ShipPartManager.Instance.lifeSupportPartPlaced;
             checkpointPartsPlaced[3] = ShipPartManager.Instance.airlockPartPlaced;
         }
+
+        // Save collected ship pieces (indoor)
+        checkpointCollectedPieceNames.Clear();
+        PickupItem[] allItems = FindObjectsOfType<PickupItem>(true);
+
+        foreach (PickupItem item in allItems)
+        {
+            if (item.itemType == ItemType.ShipPartPiece && !item.gameObject.activeInHierarchy)
+            {
+                string itemPath = GetGameObjectPath(item.gameObject);
+                checkpointCollectedPieceNames.Add(itemPath);
+            }
+        }
     }
 
-    // Automatically respawn at checkpoint after short delay
+    string GetGameObjectPath(GameObject obj)
+    {
+        string path = obj.name;
+        Transform current = obj.transform.parent;
+
+        while (current != null)
+        {
+            path = current.name + "/" + path;
+            current = current.parent;
+        }
+
+        return path;
+    }
+
     public void PlayerDied()
     {
         currentLives--;
+        Debug.Log($"Player died! Lives remaining: {currentLives}/{maxLives}");
 
         if (currentLives > 0)
         {
-            Invoke(nameof(RespawnAtCheckpoint), 1f);
+            isRespawning = true;
+            SceneManager.LoadScene(currentScene);
+        }
+        else
+        {
+            Debug.Log("Game Over - No lives remaining");
         }
     }
 
     void RespawnAtCheckpoint()
     {
-        if (player == null) return;
+        isRespawning = false;
+
+        if (player == null)
+        {
+            FindPlayerReferences();
+        }
+
+        if (player == null)
+        {
+            Debug.LogError("Cannot respawn - player not found!");
+            return;
+        }
+
+        Debug.Log($"Respawning at checkpoint: {currentCheckpoint}");
 
         // Restore position
         CharacterController cc = player.GetComponent<CharacterController>();
@@ -132,41 +242,69 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        PlayerInput playerInput = player.GetComponent<PlayerInput>();
         if (playerInput != null)
         {
             playerInput.actions.Enable();
         }
+
+        Debug.Log($"Respawn complete. Lives: {currentLives}/{maxLives}");
+    }
+
+    public bool IsRespawning()
+    {
+        return isRespawning;
     }
 
     void RestoreCheckpointData()
     {
-        if (ShipPartManager.Instance == null) return;
 
-        int currentParts = ShipPartManager.Instance.GetParts();
-        int targetParts = checkpointShipParts;
-
-        while (ShipPartManager.Instance.GetParts() > 0)
+        if (KeyCardManager.Instance != null)
         {
-            ShipPartManager.Instance.UsePart();
+            KeyCardManager.Instance.SetCollectedCards(checkpointKeyCards);
+
+            Debug.Log($"Restoring {checkpointCollectedCardNumbers.Count} collected cards");
+
+            KeyCard[] allCards = FindObjectsOfType<KeyCard>(true);
+            foreach (KeyCard card in allCards)
+            {
+                if (checkpointCollectedCardNumbers.Contains(card.cardNumber))
+                {
+                    card.gameObject.SetActive(false);
+                    Debug.Log($"Hiding collected card #{card.cardNumber}");
+                }
+                else
+                {
+                    card.gameObject.SetActive(true);
+                }
+            }
         }
 
-        for (int i = 0; i < targetParts; i++)
+        if (ShipPartManager.Instance != null)
         {
-            ShipPartManager.Instance.AddPart();
+            Debug.Log($"Target ship parts: {checkpointShipParts}");
+
+            while (ShipPartManager.Instance.GetParts() > 0)
+            {
+                ShipPartManager.Instance.UsePart();
+            }
+
+            for (int i = 0; i < checkpointShipParts; i++)
+            {
+                ShipPartManager.Instance.AddPart();
+            }
+
+            // Restore puzzle completion states
+            ShipPartManager.Instance.enginePuzzleCompleted = checkpointPuzzlesCompleted[0];
+            ShipPartManager.Instance.cockpitPuzzleCompleted = checkpointPuzzlesCompleted[1];
+            ShipPartManager.Instance.lifeSupportPuzzleCompleted = checkpointPuzzlesCompleted[2];
+            ShipPartManager.Instance.airlockPuzzleCompleted = checkpointPuzzlesCompleted[3];
+
+            // Restore part placement states
+            ShipPartManager.Instance.enginePartPlaced = checkpointPartsPlaced[0];
+            ShipPartManager.Instance.cockpitPartPlaced = checkpointPartsPlaced[1];
+            ShipPartManager.Instance.lifeSupportPartPlaced = checkpointPartsPlaced[2];
+            ShipPartManager.Instance.airlockPartPlaced = checkpointPartsPlaced[3];
         }
-
-        // Restore puzzle completion states
-        ShipPartManager.Instance.enginePuzzleCompleted = checkpointPuzzlesCompleted[0];
-        ShipPartManager.Instance.cockpitPuzzleCompleted = checkpointPuzzlesCompleted[1];
-        ShipPartManager.Instance.lifeSupportPuzzleCompleted = checkpointPuzzlesCompleted[2];
-        ShipPartManager.Instance.airlockPuzzleCompleted = checkpointPuzzlesCompleted[3];
-
-        // Restore part placement states
-        ShipPartManager.Instance.enginePartPlaced = checkpointPartsPlaced[0];
-        ShipPartManager.Instance.cockpitPartPlaced = checkpointPartsPlaced[1];
-        ShipPartManager.Instance.lifeSupportPartPlaced = checkpointPartsPlaced[2];
-        ShipPartManager.Instance.airlockPartPlaced = checkpointPartsPlaced[3];
     }
 
     public int GetRemainingLives()
@@ -178,17 +316,27 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         currentLives = maxLives;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        currentScene = "";
+        currentCheckpoint = Vector3.zero;
+        isRespawning = false;
+        checkpointCollectedPieceNames.Clear();
+        checkpointCollectedCardNumbers.Clear();
+
+        if (KeyCardManager.Instance != null)
+        {
+            KeyCardManager.Instance.ResetCards();
+        }
+
+        SceneManager.LoadScene("Main");
     }
 
     public void LockGameplay()
     {
         gameplayLockCount++;
 
-        if (gameplayLockCount == 1)
+        if (gameplayLockCount == 1 && playerInput != null)
         {
-            if (playerInput != null)
-                playerInput.actions.Disable();
+            playerInput.actions.Disable();
         }
     }
 
@@ -196,10 +344,9 @@ public class GameManager : MonoBehaviour
     {
         gameplayLockCount = Mathf.Max(0, gameplayLockCount - 1);
 
-        if (gameplayLockCount == 0)
+        if (gameplayLockCount == 0 && playerInput != null)
         {
-            if (playerInput != null)
-                playerInput.actions.Enable();
+            playerInput.actions.Enable();
         }
     }
 
@@ -207,5 +354,4 @@ public class GameManager : MonoBehaviour
     {
         return gameplayLockCount > 0;
     }
-
 }

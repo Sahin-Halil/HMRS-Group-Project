@@ -123,17 +123,19 @@ public class InventoryManager : MonoBehaviour
     {
         if (item.itemType == ItemType.DataLog)
         {
+            Debug.Log($"Adding data log: {item.itemName}");
             ShowDataLogInfo(item);
             return true;
         }
 
         if (item.itemType == ItemType.ShipPartPiece)
         {
-            Debug.Log($"Attempting to add ship part piece. Current inventory: {inventory.Count}/{maxSlots}");
+            int usedSlots = GetUsedSlots();
+            Debug.Log($"Attempting to add ship part piece. Used slots: {usedSlots}/{maxSlots}, Item slot size: {item.slotSize}");
 
-            if (GetUsedSlots() + item.slotSize > maxSlots)
+            if (usedSlots + item.slotSize > maxSlots)
             {
-                Debug.Log("Inventory full!");
+                Debug.Log($"INVENTORY FULL! Cannot add {item.itemName}. Used: {usedSlots}, Max: {maxSlots}, Needed: {item.slotSize}");
                 ShowInventoryFullMessage();
                 return false;
             }
@@ -143,12 +145,11 @@ public class InventoryManager : MonoBehaviour
             {
                 ShipPartType assignedPart = GetRandomIncompletePartType();
                 item.shipPartType = assignedPart;
+                Debug.Log($"Assigned random type: {assignedPart}");
             }
 
             inventory.Add(item);
             partPieces[item.shipPartType]++;
-
-            Debug.Log($"Added piece for {item.shipPartType}. Total: {partPieces[item.shipPartType]}/{piecesRequired[item.shipPartType]}");
 
             UpdateInventoryUI();
             CheckCraftingAvailability();
@@ -158,8 +159,10 @@ public class InventoryManager : MonoBehaviour
 
         if (item.itemType == ItemType.AssembledShipPart)
         {
+            int usedSlots = GetUsedSlots();
+
             // Assembled parts take 2 slots
-            if (GetUsedSlots() + item.slotSize > maxSlots)
+            if (usedSlots + item.slotSize > maxSlots)
             {
                 ShowInventoryFullMessage();
                 return false;
@@ -402,6 +405,10 @@ public class InventoryManager : MonoBehaviour
         {
             partPieces[itemToDrop.shipPartType]--;
             Debug.Log($"Decreased {itemToDrop.shipPartType} pieces to {partPieces[itemToDrop.shipPartType]}");
+            if (ShipPartManager.Instance != null)
+            {
+                ShipPartManager.Instance.UsePart(); // decrement UI count
+            }
         }
 
         // Calculate drop position in front of player

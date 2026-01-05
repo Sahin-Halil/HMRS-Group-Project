@@ -22,7 +22,7 @@ public class UIManager : MonoBehaviour
     // State tracking
     private bool isPaused = false;
     private bool hasWon = false;
-    
+
     // Static flag to track if this is a restart (persists across scene reloads)
     private static bool isRestarting = false;
 
@@ -31,15 +31,22 @@ public class UIManager : MonoBehaviour
     {
         pauseMenuUI.SetActive(false);
         hasWon = false;
-        
+
         // Get the Pause action from the PlayerInput component and subscribe to it
         pauseAction = playerInput.actions["Pause"];
-        pauseAction.performed += ctx => OnPause();
+        pauseAction.performed += OnPause;
 
-        // Check if this is a restart or first load
+        // Check if this scene load is due to a checkpoint respawn
+        if (GameManager.Instance != null && GameManager.Instance.IsRespawning())
+        {
+            // Respawn flow → skip menus entirely
+            StartGame();
+            return;
+        }
+
+        // If restarting, skip the main menu and start the game directly
         if (isRestarting)
         {
-            // If restarting, skip the main menu and start the game directly
             isRestarting = false;
             StartGame();
         }
@@ -56,45 +63,38 @@ public class UIManager : MonoBehaviour
         // Unsubscribe from the action when the object is destroyed
         if (pauseAction != null)
         {
-            pauseAction.performed -= ctx => OnPause();
+            pauseAction.performed -= OnPause;
         }
     }
 
     // Handles pause toggling (can be called from UI buttons or input action)
-    public void OnPause()
+    public void OnPause(InputAction.CallbackContext ctx)
     {
-        // Check if objects still exist (they might be destroyed during scene reload)
-        if (pauseMenuUI == null || playerDeath == null) return;
-        
-        if (!playerDeath.checkDead() && !hasWon)
-        {
-            if (isPaused) { ResumeGame(); }
-            else { PauseGame(); }
-        }
+        if (playerDeath.checkDead() || hasWon) return;
+
+        if (!isPaused)
+            PauseGame();
+        else
+            ResumeGame();
     }
+
 
     // Pauses game by stopping timescale to 0, and locking all player movement
     public void PauseGame()
     {
-        if (pauseMenuUI == null || playerInput == null) return;
-        
         isPaused = true;
         Time.timeScale = 0f;
         pauseMenuUI.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        playerInput.actions.Disable();
     }
 
     // Resumes game by undoing all the actions taken by PauseGame()
     public void ResumeGame()
     {
-        if (pauseMenuUI == null || settingsMenuUI == null || playerInput == null) return;
-        
         isPaused = false;
         Time.timeScale = 1f;
         pauseMenuUI.SetActive(false);
-        settingsMenuUI.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         playerInput.actions.Enable();
@@ -103,7 +103,7 @@ public class UIManager : MonoBehaviour
     // Exits the game or returns to the title screen
     public void ExitGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene("Main");
         OpenMainMenu();
     }
 
@@ -130,7 +130,10 @@ public class UIManager : MonoBehaviour
     {
         isRestarting = true; // Set flag so Start() knows this is a restart
         Time.timeScale = 1f; // Reset time scale before reloading
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RestartGame();
+        }
     }
 
     // Handles win state and displays win menu
@@ -150,13 +153,21 @@ public class UIManager : MonoBehaviour
         notEnoughPartsUI.SetActive(value);
     }
 
-    public bool getPauseState() 
+    public bool getPauseState()
     {
         return isPaused;
     }
 
-    public void StartGame() 
+    public void StartGame()
     {
+        startMenuUI.SetActive(false);
+        pauseMenuUI.SetActive(false);
+        settingsMenuUI.SetActive(false);
+        winMenuUI.SetActive(false);
+        notEnoughPartsUI.SetActive(false);
+        creditsMenuUI.SetActive(false);
+        startSettingsMenuUI.SetActive(false);
+
         startMenuUI.SetActive(false);
         Time.timeScale = 1f; // Unpause the game
         Cursor.lockState = CursorLockMode.Locked;
@@ -175,13 +186,13 @@ public class UIManager : MonoBehaviour
         notEnoughPartsUI.SetActive(false);
         creditsMenuUI.SetActive(false);
         HUD.SetActive(false);
-        
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         playerInput.actions.Disable();
     }
 
-    public void OpenStartSettings() 
+    public void OpenStartSettings()
     {
         startSettingsMenuUI.SetActive(true);
         startMenuUI.SetActive(false);

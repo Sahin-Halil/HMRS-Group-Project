@@ -24,16 +24,6 @@ public class PauseManager : MonoBehaviour
         hasWon = false;
     }
 
-    // Checks every frame to see if the player has pressed the escape key to open the settings menu
-    void Update()
-    {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame && !playerDeath.checkDead() && !hasWon)
-        {
-            if (isPaused) { ResumeGame(); }
-            else { PauseGame(); }
-        }
-    }
-
     // Pauses game by stopping timescale to 0, and locking all player movement
     public void PauseGame()
     {

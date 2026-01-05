@@ -135,6 +135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   number: 0
+  text: {fileID: 3213915882104031875}
 --- !u!1 &4357651730588060290
 GameObject:
   m_ObjectHideFlags: 0

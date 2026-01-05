@@ -7,7 +7,7 @@ using TMPro;
 public class PowerConduitPuzzle : PuzzleConsole
 {
     // Puzzle Settings and UI
-    public int gridWidth = 3;
+    public int gridWidth = 4;
     public int gridHeight = 3;
     public int totalNumbers = 10;
     public float timeLimit = 10f;
@@ -119,10 +119,11 @@ public class PowerConduitPuzzle : PuzzleConsole
 
     void GenerateNumberGrid()
     {
-        foreach (Transform child in gridParent)
+        while (gridParent.childCount > 0)
         {
-            Destroy(child.gameObject);
+            DestroyImmediate(gridParent.GetChild(0).gameObject);
         }
+
         allButtons.Clear();
 
         List<int> numbers = new List<int>();
@@ -141,20 +142,15 @@ public class PowerConduitPuzzle : PuzzleConsole
         }
 
         // Create buttons in grid
-        int totalSlots = gridWidth * gridHeight;
-        for (int i = 0; i < totalSlots; i++)
+        for (int i = 0; i < totalNumbers; i++)
         {
             GameObject obj = Instantiate(numberButtonPrefab, gridParent);
             NumberButton numButton = obj.GetComponent<NumberButton>();
 
-            if (numButton != null && i < numbers.Count)
+            if (numButton != null)
             {
                 numButton.Initialize(numbers[i], this);
                 allButtons.Add(numButton);
-            }
-            else if (numButton != null)
-            {
-                numButton.gameObject.SetActive(false);
             }
         }
     }

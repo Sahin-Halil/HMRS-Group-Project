@@ -13,6 +13,7 @@ public abstract class PuzzleConsole : MonoBehaviour
 
     public KeyCode interactKey = KeyCode.C;
     public float interactionRange = 3f;
+    private bool puzzleWasStarted = false;
 
     // UI References
     public GameObject puzzleUI;
@@ -59,9 +60,9 @@ public abstract class PuzzleConsole : MonoBehaviour
 
             if (promptText != null)
             {
-                promptText.gameObject.SetActive(playerInRange && !puzzleActive);
+                promptText.gameObject.SetActive(ShouldShowPrompt);
 
-                if (playerInRange && !puzzleActive)
+                if (ShouldShowPrompt)
                 {
                     promptText.text = GetPromptText();
                 }
@@ -395,6 +396,17 @@ public abstract class PuzzleConsole : MonoBehaviour
         }
     }
 
+    // Add this property to control prompt visibility
+    private bool ShouldShowPrompt
+    {
+        get
+        {
+            return playerInRange &&
+                   !puzzleActive &&
+                   !shipPartManager.IsPuzzleCompleted(puzzleType) &&
+                   !puzzleWasStarted;
+        }
+    }
     // Abstract methods for each puzzle to implement
     protected abstract void OnPuzzleStart();
     protected abstract void OnPuzzleComplete();
