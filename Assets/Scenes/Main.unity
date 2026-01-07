@@ -4515,36 +4515,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 329347732}
-  - component: {fileID: 329347731}
+  - component: {fileID: 329347733}
   m_Layer: 0
-  m_Name: ShipPartManager
+  m_Name: KeyCardManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &329347731
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 329347730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f3c4cbd9320f664793e3918ffe1b378, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  collectedParts: 0
-  totalPartsNeeded: 12
-  enginePuzzleCompleted: 0
-  cockpitPuzzleCompleted: 0
-  lifeSupportPuzzleCompleted: 0
-  airlockPuzzleCompleted: 0
-  enginePartPlaced: 0
-  cockpitPartPlaced: 0
-  lifeSupportPartPlaced: 0
-  airlockPartPlaced: 0
 --- !u!4 &329347732
 Transform:
   m_ObjectHideFlags: 0
@@ -4560,6 +4538,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &329347733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 329347730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f34fcaaaf0a6b4302bb3478e260237cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  totalCards: 12
+  keyCardText: {fileID: 0}
 --- !u!1 &338269516
 GameObject:
   m_ObjectHideFlags: 0
