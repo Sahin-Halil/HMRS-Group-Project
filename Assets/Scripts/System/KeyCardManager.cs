@@ -6,7 +6,7 @@ public class KeyCardManager : MonoBehaviour
 {
     public static KeyCardManager Instance;
 
-    [SerializeField] private int totalCards = 12;
+    [SerializeField] private int totalCards = 8;
     [SerializeField] private TMP_Text keyCardText;
 
     private int collectedCards = 0;
