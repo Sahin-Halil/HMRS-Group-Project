@@ -523,7 +523,6 @@ GameObject:
   - component: {fileID: 333837086874464313}
   - component: {fileID: 8127166218257884729}
   - component: {fileID: 4169795541926455497}
-  - component: {fileID: 6128869211994708901}
   m_Layer: 0
   m_Name: LifeSupportConsole
   m_TagString: Untagged
@@ -575,7 +574,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 21085cfc4f7ff8a4291ed42a85f27537, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -618,38 +617,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6128869211994708901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7958358167358507443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4fab49773f411443ea40662199c9d7ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  puzzleType: 2
-  consoleName: Life Support Console
-  interactKey: 99
-  interactionRange: 3
-  puzzleUI: {fileID: 3919595263714397125}
-  promptText: {fileID: 0}
-  statusText: {fileID: 0}
-  consoleRenderer: {fileID: 0}
-  originalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  puzzleCompleteColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  partPlacedColor: {r: 0, g: 1, b: 0, a: 1}
-  resourcesPerType: 2
-  resourcesContainer: {fileID: 1693648072529979303}
-  slotsContainer: {fileID: 2708924878727933134}
-  resourceButtonPrefab: {fileID: 3094964274503091754, guid: 580fef60bf7404f4982b7f67d63caec8, type: 3}
-  slotPrefab: {fileID: 2873553767250618896, guid: 6811f7ee4d51847e0a8811bf7b588268, type: 3}
-  instructionText: {fileID: 5271510529801457128}
-  oxygenColor: {r: 0, g: 1, b: 1, a: 1}
-  nitrogenColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  co2Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &8392405788852119035
 GameObject:
   m_ObjectHideFlags: 0

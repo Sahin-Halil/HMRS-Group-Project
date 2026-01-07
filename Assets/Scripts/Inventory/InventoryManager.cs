@@ -429,30 +429,7 @@ public class InventoryManager : MonoBehaviour
             return;
         }
 
-        itemToDrop.gameObject.SetActive(true);
-
-        // Disable physics temporarily to set position
-        Rigidbody rb = itemToDrop.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-        }
-
-        // Set position
-        itemToDrop.transform.position = dropPos;
-        itemToDrop.transform.rotation = Quaternion.identity;
-
-        // Re-enable physics
-        if (rb != null)
-        {
-            rb.isKinematic = false;
-        }
-
-        Renderer[] renderers = itemToDrop.GetComponentsInChildren<Renderer>();
-        foreach (Renderer rend in renderers)
-        {
-            rend.enabled = true;
-        }
+        itemToDrop.Drop(dropPos);
 
         UpdateInventoryUI();
         CheckCraftingAvailability();

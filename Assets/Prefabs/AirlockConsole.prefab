@@ -1274,7 +1274,6 @@ GameObject:
   - component: {fileID: 5736305796803013370}
   - component: {fileID: 322062277283393679}
   - component: {fileID: 4977919830498987796}
-  - component: {fileID: 8426647881500209731}
   m_Layer: 0
   m_Name: AirlockConsole
   m_TagString: Untagged
@@ -1326,7 +1325,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 21085cfc4f7ff8a4291ed42a85f27537, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1369,46 +1368,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8426647881500209731
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5633457741526516751}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa0951ed518154501a570a03135556b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  puzzleType: 3
-  consoleName: AirlockConsole
-  interactKey: 99
-  interactionRange: 3
-  puzzleUI: {fileID: 8438468455091354753}
-  promptText: {fileID: 0}
-  statusText: {fileID: 7710714582022497519}
-  consoleRenderer: {fileID: 322062277283393679}
-  originalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  puzzleCompleteColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  partPlacedColor: {r: 0, g: 1, b: 0, a: 1}
-  targetFrequencies:
-  - 25
-  - 50
-  - 75
-  tolerance: 5
-  lockInTime: 2
-  frequencySlider: {fileID: 5847708120779364370}
-  frequencyDisplayText: {fileID: 0}
-  puzzleInstructionText: {fileID: 0}
-  lockStatusText: {fileID: 0}
-  signalStrengthBar: {fileID: 3635504487160575316}
-  weakSignalColor: {r: 1, g: 0, b: 0, a: 1}
-  strongSignalColor: {r: 0, g: 1, b: 0, a: 1}
-  lockIndicators:
-  - {fileID: 3494595573163425115}
-  - {fileID: 2772866598664396558}
-  - {fileID: 1575472195772275716}
 --- !u!1 &6488349092468801521
 GameObject:
   m_ObjectHideFlags: 0

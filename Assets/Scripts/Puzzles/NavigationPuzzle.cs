@@ -200,7 +200,7 @@ public class NavigationPuzzle : PuzzleConsole
     {
         if (instructionText != null)
         {
-            instructionText.text = "SUCCESS! All shapes matched!";
+            instructionText.text = "SUCCESS! Navigation System Repaired!";
             instructionText.color = Color.green;
         }
 

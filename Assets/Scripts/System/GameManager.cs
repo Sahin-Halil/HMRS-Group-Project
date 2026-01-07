@@ -15,8 +15,6 @@ public class GameManager : MonoBehaviour
 
     // Checkpoint System
     public Vector3 currentCheckpoint;
-    public int maxLives = 3;
-    public int currentLives;
     public string currentScene;
 
     private int gameplayLockCount = 0;
@@ -42,8 +40,6 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
-        currentLives = maxLives;
     }
 
     void OnDestroy()
@@ -55,17 +51,10 @@ public class GameManager : MonoBehaviour
     {
         FindPlayerReferences();
 
-        // If we're respawning, restore checkpoint position
+        // Only respawn if in respawn state and it's the same scene
         if (isRespawning && currentScene == scene.name)
         {
-            Invoke(nameof(RespawnAtCheckpoint), 0.2f);
-        }
-        // Otherwise, set initial checkpoint for new scene
-        else if (player != null && !isRespawning)
-        {
-            currentCheckpoint = player.position;
-            currentScene = scene.name;
-            SaveCheckpoint();
+            Invoke(nameof(RespawnAtCheckpoint), 0.5f);
         }
     }
 
@@ -96,10 +85,10 @@ public class GameManager : MonoBehaviour
 
     public void SetCheckpoint(Vector3 position)
     {
-        currentCheckpoint = position;
+        currentCheckpoint = position + Vector3.up * 1.5f; // Player height offset
         currentScene = SceneManager.GetActiveScene().name;
         SaveCheckpoint();
-        Debug.Log($"Checkpoint saved at {position} in {currentScene}. Lives remaining: {currentLives}");
+        Debug.Log($"Checkpoint saved at {currentCheckpoint} in {currentScene}");
     }
 
     public void SaveCheckpoint()
@@ -167,18 +156,14 @@ public class GameManager : MonoBehaviour
 
     public void PlayerDied()
     {
-        currentLives--;
-        Debug.Log($"Player died! Lives remaining: {currentLives}/{maxLives}");
+        isRespawning = true;
+        SaveCheckpoint();
+    }
 
-        if (currentLives > 0)
-        {
-            isRespawning = true;
-            SceneManager.LoadScene(currentScene);
-        }
-        else
-        {
-            Debug.Log("Game Over - No lives remaining");
-        }
+    public void RespawnFromDeathMenu()
+    {
+        isRespawning = true;
+        SceneManager.LoadScene(currentScene);
     }
 
     void RespawnAtCheckpoint()
@@ -238,8 +223,6 @@ public class GameManager : MonoBehaviour
         {
             playerInput.actions.Enable();
         }
-
-        Debug.Log($"Respawn complete. Lives: {currentLives}/{maxLives}");
     }
 
     public bool IsRespawning()
@@ -249,7 +232,6 @@ public class GameManager : MonoBehaviour
 
     void RestoreCheckpointData()
     {
-
         if (KeyCardManager.Instance != null)
         {
             KeyCardManager.Instance.SetCollectedCards(checkpointKeyCards);
@@ -310,15 +292,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int GetRemainingLives()
-    {
-        return currentLives;
-    }
-
     public void RestartGame()
     {
         Time.timeScale = 1f;
-        currentLives = maxLives;
         currentScene = "";
         currentCheckpoint = Vector3.zero;
         isRespawning = false;
@@ -356,5 +332,11 @@ public class GameManager : MonoBehaviour
     public bool IsGameplayLocked()
     {
         return gameplayLockCount > 0;
+    }
+
+    public void ResetRespawnState()
+    {
+        isRespawning = false;
+        Debug.Log("Respawn state reset");
     }
 }

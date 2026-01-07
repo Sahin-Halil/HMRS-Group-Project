@@ -115,8 +115,27 @@ public class UIManager : MonoBehaviour
     // Exits the game or returns to the title screen
     public void ExitGame()
     {
+        Debug.Log("ExitGame() called from death menu");
+
+        // Hide death menu
+        HealthSystem playerHealth = FindObjectOfType<HealthSystem>();
+        if (playerHealth != null)
+        {
+            playerHealth.HideDeathMenu();
+        }
+
+        // Reset respawn state in GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetRespawnState();
+        }
+
+        // Unpause and reset restart flag
+        Time.timeScale = 1f;
+        isRestarting = false;
+
+        // Load main menu
         SceneManager.LoadScene("Main");
-        OpenMainMenu();
     }
 
     // Opens settings menu from pause menu
@@ -220,5 +239,14 @@ public class UIManager : MonoBehaviour
     {
         startMenuUI.SetActive(false);
         creditsMenuUI.SetActive(true);
+    }
+
+    public void OnRespawnButtonClicked()
+    {
+        Time.timeScale = 1f;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RespawnFromDeathMenu();
+        }
     }
 }

@@ -176,7 +176,7 @@ public class PowerConduitPuzzle : PuzzleConsole
 
         if (instructionText != null)
         {
-            instructionText.text = "SUCCESS! Sequence complete!";
+            instructionText.text = "SUCCESS! Power Conduit Repaired!";
             instructionText.color = Color.green;
         }
 

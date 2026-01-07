@@ -14,7 +14,7 @@ public class FrequencyTunerPuzzle : PuzzleConsole
     public Slider frequencySlider;
     public TMP_Text frequencyDisplayText;
     public TMP_Text puzzleInstructionText;
-    public TMP_Text lockStatusText;  
+    public TMP_Text lockStatusText;
     public Image signalStrengthBar;
 
     public Color weakSignalColor = Color.red;
@@ -223,7 +223,7 @@ public class FrequencyTunerPuzzle : PuzzleConsole
     {
         if (puzzleInstructionText != null)
         {
-            puzzleInstructionText.text = "SUCCESS! All frequencies locked!";
+            puzzleInstructionText.text = "SUCCESS! Airlock recalibrated!";
             puzzleInstructionText.color = Color.green;
         }
 

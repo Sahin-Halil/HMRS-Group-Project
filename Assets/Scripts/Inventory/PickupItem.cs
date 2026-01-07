@@ -42,6 +42,12 @@ public class PickupItem : MonoBehaviour
         }
     }
 
+    // Reset pickup state when object is enabled
+    void OnEnable()
+    {
+        isBeingPickedUp = false;
+    }
+
     void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
@@ -94,6 +100,7 @@ public class PickupItem : MonoBehaviour
     public void Drop(Vector3 position)
     {
         Debug.Log($"Dropping {itemName} at {position}");
+        isBeingPickedUp = false;
         transform.position = position;
         gameObject.SetActive(true);
 
