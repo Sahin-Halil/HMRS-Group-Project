@@ -4554,7 +4554,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalCards: 4
-  keyCardText: {fileID: 0}
+  keyCardText: {fileID: 712409088}
 --- !u!1 &338269516
 GameObject:
   m_ObjectHideFlags: 0
