@@ -78,6 +78,7 @@ public class UIManager : MonoBehaviour
     {
         if (pauseMenuUI == null || playerInput == null) return;
         
+        HUD.SetActive(false);
         isPaused = true;
         Time.timeScale = 0f;
         pauseMenuUI.SetActive(true);
@@ -91,6 +92,7 @@ public class UIManager : MonoBehaviour
     {
         if (pauseMenuUI == null || settingsMenuUI == null || playerInput == null) return;
         
+        HUD.SetActive(true);
         isPaused = false;
         Time.timeScale = 1f;
         pauseMenuUI.SetActive(false);
