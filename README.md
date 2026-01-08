@@ -71,6 +71,7 @@ A special thank you to all of the people mentioned here who published these beau
 All gameplay assets that have not been created by us are included in this section. Please note that all assets used in the game are either our own creations, or are licensed to be free for usage. If you feel we have used any art/assets belonging to you against your wishes, please feel free to contact any of the maintainers so we may promptly remove it.
 
 - Spaceship: "Federation Corvette F3" by **CGPitbull**
+- Ship Part/Console Texture: "Federation Corvette F3" by **CGPitbull**
 - Lava Texture: "Free Lava Shader" by **AYproduct**
 - Lava Assets: "Stylized Lava materials" by **Rob luo**
 - Terrain Textures: "Terrain Sample Asset Pack" by **Unity Technologies**
@@ -79,6 +80,7 @@ All gameplay assets that have not been created by us are included in this sectio
 - Lady-Enemy: "DemonBoss4" by **Panchenko Lyudmila**
 - Legs-Enemy: "Fantastic Creature #1" by **Panchenko Lyudmila**
 - Creep-Enemy: "Creep Horror Creature" by **AC Game Assets**
+- Indoor Ship Modules: "Sci-Fi Styled Modular Pack" by **Karboosx**
 
 #### Self Made Assets and Sounds
 
