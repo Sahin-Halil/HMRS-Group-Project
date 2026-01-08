@@ -275,4 +275,4 @@ MonoBehaviour:
   saveOnActivate: 1
   checkpointMessageUI: {fileID: 0}
   messageDisplayTime: 2
-  activationSound: {fileID: 8300000, guid: abd12c32f4ea747a98f939967b9dbf61, type: 3}
+  activationSound: {fileID: 0}

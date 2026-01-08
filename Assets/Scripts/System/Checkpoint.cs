@@ -11,19 +11,11 @@ public class Checkpoint : MonoBehaviour
     public GameObject checkpointMessageUI;
     public float messageDisplayTime = 2f;
 
-    // Sound
-    public AudioClip activationSound;
-    private AudioSource audioSource;
     private Renderer checkpointRenderer;
 
     void Start()
     {
         checkpointRenderer = GetComponent<Renderer>();
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
         UpdateVisuals();
 
         if (checkpointMessageUI != null)
@@ -48,11 +40,6 @@ public class Checkpoint : MonoBehaviour
         {
             Vector3 spawnPosition = transform.position + Vector3.up * 1.5f;
             GameManager.Instance.SetCheckpoint(transform.position);
-        }
-
-        if (activationSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(activationSound);
         }
 
         // Show message

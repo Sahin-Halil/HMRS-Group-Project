@@ -10,11 +10,10 @@ public class ScenePortal : MonoBehaviour
     // Scene Settings
     public string targetSceneName = "Level2";
     public string portalName = "Ship Interior";
-    public bool isExitPortal = false; // false = entrance, true = exit
 
     // Requirements
     public bool requiresPuzzles = true;
-    public int requiredPuzzlesCompleted = 12;
+    public int requiredPuzzlesCompleted = 4;
 
     // UI
     public TMP_Text promptText;
@@ -77,10 +76,7 @@ public class ScenePortal : MonoBehaviour
 
     bool CanUsePortal()
     {
-        // Exit portals always work
-        if (isExitPortal) return true;
-
-        // Entry portal requires all key cards (outdoor)
+        // Portal requires all key cards (outdoor)
         if (requiresPuzzles)
         {
             if (KeyCardManager.Instance == null) return false;
@@ -95,7 +91,7 @@ public class ScenePortal : MonoBehaviour
         if (KeyCardManager.Instance == null) return "System Error";
 
         int collected = KeyCardManager.Instance.GetCollectedCards();
-        int remaining = 12 - collected;
+        int remaining = 4 - collected;
 
         return $"Airlock Locked! Collect {remaining} more key card(s) to enter.";
     }
@@ -176,7 +172,7 @@ public class ScenePortal : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.color = isExitPortal ? Color.magenta : Color.cyan;
+        Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, 2f);
         Gizmos.DrawWireCube(transform.position + Vector3.up * 2f, Vector3.one);
     }

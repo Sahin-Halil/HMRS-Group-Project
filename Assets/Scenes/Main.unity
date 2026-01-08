@@ -20030,7 +20030,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetSceneName: Level2
   portalName: Ship Interior
-  isExitPortal: 0
   requiresPuzzles: 1
   requiredPuzzlesCompleted: 8
   promptText: {fileID: 1160728743}
