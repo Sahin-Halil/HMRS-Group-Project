@@ -94,6 +94,7 @@ public class UIManager : MonoBehaviour
     // Pauses game by stopping timescale to 0, and locking all player movement
     public void PauseGame()
     {
+        HUD.SetActive(false);
         isPaused = true;
         Time.timeScale = 0f;
         pauseMenuUI.SetActive(true);
@@ -104,6 +105,7 @@ public class UIManager : MonoBehaviour
     // Resumes game by undoing all the actions taken by PauseGame()
     public void ResumeGame()
     {
+        HUD.SetActive(true);
         isPaused = false;
         Time.timeScale = 1f;
         pauseMenuUI.SetActive(false);
