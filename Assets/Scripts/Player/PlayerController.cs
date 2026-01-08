@@ -169,12 +169,6 @@ public class PlayerController : MonoBehaviour
         state = MovementState.Idle;
         previousState = MovementState.Idle;
 
-        // Find scene-specific references
-        if (shipPartManager == null)
-        {
-            shipPartManager = FindObjectOfType<ShipPartManager>();
-        }
-
         if (uiManager == null)
         {
             uiManager = FindObjectOfType<UIManager>();
@@ -1231,18 +1225,6 @@ public class PlayerController : MonoBehaviour
         jumpAction = playerInput.actions["Jump"];
         dashAction = playerInput.actions["Dash"];
         attackAction = playerInput.actions["Fire"];
-
-        if (shipPartManager == null)
-        {
-            shipPartManager = FindObjectOfType<ShipPartManager>();
-
-            if (shipPartManager == null)
-
-            {
-                Debug.LogError("No ShipPartManager found in scene!");
-
-            }
-        }
     }
 
     // Handles movement and rotation each frame
@@ -1276,9 +1258,4 @@ public class PlayerController : MonoBehaviour
     // Setter for sensitivity
     public void SetSensitivity(float sensitivity) => mouseSense = sensitivity;
 
-    // Returns reference to ShipPartManager
-    public ShipPartManager GetShipPartManager()
-    {
-        return shipPartManager;
-    }
 }
