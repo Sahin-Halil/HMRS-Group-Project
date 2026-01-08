@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7290498370818565888}
   - component: {fileID: 1922644186299318821}
   - component: {fileID: 7213115782900307314}
+  - component: {fileID: 4119387822115832765}
   m_Layer: 0
   m_Name: ShipPart
   m_TagString: ShipPart
@@ -63,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 21085cfc4f7ff8a4291ed42a85f27537, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -106,6 +107,25 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4119387822115832765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337773809366273719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8201be4c320014e08ba362cb013030ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemType: 0
+  itemName: Ship Part Piece
+  itemIcon: {fileID: -1561796954, guid: 649aa630ee09c4c04879ef7ea1970a90, type: 3}
+  shipPartType: 0
+  isPartTypeAssigned: 0
+  autoPickup: 1
+  slotSize: 1
 --- !u!1 &1557158821905403214
 GameObject:
   m_ObjectHideFlags: 0

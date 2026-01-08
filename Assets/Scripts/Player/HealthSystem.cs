@@ -50,17 +50,41 @@ public class HealthSystem : MonoBehaviour
     // Handles player death logic and UI activation
     public void Die()
     {
+        if (isDead) return;
+
         isDead = true;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.PlayerDied();
+        }
+
+        // Show death menu and pause (GameManager will handle actual respawn)
         respawnMenuUI.SetActive(true);
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        playerInput.actions.Disable();
+
+        if (playerInput != null)
+        {
+            playerInput.actions.Disable();
+        }
+
+        Debug.Log("Player died - death menu shown");
     }
 
     // Returns current death state
     public bool checkDead()
     {
         return isDead;
+    }
+
+    public void HideDeathMenu()
+    {
+        if (respawnMenuUI != null)
+        {
+            respawnMenuUI.SetActive(false);
+        }
+        isDead = false;
     }
 }
