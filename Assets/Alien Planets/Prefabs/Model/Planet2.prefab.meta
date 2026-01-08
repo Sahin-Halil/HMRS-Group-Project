@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 2f6c5d6ec779606459f39a8773a9fb35
+labels:
+- Earth
+- Planet
+- Solar
+- Space
+- Scifi
+- Atmosphere
+timeCreated: 1454203577
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 291485
+  packageName: Sci-fi Exo Planets and Nebula
+  packageVersion: 1.0
+  assetPath: Assets/Alien Planets/Prefabs/Model/Planet2.prefab
+  uploadId: 685476

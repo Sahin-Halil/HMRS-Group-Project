@@ -75,3 +75,13 @@ crashlytics-build.properties
 
 /Assets/Scenes/sahin.unity
 /Assets/Scenes/sahin.unity.meta
+
+# Sci-Fi Warehouse Kit (import from Asset Store)
+Assets/Sci-Fi Styled Modular Pack
+!Assets/Sci-Fi Styled Modular Pack.gitkeep
+
+/Assets/Scenes/Main 1.unity
+Assets/Scenes/Main 1.unity.meta
+
+/Assets/Scenes/Level2Init.unity
+Assets/Scenes/Level2Init.unity.meta

@@ -12,7 +12,6 @@ public class OxygenLamp : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             oxygen = other.GetComponent<PlayerOxygen>();
-            oxygen.RefillOxygen(Time.deltaTime * 2);
         }
         if (other.CompareTag("Enemy"))
         {
@@ -24,11 +23,6 @@ public class OxygenLamp : MonoBehaviour
     // Handles trigger stay events
     void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            oxygen = other.GetComponent<PlayerOxygen>();
-            oxygen.RefillOxygen(Time.deltaTime * 2);
-        }
         if (other.CompareTag("Enemy"))
         {
             // Push enemy back out of the zone
@@ -48,7 +42,7 @@ public class OxygenLamp : MonoBehaviour
     {
         if (oxygen != null)
         {
-            oxygen.RefillOxygen(Time.deltaTime * 10);
+            oxygen.RefillOxygen(Time.deltaTime * 10f);
         }
     }
 }

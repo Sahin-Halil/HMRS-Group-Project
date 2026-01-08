@@ -6,25 +6,202 @@ using TMPro;
 
 public class ShipPartManager : MonoBehaviour
 {
-    // Ship part tracking and UI reference
-    [SerializeField] private float parts = 0;
-    [SerializeField] private TMP_Text shipPartText;
+    public static ShipPartManager Instance;
 
-    // Updates ship part count display each frame
-    void Update()
+    // Ship part tracking and UI reference
+    [SerializeField] private int collectedParts = 0;
+    [SerializeField] private int totalPartsNeeded = 12;
+
+    // Console tracking
+    public bool enginePuzzleCompleted = false;
+    public bool cockpitPuzzleCompleted = false;
+    public bool lifeSupportPuzzleCompleted = false;
+    public bool airlockPuzzleCompleted = false;
+
+    // Ship part placement
+    public bool enginePartPlaced = false;
+    public bool cockpitPartPlaced = false;
+    public bool lifeSupportPartPlaced = false;
+    public bool airlockPartPlaced = false;
+
+    void Awake()
     {
-        shipPartText.text = "ShipPart Count: " + parts.ToString();
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     // Increases collected ship part count
-    public void addPart()
+    public void AddPart()
     {
-        parts++;
+        collectedParts++;
+        Debug.Log($"Ship part collected! Total: {collectedParts}/{totalPartsNeeded}");
     }
 
-    // Returns current number of collected ship parts
-    public float getParts()
+    // Check if player has parts available
+    public bool HasParts()
     {
-        return parts;
+        return collectedParts > 0;
     }
+
+    // Use a ship part (when placing at console)
+    public bool UsePart()
+    {
+        if (collectedParts > 0)
+        {
+            collectedParts--;
+            return true;
+        }
+        return false;
+    }
+
+    public int GetParts()
+    {
+        return collectedParts;
+    }
+
+    public void DecrementPart()
+    {
+        if (collectedParts > 0)
+        {
+            collectedParts--;
+        }
+        else
+        {
+            Debug.LogWarning("Tried to decrement ship parts when count is already 0!");
+        }
+    }
+    // Check if specific console puzzle is completed
+    public bool IsPuzzleCompleted(PuzzleType puzzleType)
+    {
+        switch (puzzleType)
+        {
+            case PuzzleType.Engine:
+                return enginePuzzleCompleted;
+            case PuzzleType.Cockpit:
+                return cockpitPuzzleCompleted;
+            case PuzzleType.LifeSupport:
+                return lifeSupportPuzzleCompleted;
+            case PuzzleType.Airlock:
+                return airlockPuzzleCompleted;
+            default:
+                return false;
+        }
+    }
+
+    public bool AreAllPuzzlesCompleted()
+    {
+        return enginePuzzleCompleted &&
+               cockpitPuzzleCompleted &&
+               lifeSupportPuzzleCompleted &&
+               airlockPuzzleCompleted;
+    }
+
+    public void CompletePuzzle(PuzzleType puzzleType)
+    {
+        switch (puzzleType)
+        {
+            case PuzzleType.Engine:
+                enginePuzzleCompleted = true;
+                break;
+            case PuzzleType.Cockpit:
+                cockpitPuzzleCompleted = true;
+                break;
+            case PuzzleType.LifeSupport:
+                lifeSupportPuzzleCompleted = true;
+                break;
+            case PuzzleType.Airlock:
+                airlockPuzzleCompleted = true;
+                break;
+        }
+        Debug.Log($"{puzzleType} puzzle completed!");
+
+        // Check if all puzzles are complete
+        if (AreAllPuzzlesCompleted())
+        {
+            TriggerWin();
+        }
+    }
+
+    private void TriggerWin()
+    {
+        UIManager uiManager = FindObjectOfType<UIManager>();
+
+        if (uiManager != null)
+        {
+            uiManager.Win();
+        }
+        else
+        {
+            Debug.LogError("UIManager not found in scene! Can't show win menu.");
+        }
+    }
+
+    // Mark ship part as placed
+    public void PlaceShipPart(PuzzleType puzzleType)
+    {
+        switch (puzzleType)
+        {
+            case PuzzleType.Engine:
+                enginePartPlaced = true;
+                break;
+            case PuzzleType.Cockpit:
+                cockpitPartPlaced = true;
+                break;
+            case PuzzleType.LifeSupport:
+                lifeSupportPartPlaced = true;
+                break;
+            case PuzzleType.Airlock:
+                airlockPartPlaced = true;
+                break;
+        }
+        Debug.Log($"{puzzleType} ship part placed!");
+    }
+
+    // Check if ship part is already placed
+    public bool IsPartPlaced(PuzzleType puzzleType)
+    {
+        switch (puzzleType)
+        {
+            case PuzzleType.Engine:
+                return enginePartPlaced;
+            case PuzzleType.Cockpit:
+                return cockpitPartPlaced;
+            case PuzzleType.LifeSupport:
+                return lifeSupportPartPlaced;
+            case PuzzleType.Airlock:
+                return airlockPartPlaced;
+            default:
+                return false;
+        }
+    }
+
+    public int GetPlacedPartsCount()
+    {
+        int count = 0;
+        if (enginePartPlaced) count++;
+        if (cockpitPartPlaced) count++;
+        if (lifeSupportPartPlaced) count++;
+        if (airlockPartPlaced) count++;
+        return count;
+    }
+
+    // Check if all parts are placed
+    public bool IsShipRepaired()
+    {
+        return GetPlacedPartsCount() >= totalPartsNeeded;
+    }
+}
+
+public enum PuzzleType
+{
+    Engine,
+    Cockpit,
+    LifeSupport,
+    Airlock
 }
