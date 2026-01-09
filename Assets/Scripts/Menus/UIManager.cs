@@ -90,6 +90,16 @@ public class UIManager : MonoBehaviour
             ResumeGame();
     }
 
+    void Update()
+    {
+        // Ensure cursor stays visible and unlocked when won
+        if (hasWon)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
+
 
     // Pauses game by stopping timescale to 0, and locking all player movement
     public void PauseGame()
@@ -172,12 +182,35 @@ public class UIManager : MonoBehaviour
     // Handles win state and displays win menu
     public void Win()
     {
+        if (hasWon) return; // Prevent multiple calls
+        
+        Debug.Log("Win() called - Setting up win screen");
+        HUD.SetActive(false);
         hasWon = true;
         Time.timeScale = 0f;
-        winMenuUI.SetActive(true);
+        
+        // Unlock cursor BEFORE showing menu
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        playerInput.actions.Disable();
+        
+        winMenuUI.SetActive(true);
+        
+        // Force cursor state again after showing menu
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        
+        if (playerInput != null)
+        {
+            playerInput.actions.Disable();
+        }
+        
+        // Also lock gameplay through GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.LockGameplay();
+        }
+        
+        Debug.Log("Win screen setup complete. Cursor visible: " + Cursor.visible);
     }
 
     // Toggles the 'Not Enough Parts' UI display
@@ -188,7 +221,7 @@ public class UIManager : MonoBehaviour
 
     public bool getPauseState()
     {
-        return isPaused;
+        return isPaused || hasWon;
     }
 
     public void StartGame()
