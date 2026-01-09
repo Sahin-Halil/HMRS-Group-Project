@@ -21847,6 +21847,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1299708882}
     - target: {fileID: 8437181281200004629, guid: 40e4bd13c0e1b944da716689ed8a617c, type: 3}
+      propertyPath: maxOxygen
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 8437181281200004629, guid: 40e4bd13c0e1b944da716689ed8a617c, type: 3}
       propertyPath: oxygenSlider
       value: 
       objectReference: {fileID: 817199361}
