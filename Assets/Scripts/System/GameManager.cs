@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
         // Only respawn if in respawn state and it's the same scene
         if (isRespawning && currentScene == scene.name)
         {
-            Invoke(nameof(RespawnAtCheckpoint), 0.5f);
+            Invoke(nameof(RespawnAtCheckpoint), 0f);
         }
     }
 
