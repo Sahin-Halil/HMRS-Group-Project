@@ -54,7 +54,7 @@ Playable with keyboard and mouse on GitHub Pages, linked [here](https://rayyan-p
 | Sahin Efe Sabri Halil  |  SYSTEMS DESIGN, COMBAT, ANIMATIONS, ASSETS, QA, UI, UX, ENEMIES, TERRAIN, NARRATIVE, LEVEL DESIGN, NPC AI, CUTSCENE and BALANCING  |
 
 ### Gameplay Video
-Watch our prototype demo: [(CLICK HERE)](https://youtu.be/0Qupi1xkNf4)
+Watch our Final game demo: [(CLICK HERE)]( https://youtu.be/a1BYWz0lkfw?si=RLhwJJxoizFEdbs- )
 
 ### Gameplay Assets
 A special thank you to all of the people mentioned here who published these beautiful and (scary!) assets, and animations without whom this game would not be complete.
