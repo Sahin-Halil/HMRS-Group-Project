@@ -5,7 +5,7 @@ using UnityEngine;
 public class WinScreen : MonoBehaviour
 {
     // References to pause and ship part managers
-    [SerializeField] private PauseManager pauseManager;
+    [SerializeField] private UIManager uiManager;
     [SerializeField] private ShipPartManager shipPartManager;
 
     // Handles win or insufficient parts when player enters trigger
@@ -15,12 +15,12 @@ public class WinScreen : MonoBehaviour
         {
             if (shipPartManager.IsShipRepaired())
             {
-                pauseManager.Win();
+                uiManager.Win();
             }
             else
             {
                 int partsPlaced = shipPartManager.GetPlacedPartsCount();
-                pauseManager.NotEnoughParts(true);
+                uiManager.NotEnoughParts(true);
             }
         }
     }
@@ -30,7 +30,7 @@ public class WinScreen : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            pauseManager.NotEnoughParts(false);
+            uiManager.NotEnoughParts(false);
         }
     }
 }
