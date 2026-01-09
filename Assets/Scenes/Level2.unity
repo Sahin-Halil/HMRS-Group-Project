@@ -2333,13 +2333,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e890552f17364198841cc13be2d1475, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pauseMenuUI: {fileID: 1151959486}
-  settingsMenuUI: {fileID: 564746057}
-  winMenuUI: {fileID: 545543538}
-  notEnoughPartsUI: {fileID: 315052308}
-  playerInput: {fileID: 1299708884}
-  isPaused: 0
-  hasWon: 0
 --- !u!4 &127970186
 Transform:
   m_ObjectHideFlags: 0
@@ -20427,6 +20420,10 @@ PrefabInstance:
       propertyPath: dieScript
       value: 
       objectReference: {fileID: 1299708882}
+    - target: {fileID: 8437181281200004629, guid: 40e4bd13c0e1b944da716689ed8a617c, type: 3}
+      propertyPath: maxOxygen
+      value: 10000
+      objectReference: {fileID: 0}
     - target: {fileID: 8437181281200004629, guid: 40e4bd13c0e1b944da716689ed8a617c, type: 3}
       propertyPath: oxygenSlider
       value: 
