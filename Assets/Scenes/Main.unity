@@ -3367,7 +3367,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -657.96545, y: 0.5214844, z: 172.50723, w: 0}
+  m_margin: {x: -701.58545, y: 0.5214844, z: 172.50723, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -7832,7 +7832,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -26, y: 192}
+  m_AnchoredPosition: {x: -23, y: 226}
   m_SizeDelta: {x: -904.4605, y: 100.18}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &523967078
@@ -11015,7 +11015,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &742284089
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11941,8 +11941,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: LEVEL 2 DESIGN, LEVEL 2 PUZZLES, ASSETS, QA, UX, CHECKPOINTS, INVENTORY
-    SYSTEM
+  m_text: SYSTEMS DESIGN, LEVEL 2 DESIGN, PUZZLES, CHECKPOINTS, INVENTORY SYSTEM,
+    ASSETS, QA, UX
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 139da904a945a33459369d4f9be23ed7, type: 2}
   m_sharedMaterial: {fileID: -4872684970837846643, guid: 139da904a945a33459369d4f9be23ed7, type: 2}
@@ -13984,7 +13984,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 387, y: 215}
+  m_AnchoredPosition: {x: 387, y: 249}
   m_SizeDelta: {x: -904.4605, y: 100.18}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &992450006
@@ -22954,7 +22954,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.0052490234, y: 255}
+  m_AnchoredPosition: {x: 0.0052490234, y: 289}
   m_SizeDelta: {x: 946.9768, y: 25.5278}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1644145763
@@ -23300,7 +23300,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 301, y: -29}
+  m_AnchoredPosition: {x: 301, y: 5}
   m_SizeDelta: {x: -1064.8, y: 100.18}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1669132036
@@ -24917,7 +24917,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -222, y: 286}
+  m_AnchoredPosition: {x: -222, y: 320}
   m_SizeDelta: {x: -904.4605, y: 100.18}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1785528243
